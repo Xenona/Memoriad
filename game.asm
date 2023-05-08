@@ -29,12 +29,9 @@ EntryPoint:
    
     push $A000
     pop es
+ 
 
-    ; mov cx, 320*200
-    ; mov di, 0
-    ; mov al, 19
-    ; rep stosb
-
+    push [BGCOLOR]
     call Screen.Clear
 
     ; push 0 255
@@ -43,7 +40,7 @@ EntryPoint:
 
 
     ;    color    x         y    width    height  
-    push  15   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+    push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
 
     call Board.DrawFace
 
@@ -51,7 +48,7 @@ EntryPoint:
     ; call Random.Get 
  
 
-    mov ax, 184
+    mov ax, [CARDCOLOR]
     call Board.renderBoard
     
 
@@ -93,8 +90,11 @@ EntryPoint:
 .EndProc:
     ret
 
-XPointer dw 43 ; 45 - 2 
-YPointer dw 52 ; 54 - 2 where -2 is for frame
+BGCOLOR dw 108
+
+CARDCOLOR dw 68
+
+BORDERCOLOR dw 15
 
 ; ------------------- CLEAR SCREEN
 
@@ -104,11 +104,11 @@ Screen.Clear:
 
     mov cx, 320*200
     mov di, 0
-    mov al, 19
+    mov al, byte[bp + 4]
     rep stosb
 
     pop bp 
-ret
+ret 2
 
 ; --------------------------------------------- WAIT
 
@@ -154,6 +154,8 @@ Process.PressedKey:
     je right_arrow_pressed ; if so, jump to right arrow handler
     cmp al, 0x50 ; check if down arrow key pressed
     je down_arrow_pressed ; if so, jump to down arrow handler
+    cmp al, 0x1b
+    je esc_button_pressed
     @@:
     cmp al, 0x20
     je white_space_pressed
@@ -162,74 +164,87 @@ Process.PressedKey:
     up_arrow_pressed:
         ; handle up arrow key press
 
-                
+        push [BGCOLOR]        
         call Screen.Clear
+        sub [YPointer], 50 
 
+        cmp [YPointer], 0
+        jnl NotUPPERBorder
+        add [YPointer], 50
 
-        sub [YPointer], 50
-        ;    color    x         y    width    height  
-        push  15   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
-
+        NotUPPERBorder:
+        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
         call Board.DrawFace
-
-       
-        mov al, 184
+        mov al, byte[CARDCOLOR]
         call Board.renderBoard  
-
-
+ 
     jmp check_arrow_key
 
     left_arrow_pressed:
         ; handle left arrow key press
 
+        push [BGCOLOR]
         call Screen.Clear
-
         sub [XPointer], 40
-         
-        ;    color    x         y    width    height  
-        push  15   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+
+        cmp [XPointer], 0
+        jnl NotLEFTBorder
+        add [XPointer], 40
+
+        NotLEFTBorder:  
+        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
         call Board.DrawFace
+        mov al, byte[CARDCOLOR]
+        call Board.renderBoard
 
-
-        mov al, 184
-        call Board.renderBoard 
     jmp check_arrow_key
 
     right_arrow_pressed:
         ; handle right arrow key press
 
+        push [BGCOLOR]
         call Screen.Clear
         add [XPointer], 40
-        ;    color    x         y    width    height  
-        push  15   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+
+        cmp [XPointer], 320
+        jng NotRIGHTBorder
+        sub [XPointer], 40
+
+        NotRIGHTBorder:
+        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
         call Board.DrawFace
-
-
-
-        mov al, 184
+        mov al, byte[CARDCOLOR]
         call Board.renderBoard 
+
     jmp check_arrow_key
 
     down_arrow_pressed:
         ; handle down arrow key press
 
+        push [BGCOLOR]
         call Screen.Clear
         add [YPointer], 50
-        ;    color    x         y    width    height  
-        push  15   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
-        call Board.DrawFace
 
-        mov al, 184
-        call Board.renderBoard 
+        cmp [YPointer], 200
+        jng NotBOTTOMBorder
+        sub [YPointer], 50
+
+        NotBOTTOMBorder:
+        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        call Board.DrawFace
+        mov al, byte[CARDCOLOR]
+        call Board.renderBoard
+
     jmp check_arrow_key
 
     white_space_pressed:
-
     
     mov cx, 320*200
     mov di, 0
-    mov al, 19
+    mov al, byte[BGCOLOR]
     rep stosb
+
+    esc_button_pressed:
 
     
 
@@ -243,6 +258,8 @@ Process.PressedKey:
     pop bx 
 ret 
 
+XPointer dw 43 ; 45 - 2 
+YPointer dw 52 ; 54 - 2 where -2 is for frame
 
 
 
