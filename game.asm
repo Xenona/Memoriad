@@ -165,14 +165,21 @@ Process.PressedKey:
         ; handle up arrow key press
 
         push [BGCOLOR]        
-        call Screen.Clear
-        sub [YPointer], 50 
+        ; call Screen.Clear
 
-        cmp [YPointer], 0
-        jnl NotUPPERBorder
-        add [YPointer], 50
+        cmp [YPointer], 50
+        jl NotUPPERBorder
+        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        call Board.DrawFace
+        push  [CARDCOLOR]  [XCurrCard] [YCurrCard]   30      42 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        call Board.DrawFace
+
+
+        sub [YPointer], 50
+        sub [YCurrCard], 50
 
         NotUPPERBorder:
+
         push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
         call Board.DrawFace
         mov al, byte[CARDCOLOR]
@@ -184,12 +191,18 @@ Process.PressedKey:
         ; handle left arrow key press
 
         push [BGCOLOR]
-        call Screen.Clear
-        sub [XPointer], 40
+        ; call Screen.Clear
 
-        cmp [XPointer], 0
-        jnl NotLEFTBorder
-        add [XPointer], 40
+        cmp [XPointer], 40
+        jl NotLEFTBorder
+        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        call Board.DrawFace
+        push  [CARDCOLOR]  [XCurrCard] [YCurrCard]   30      42 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        call Board.DrawFace
+
+
+        sub [XPointer], 40
+        sub [XCurrCard], 40
 
         NotLEFTBorder:  
         push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
@@ -203,12 +216,17 @@ Process.PressedKey:
         ; handle right arrow key press
 
         push [BGCOLOR]
-        call Screen.Clear
-        add [XPointer], 40
+        ; call Screen.Clear
 
-        cmp [XPointer], 320
-        jng NotRIGHTBorder
-        sub [XPointer], 40
+        cmp [XPointer], 280
+        jg NotRIGHTBorder
+        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        call Board.DrawFace
+        push  [CARDCOLOR]  [XCurrCard] [YCurrCard]   30      42 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        call Board.DrawFace
+
+        add [XPointer], 40
+        add [XCurrCard], 40
 
         NotRIGHTBorder:
         push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
@@ -222,14 +240,22 @@ Process.PressedKey:
         ; handle down arrow key press
 
         push [BGCOLOR]
-        call Screen.Clear
-        add [YPointer], 50
+        ; call Screen.Clear
 
-        cmp [YPointer], 200
-        jng NotBOTTOMBorder
-        sub [YPointer], 50
+        cmp [YPointer], 150
+        jg NotBOTTOMBorder
+
+        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        call Board.DrawFace
+        push  [CARDCOLOR]  [XCurrCard] [YCurrCard]   30      42 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        call Board.DrawFace
+
+
+        add [YPointer], 50
+        add [YCurrCard], 50
 
         NotBOTTOMBorder:
+
         push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
         call Board.DrawFace
         mov al, byte[CARDCOLOR]
@@ -238,30 +264,26 @@ Process.PressedKey:
     jmp check_arrow_key
 
     white_space_pressed:
-    
-    mov cx, 320*200
-    mov di, 0
-    mov al, byte[BGCOLOR]
-    rep stosb
+
+
 
     esc_button_pressed:
 
-    
-
-
-
-
-
-
-
+        
+    ; mov cx, 320*200
+    ; mov di, 0   
+    ; mov al, byte[BGCOLOR]
+    ; rep stosb
 
     pop bx 
-ret 
+ret  
 
 XPointer dw 43 ; 45 - 2 
 YPointer dw 52 ; 54 - 2 where -2 is for frame
 
-
+XCurrCard dw  45
+YCurrCard dw 54
+  
 
 ; -------------------------------- RANDOM 
 Random.Initialize: 
