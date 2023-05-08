@@ -164,7 +164,7 @@ Process.PressedKey:
     up_arrow_pressed:
         ; handle up arrow key press
 
-        push [BGCOLOR]        
+        ; push [BGCOLOR]        
         ; call Screen.Clear
 
         cmp [YPointer], 50
@@ -190,7 +190,7 @@ Process.PressedKey:
     left_arrow_pressed:
         ; handle left arrow key press
 
-        push [BGCOLOR]
+        ; push [BGCOLOR]
         ; call Screen.Clear
 
         cmp [XPointer], 40
@@ -215,7 +215,7 @@ Process.PressedKey:
     right_arrow_pressed:
         ; handle right arrow key press
 
-        push [BGCOLOR]
+        ; push [BGCOLOR]
         ; call Screen.Clear
 
         cmp [XPointer], 280
@@ -239,7 +239,7 @@ Process.PressedKey:
     down_arrow_pressed:
         ; handle down arrow key press
 
-        push [BGCOLOR]
+        ; push [BGCOLOR]
         ; call Screen.Clear
 
         cmp [YPointer], 150
