@@ -1,4 +1,4 @@
-
+ 
 org 100h
 
 
@@ -8,7 +8,8 @@ org 100h
 bOldMode db ?
 bOldPage db ?
 
-
+MatchedPairs db 0
+NEEDEDPAIRS db 16
 
 EntryPoint:
 
@@ -62,8 +63,17 @@ EntryPoint:
 
     ; call Board.renderBoard
 
+    call Process.PressedKey
+    mov ax, [XCurrCard]
+    mov [FirstCardX], ax
+    mov ax, [YCurrCard]
+    mov [FirstCardY], ax
 
     call Process.PressedKey
+    mov ax, [XCurrCard]
+    mov [SecondCardX], ax
+    mov ax, [YCurrCard]
+    mov [SecondCardY], ax    
 
 
 
@@ -90,11 +100,21 @@ EntryPoint:
 .EndProc:
     ret
 
-BGCOLOR dw 108
+BGCOLOR dw 221
 
-CARDCOLOR dw 68
+CARDCOLOR dw 2ah
 
 BORDERCOLOR dw 15
+CARDWIDTH dw 30
+CARDHEIGHT dw 42
+
+FirstCardX dw ?
+FirstCardY dw ? 
+
+SecondCardX dw ?
+SecondCardY dw ? 
+
+
 
 ; ------------------- CLEAR SCREEN
 
@@ -182,6 +202,8 @@ Process.PressedKey:
 
         push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
         call Board.DrawFace
+        ; push  [CARDCOLOR]   [XPointer] [YPointer]   30      42 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; call Board.DrawFace
         mov al, byte[CARDCOLOR]
         call Board.renderBoard  
  
@@ -276,7 +298,7 @@ Process.PressedKey:
     ; rep stosb
 
     pop bx 
-ret  
+ret 
 
 XPointer dw 43 ; 45 - 2 
 YPointer dw 52 ; 54 - 2 where -2 is for frame
@@ -407,9 +429,7 @@ Board.DrawFace:
     pop bp
 ret 10
 
-
-
-
+ 
 X dw 0
 Y dw 0 
 WIDTH dw 0
@@ -419,4 +439,6 @@ COLOR dw 0
 
 
 
-; -------------------=-----------------
+; -----------------------  CARD SECTION 
+
+ 
