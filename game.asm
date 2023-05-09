@@ -13,6 +13,11 @@ NEEDEDPAIRS dw 16
 
 EntryPoint:
 
+
+
+    ; call Random.CreateArray
+
+
     mov ah, $0F
     int 10h
     mov [bOldMode], al
@@ -23,6 +28,7 @@ EntryPoint:
 
 ;   randomize
     call Random.Initialize
+
 
     ; выбираем рандомный цвет
 
@@ -69,14 +75,49 @@ EntryPoint:
         mov [FirstCardX], ax
         mov ax, [YCurrCard]
         mov [FirstCardY], ax
+        mov ax, [CurrIndex]
+        mov [FirstCardIndex], ax
 
         call Process.PressedKey
         mov ax, [XCurrCard]
         mov [SecondCardX], ax
         mov ax, [YCurrCard]
         mov [SecondCardY], ax    
+        mov ax, [CurrIndex]
+        mov [SecondCardIndex], ax
 
-    inc [MatchedPairs]
+
+        mov ax, [FirstCardIndex]
+        mul word[two]
+        mov si, ax
+        mov ax, [deck + si]
+
+        push ax
+        mov ax, [SecondCardIndex]
+        mul word[two]
+        mov si, ax
+        mov cx, [deck + si]
+        pop ax
+
+        cmp ax, cx
+        
+        jne @F
+
+        inc [MatchedPairs]
+        jmp WHILE_MATCH_LESS_NEEDED.End
+
+        @@:
+
+        call Just.Wait
+
+        push [CARDCOLOR] [FirstCardX] [FirstCardY] [CARDWIDTH] [CARDHEIGHT]
+        call Board.DrawFace
+        push [CARDCOLOR] [SecondCardX] [SecondCardY] [CARDWIDTH] [CARDHEIGHT]
+        call Board.DrawFace
+
+        
+
+    WHILE_MATCH_LESS_NEEDED.End:
     mov ax, [MatchedPairs]
     cmp ax, word[NEEDEDPAIRS]    
     jne WHILE_MATCH_LESS_NEEDED
@@ -92,6 +133,7 @@ EntryPoint:
     int 21h
 
 @@:
+EntryPoint.EndProc:
     movzx ax, [bOldMode]
     int 10h
     mov ah, $05
@@ -103,7 +145,7 @@ EntryPoint:
         
 
 
-.EndProc:
+
     ret
 
 BGCOLOR dw 221
@@ -120,7 +162,10 @@ FirstCardY dw ?
 SecondCardX dw ?
 SecondCardY dw ? 
 
+FirstCardIndex dw ?
+SecondCardIndex dw ?
 
+two dw 2
 
 ; ------------------- CLEAR SCREEN
 
@@ -145,7 +190,7 @@ Just.Wait:
     mov cx, 1000
     simpleLoop: 
 
-        mov dx, 30000
+        mov dx, 20000
         @@: 
             dec dx
         jnz @B
@@ -180,156 +225,142 @@ Process.PressedKey:
     je right_arrow_pressed ; if so, jump to right arrow handler
     cmp al, 0x50 ; check if down arrow key pressed
     je down_arrow_pressed ; if so, jump to down arrow handler
-    cmp al, 0x1b
-    je esc_button_pressed
+
     @@:
     cmp al, 0x20
     je white_space_pressed
+    cmp al, 0x1b
+    je esc_button_pressed
     jmp check_arrow_key ; if not arrow key, check next key press
 
     up_arrow_pressed:
-        ; handle up arrow key press
-        ; get color of current state
-        push [XCurrCard] [YCurrCard]
-        call Board.GetColor
+ 
 
         cmp [YPointer], 50
         jl UPPERBorder
-        ; draw frame
-        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 
-        call Board.DrawFace
-        ; draw card back or face depending on a color of the first pixel 
-        push  [CurrColor]  [XCurrCard] [YCurrCard]   [CARDWIDTH]   [CARDHEIGHT]
-        call Board.DrawFace
+        ; remove frame
+        push   [BGCOLOR]  [XPointer] [YPointer]   34      46  
+        call Board.DrawBorder
+ 
         ; change position of pointers
         sub [YPointer], 50
         sub [YCurrCard], 50
+        sub [CurrIndex], 8
 
-        ; get color of updated state
-        push [XCurrCard] [YCurrCard]
-        call Board.GetColor
 
         UPPERBorder:
-        ; draw a selecteb by stroke card
-        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 
-        call Board.DrawFace
-        push  [CurrColor]  [XCurrCard] [YCurrCard]  [CARDWIDTH] [CARDHEIGHT] 
-        call Board.DrawFace
+        ; draw a selected frame by stroke card
+ 
+        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46
+        call Board.DrawBorder
+ 
  
     jmp check_arrow_key
 
     left_arrow_pressed:
         ; handle left arrow key press
-
-        ; get color of current state
-        push [XCurrCard] [YCurrCard]
-        call Board.GetColor
+ 
 
         cmp [XPointer], 40
         jl NotLEFTBorder
-        ; draw frame
+        ; rm frame
         push  [BGCOLOR]   [XPointer] [YPointer]   34      46 
-        call Board.DrawFace
-        ; draw card back or face depending on a color of the first pixel 
-        push  [CurrColor]  [XCurrCard] [YCurrCard]   [CARDWIDTH] [CARDHEIGHT]  
-        call Board.DrawFace
+        call Board.DrawBorder
+ 
         ; change position of pointers
         sub [XPointer], 40
         sub [XCurrCard], 40
-        ; get color of updated state
-        push [XCurrCard] [YCurrCard]
-        call Board.GetColor
+        sub [CurrIndex], 1
+ 
 
         NotLEFTBorder:  
         ; draw a selecteb by stroke card
         push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 
-        call Board.DrawFace
-        push  [CurrColor]  [XCurrCard] [YCurrCard]  [CARDWIDTH] [CARDHEIGHT] 
-        call Board.DrawFace
+        call Board.DrawBorder
+ 
  
     jmp check_arrow_key
 
     right_arrow_pressed:
         ; handle right arrow key press
 
-        ; get color of current state
-        push [XCurrCard] [YCurrCard]
-        call Board.GetColor
+ 
 
         cmp [XPointer], 280
         jg NotRIGHTBorder
-        ; draw frame
+        ; rm frame
         push  [BGCOLOR]   [XPointer] [YPointer]   34      46  
-        call Board.DrawFace
-        ; draw card back or face depending on a color of the first pixel
-        push  [CurrColor]  [XCurrCard] [YCurrCard]   [CARDWIDTH] [CARDHEIGHT]  
-        call Board.DrawFace
+        call Board.DrawBorder
+ 
         ; change position of pointers
         add [XPointer], 40
         add [XCurrCard], 40
-        ; get color of updated state
-        push [XCurrCard] [YCurrCard]
-        call Board.GetColor
-
+        add [CurrIndex], 1
+ 
         NotRIGHTBorder:
         ; draw a selecteb by stroke card
         push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 
-        call Board.DrawFace
-        push  [CurrColor]  [XCurrCard] [YCurrCard]  [CARDWIDTH] [CARDHEIGHT] 
-        call Board.DrawFace
+        call Board.DrawBorder
 
     jmp check_arrow_key
 
     down_arrow_pressed:
         ; handle down arrow key press
-
-        ; get color of current state
-        push [XCurrCard] [YCurrCard]
-        call Board.GetColor
+ 
 
         cmp [YPointer], 150
         jg NotBOTTOMBorder
-        ; draw frame
+        ; rm frame
         push  [BGCOLOR]   [XPointer] [YPointer]   34      46  
-        call Board.DrawFace
-        ; draw card back or face depending on a color of the first pixel
-        push  [CurrColor]  [XCurrCard] [YCurrCard]   [CARDWIDTH] [CARDHEIGHT]  
-        call Board.DrawFace
-
+        call Board.DrawBorder
+ 
         ; change position of pointers
         add [YPointer], 50
         add [YCurrCard], 50
-        ; get color of updated state
-        push [XCurrCard] [YCurrCard]
-        call Board.GetColor
-
+        add [CurrIndex], 8
+ 
         NotBOTTOMBorder:
         ; draw a selecteb by stroke card
         push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 
-        call Board.DrawFace
-        push  [CurrColor]  [XCurrCard] [YCurrCard]  [CARDWIDTH] [CARDHEIGHT] 
-        call Board.DrawFace
+        call Board.DrawBorder
 
     jmp check_arrow_key
 
     white_space_pressed:
 
-
-
-
-    esc_button_pressed:
+    ; setting di
+    mov ax, 320
+    mul word[YCurrCard]
+    add ax, word[XCurrCard]
+    mov di, ax
+    ; clearing ax
+    xor ax, ax
+    ; getting color from selected card
+    mov al, [es:di]
+    cmp al, byte[CARDCOLOR]
+    ; if card has its face, not change it
+    jne Process.EndProcess
 
         
     push [XCurrCard] [YCurrCard]
     call Board.XORCard
+    jmp Process.EndProcess
+
+    esc_button_pressed:
+    pop bx
+    add sp, 2
+    jmp EntryPoint.EndProc
+
+
     ; mov cx, 320*200
     ; mov di, 0   
     ; mov al, byte[BGCOLOR]
     ; rep stosb
 
+Process.EndProcess:
     pop bx 
 
-Process.EndProcess:
+
 ret 
 
 XPointer dw 43 ; 45 - 2 
@@ -339,6 +370,8 @@ XCurrCard dw  45
 YCurrCard dw 54
 
 CurrColor dw ? 
+
+CurrIndex dw 9
   
 
 ; -------------------------------- RANDOM 
@@ -350,14 +383,23 @@ Random.Initialize:
      mov        ah, $2C
      int        21h
      mov        [Random.wPrevNumber], dx
+     mov        [seed], dx
 
     pop bp 
 ret
       
+ 
+    seed dw 0x123
+    f1 dw 0x0001
+    f2 dw 0x0002
+    
+
 Random.Get:
      
     push bp 
     mov bp, sp
+
+    push bx cx dx 
 
     mov ax, [bp+4]
     mov [wMax], ax
@@ -369,16 +411,121 @@ Random.Get:
     adc        ax, 23
     mov        [Random.wPrevNumber], ax
 
+    ; mov ax, [seed]    ; текущий элемент последовательности
+    ; mov bx, [f1]      ; первый элемент Фибоначчи
+    ; add bx, [f2]      ; второй элемент Фибоначчи
+    ; mov [seed], bx    ; сохраняем текущий элемент в seed
+    ; mov [f1], bx      ; перезаписываем первый элемент
+    ; mov [f2], ax 
+    ; mov cx, 6547
+    ; div cx
+    ; xchg ax, dx
+
+
+    
+
+
     mov        cx, [wMax]
     sub        cx, [wMin]
     inc        cx
     xor        dx, dx
     div        cx
     add        dx, [wMin]
-    xchg       ax, dx
+    xchg       ax, dx  
+
+    pop dx cx bx
     
     pop bp
 ret 4
+
+
+ 
+deck dw 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+     dw 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+
+
+
+deckMethods dw Cards.Card1, Cards.Card2, Cards.Card3
+            dw Cards.Card4, Cards.Card5, Cards.Card6
+            dw Cards.Card7, Cards.Card8, Cards.Card9
+            dw Cards.CardA, Cards.CardB, Cards.CardC
+            dw Cards.CardD, Cards.CardE, Cards.CardF
+            dw Cards.Card10
+
+; deck dw 32 dup 0
+deckCounts dw 40 dup 0
+
+Random.CreateArray:
+    push bp 
+    mov bp, sp
+
+    
+    ;   randomize
+    call Random.Initialize
+
+
+    
+    CreateDeck:
+
+
+
+        push 1 40 
+        call Random.Get
+        
+
+        mov bx, ax
+
+        genRand1:
+        
+        push 0 31 
+        call Random.Get
+        
+        
+        mov si, ax
+        cmp [deck + si], 0
+        jnz genRand1
+
+        cmp word[deckCounts + bx], 2
+        jge CreateDeck
+
+        mov [deck + si], bx
+        inc [deckCounts + bx]
+
+
+
+        genRand2:
+        
+        push 1 32 
+        call Random.Get
+        
+        mov si, ax
+        cmp [deck + si], 0
+        jnz genRand2
+
+        mov [deck + si], bx
+        add [deckCounts + bx], 1
+
+        add word[seed], 1
+
+        mov ax, 0
+        mov di, deck
+        mov cx, 32
+        repnz scasb
+
+    
+
+    
+    jz CreateDeck
+
+
+
+    pop bp
+ret
+
+
+
+
+
         
 wMax    dw ?
 wMin    dw ?
@@ -422,37 +569,28 @@ ret
 Board.DrawFace:
     push bp
     mov bp, sp
-
-       
-    push $A000
-    pop es
-
-    mov ax, [bp + 4]
-    mov [HEIGHT], ax
-    mov ax, [bp + 6]
-    mov [WIDTH], ax
-    mov ax, [bp + 8]
-    mov [Y], ax
-    mov ax, [bp + 10]
-    mov [X], ax
-    mov ax, [bp + 12]
-    mov [COLOR], ax
-
-    mov cx, [HEIGHT]
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
     mov ax, 2*2*80
-    mul [Y]
+    mul word[bp + 8]
     mov di, ax
-    add di, [X]
+    add di, [bp + 10]
 
-    mov al, byte[COLOR]
+    mov al, byte[bp + 12]
     rectangleLoop:
         push cx
 
-            mov cx, [WIDTH]   
+            mov cx, [bp + 6]   
             
             rep stosb
 
-            sub di, [WIDTH]
+            sub di, [bp + 6]
             add di, 80*2*2
 
         pop cx
@@ -468,9 +606,9 @@ Board.XORCard:
     mov ax, 80*2*2
     mul word[bp + 4]
     add ax, word[bp + 6]
-    mov di, ax 
+    mov di, ax  
 
-    push  68h 6fh
+    push  0ah 0eh
     call Random.Get
  
     mov cx, [CARDHEIGHT]
@@ -480,20 +618,33 @@ Board.XORCard:
         mov cx, [CARDWIDTH]
         Lines:
 
-            ; mov word[es:di], ax
-            xor word[es:di], ax
+            mov byte[es:di], al
+            ; xor word[es:di], ax
             inc di
         loop Lines
         sub di, [CARDWIDTH]
         add di, 320 
         pop cx
     loop DrawLines
+
+
+    ; mov cx, [CARDHEIGHT]
+    ; DrawLines:
+    ;     push cx
+    ;         mov []
+    ;     pop cx
+    ; loop DrawLines
     
 
     pop bp
 ret 4
 
 Board.GetColor:
+
+    ; bp + 4 - Y
+    ; bp + 6 - X
+
+
     push bp 
     mov bp, sp
 
@@ -513,17 +664,602 @@ Board.GetColor:
     pop bp
 ret 4
 
+Board.DrawBorder:
+    push bp 
+    mov bp, sp 
+
+    ; bp + 12 - color
+    ; bp + 10 - X
+    ; bp + 8 - Y
+    ; bp + 6 - width
+    ; bp + 4 - height
 
 
-X dw 0
-Y dw 0 
-WIDTH dw 0
-HEIGHT dw 0
-COLOR dw 0
+    
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+    mov al, byte[bp + 12]
 
 
+    mov cx, [bp + 6]
+    rep stosb 
+    sub di, [bp + 6]
+    add di, 320
+    mov cx, [bp + 6]
+    rep stosb 
+    sub di, [bp + 6]
+    add di, 320
+
+    mov cx, [bp + 4]
+    sub cx, 4
+
+    borderLoop:
+
+
+
+        push cx
+
+            mov cx, 2 
+            
+            rep stosb
+            add di, [bp + 6]
+            sub di, 4
+
+            mov cx, 2
+            rep stosb 
+
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+
+
+    loop borderLoop
+
+   
+    mov cx, [bp + 6]
+    rep stosb 
+    sub di, [bp + 6]
+    add di, 320
+    mov cx, [bp + 6]
+    rep stosb 
+    sub di, [bp + 6]
+
+    pop bp 
+
+ret 10
+ 
 
 
 ; -----------------------  CARD SECTION 
 
+Cards.Card1:
+    push bp
+    mov bp, sp
  
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 01h
+    rectangleLoop1:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoop1
+
+    pop bp
+ret 8
+
+Cards.Card2:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 02h
+    rectangleLoop2:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoop2
+
+    pop bp
+ret 8
+
+Cards.Card3:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 03h
+    rectangleLoop3:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoop3
+
+    pop bp
+ret 8
+
+Cards.Card4:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 04h
+    rectangleLoop4:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoop4
+
+    pop bp
+ret 8
+
+Cards.Card5:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 05h
+    rectangleLoop5:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoop5
+
+    pop bp
+ret 8
+
+Cards.Card6:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 06h
+    rectangleLoop6:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoop6
+
+    pop bp
+ret 8
+
+Cards.Card7:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 07h
+    rectangleLoop7:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoop7
+
+    pop bp
+ret 8
+
+Cards.Card8:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 08h
+    rectangleLoop8:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoop8
+
+    pop bp
+ret 8
+
+Cards.Card9:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 09h
+    rectangleLoop9:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoop9
+
+    pop bp
+ret 8
+
+Cards.CardA:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 0ah
+    rectangleLoopA:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoopA
+
+    pop bp
+ret 8
+
+Cards.CardB:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 0Bh
+    rectangleLoopB:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoopB
+
+    pop bp
+ret 8
+
+Cards.CardC:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 0Ch
+    rectangleLoopC:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoopC
+
+    pop bp
+ret 8
+
+Cards.CardD:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 0Dh
+    rectangleLoopD:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoopD
+
+    pop bp
+ret 8
+
+Cards.CardE:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 0Eh
+    rectangleLoopE:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoopE
+
+    pop bp
+ret 8
+
+Cards.CardF:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 0Fh
+    rectangleLoopF:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoopF
+
+    pop bp
+ret 8
+
+Cards.Card10:
+    push bp
+    mov bp, sp
+ 
+    ; bp + 4 - height
+    ; bp + 6 - width
+    ; bp + 8 - Y
+    ; bp + 10 - X
+    ; bp + 12 - color
+ 
+    mov cx, [bp + 4]
+    mov ax, 2*2*80
+    mul word[bp + 8]
+    mov di, ax
+    add di, [bp + 10]
+
+    mov al, 6bh
+    rectangleLoop10:
+        push cx
+
+            mov cx, [bp + 6]   
+            
+            rep stosb
+
+            sub di, [bp + 6]
+            add di, 80*2*2
+
+        pop cx
+    loop rectangleLoop10
+
+    pop bp
+ret 8
