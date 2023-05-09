@@ -8,8 +8,8 @@ org 100h
 bOldMode db ?
 bOldPage db ?
 
-MatchedPairs db 0
-NEEDEDPAIRS db 16
+MatchedPairs dw 0
+NEEDEDPAIRS dw 16
 
 EntryPoint:
 
@@ -50,32 +50,38 @@ EntryPoint:
  
 
     mov ax, [CARDCOLOR]
+    ; mov ax, 0Fh
     call Board.renderBoard
     
 
+    WHILE_MATCH_LESS_NEEDED:
+
+        ; call Just.Wait 
 
 
-    ; call Just.Wait 
+        ; push 0 255
+        ; call Random.Get 
 
+        ; call Board.renderBoard
 
-    ; push 0 255
-    ; call Random.Get 
+        call Process.PressedKey
+        mov ax, [XCurrCard]
+        mov [FirstCardX], ax
+        mov ax, [YCurrCard]
+        mov [FirstCardY], ax
 
-    ; call Board.renderBoard
+        call Process.PressedKey
+        mov ax, [XCurrCard]
+        mov [SecondCardX], ax
+        mov ax, [YCurrCard]
+        mov [SecondCardY], ax    
 
-    call Process.PressedKey
-    mov ax, [XCurrCard]
-    mov [FirstCardX], ax
-    mov ax, [YCurrCard]
-    mov [FirstCardY], ax
+    inc [MatchedPairs]
+    mov ax, [MatchedPairs]
+    cmp ax, word[NEEDEDPAIRS]    
+    jne WHILE_MATCH_LESS_NEEDED
 
-    call Process.PressedKey
-    mov ax, [XCurrCard]
-    mov [SecondCardX], ax
-    mov ax, [YCurrCard]
-    mov [SecondCardY], ax    
-
-
+    ; поздравить юзера
 
 
     mov ax, $0C08
@@ -183,105 +189,126 @@ Process.PressedKey:
 
     up_arrow_pressed:
         ; handle up arrow key press
-
-        ; push [BGCOLOR]        
-        ; call Screen.Clear
+        ; get color of current state
+        push [XCurrCard] [YCurrCard]
+        call Board.GetColor
 
         cmp [YPointer], 50
-        jl NotUPPERBorder
-        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        jl UPPERBorder
+        ; draw frame
+        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 
         call Board.DrawFace
-        push  [CARDCOLOR]  [XCurrCard] [YCurrCard]   30      42 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; draw card back or face depending on a color of the first pixel 
+        push  [CurrColor]  [XCurrCard] [YCurrCard]   [CARDWIDTH]   [CARDHEIGHT]
         call Board.DrawFace
-
-
+        ; change position of pointers
         sub [YPointer], 50
         sub [YCurrCard], 50
 
-        NotUPPERBorder:
+        ; get color of updated state
+        push [XCurrCard] [YCurrCard]
+        call Board.GetColor
 
-        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        UPPERBorder:
+        ; draw a selecteb by stroke card
+        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 
         call Board.DrawFace
-        ; push  [CARDCOLOR]   [XPointer] [YPointer]   30      42 ; 30 + 4 and 44 + 4 where + 2 is for frame
-        ; call Board.DrawFace
-        mov al, byte[CARDCOLOR]
-        call Board.renderBoard  
+        push  [CurrColor]  [XCurrCard] [YCurrCard]  [CARDWIDTH] [CARDHEIGHT] 
+        call Board.DrawFace
  
     jmp check_arrow_key
 
     left_arrow_pressed:
         ; handle left arrow key press
 
-        ; push [BGCOLOR]
-        ; call Screen.Clear
+        ; get color of current state
+        push [XCurrCard] [YCurrCard]
+        call Board.GetColor
 
         cmp [XPointer], 40
         jl NotLEFTBorder
-        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; draw frame
+        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 
         call Board.DrawFace
-        push  [CARDCOLOR]  [XCurrCard] [YCurrCard]   30      42 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; draw card back or face depending on a color of the first pixel 
+        push  [CurrColor]  [XCurrCard] [YCurrCard]   [CARDWIDTH] [CARDHEIGHT]  
         call Board.DrawFace
-
-
+        ; change position of pointers
         sub [XPointer], 40
         sub [XCurrCard], 40
+        ; get color of updated state
+        push [XCurrCard] [YCurrCard]
+        call Board.GetColor
 
         NotLEFTBorder:  
-        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; draw a selecteb by stroke card
+        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 
         call Board.DrawFace
-        mov al, byte[CARDCOLOR]
-        call Board.renderBoard
-
+        push  [CurrColor]  [XCurrCard] [YCurrCard]  [CARDWIDTH] [CARDHEIGHT] 
+        call Board.DrawFace
+ 
     jmp check_arrow_key
 
     right_arrow_pressed:
         ; handle right arrow key press
 
-        ; push [BGCOLOR]
-        ; call Screen.Clear
+        ; get color of current state
+        push [XCurrCard] [YCurrCard]
+        call Board.GetColor
 
         cmp [XPointer], 280
         jg NotRIGHTBorder
-        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; draw frame
+        push  [BGCOLOR]   [XPointer] [YPointer]   34      46  
         call Board.DrawFace
-        push  [CARDCOLOR]  [XCurrCard] [YCurrCard]   30      42 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; draw card back or face depending on a color of the first pixel
+        push  [CurrColor]  [XCurrCard] [YCurrCard]   [CARDWIDTH] [CARDHEIGHT]  
         call Board.DrawFace
-
+        ; change position of pointers
         add [XPointer], 40
         add [XCurrCard], 40
+        ; get color of updated state
+        push [XCurrCard] [YCurrCard]
+        call Board.GetColor
 
         NotRIGHTBorder:
-        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; draw a selecteb by stroke card
+        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 
         call Board.DrawFace
-        mov al, byte[CARDCOLOR]
-        call Board.renderBoard 
+        push  [CurrColor]  [XCurrCard] [YCurrCard]  [CARDWIDTH] [CARDHEIGHT] 
+        call Board.DrawFace
 
     jmp check_arrow_key
 
     down_arrow_pressed:
         ; handle down arrow key press
 
-        ; push [BGCOLOR]
-        ; call Screen.Clear
+        ; get color of current state
+        push [XCurrCard] [YCurrCard]
+        call Board.GetColor
 
         cmp [YPointer], 150
         jg NotBOTTOMBorder
-
-        push  [BGCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; draw frame
+        push  [BGCOLOR]   [XPointer] [YPointer]   34      46  
         call Board.DrawFace
-        push  [CARDCOLOR]  [XCurrCard] [YCurrCard]   30      42 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; draw card back or face depending on a color of the first pixel
+        push  [CurrColor]  [XCurrCard] [YCurrCard]   [CARDWIDTH] [CARDHEIGHT]  
         call Board.DrawFace
 
-
+        ; change position of pointers
         add [YPointer], 50
         add [YCurrCard], 50
+        ; get color of updated state
+        push [XCurrCard] [YCurrCard]
+        call Board.GetColor
 
         NotBOTTOMBorder:
-
-        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 ; 30 + 4 and 44 + 4 where + 2 is for frame
+        ; draw a selecteb by stroke card
+        push  [BORDERCOLOR]   [XPointer] [YPointer]   34      46 
         call Board.DrawFace
-        mov al, byte[CARDCOLOR]
-        call Board.renderBoard
+        push  [CurrColor]  [XCurrCard] [YCurrCard]  [CARDWIDTH] [CARDHEIGHT] 
+        call Board.DrawFace
 
     jmp check_arrow_key
 
@@ -289,15 +316,20 @@ Process.PressedKey:
 
 
 
+
     esc_button_pressed:
 
         
+    push [XCurrCard] [YCurrCard]
+    call Board.XORCard
     ; mov cx, 320*200
     ; mov di, 0   
     ; mov al, byte[BGCOLOR]
     ; rep stosb
 
     pop bx 
+
+Process.EndProcess:
 ret 
 
 XPointer dw 43 ; 45 - 2 
@@ -305,6 +337,8 @@ YPointer dw 52 ; 54 - 2 where -2 is for frame
 
 XCurrCard dw  45
 YCurrCard dw 54
+
+CurrColor dw ? 
   
 
 ; -------------------------------- RANDOM 
@@ -365,7 +399,7 @@ Board.renderBoard:
             push di 
             push cx
             ;    color x  y width    height  
-            push  ax  cx  di   30      42
+            push  ax  cx  di [CARDWIDTH]  [CARDHEIGHT]
             call Board.DrawFace
             pop cx
             pop di 
@@ -392,8 +426,6 @@ Board.DrawFace:
        
     push $A000
     pop es
-
-
 
     mov ax, [bp + 4]
     mov [HEIGHT], ax
@@ -429,7 +461,60 @@ Board.DrawFace:
     pop bp
 ret 10
 
+Board.XORCard:
+    push bp     
+    mov bp, sp 
+
+    mov ax, 80*2*2
+    mul word[bp + 4]
+    add ax, word[bp + 6]
+    mov di, ax 
+
+    push  68h 6fh
+    call Random.Get
  
+    mov cx, [CARDHEIGHT]
+    DrawLines:
+
+        push cx
+        mov cx, [CARDWIDTH]
+        Lines:
+
+            ; mov word[es:di], ax
+            xor word[es:di], ax
+            inc di
+        loop Lines
+        sub di, [CARDWIDTH]
+        add di, 320 
+        pop cx
+    loop DrawLines
+    
+
+    pop bp
+ret 4
+
+Board.GetColor:
+    push bp 
+    mov bp, sp
+
+    mov ax, 80*2*2
+    mul word[bp + 4]
+    add ax, word[bp + 6]
+    mov di, ax
+    
+    ; mov word[es:di], 0Fh
+    ; mov ax, byte[es:di]
+    ; mov word[bp + 8], ax
+
+    mov ax, word[es:di]
+    mov [CurrColor], ax 
+
+
+    pop bp
+ret 4
+
+
+
 X dw 0
 Y dw 0 
 WIDTH dw 0
