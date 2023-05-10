@@ -342,25 +342,50 @@ Process.PressedKey:
     ; if card has its face, not change it
 
 
+    ; ; !!!!!!!!!!!!!!!!!!
+    jne check_arrow_key
 
-    ; jne check_arrow_key
     mov ax, [CurrIndex]
-    div [sixteen]
-
-    xchg ax, dx
     mul [two]
-    mov si, ax
+    mov bx, ax
+    mov bx, [deck + bx]
+
+    mov ax, bx
+    mul [two]
+    xchg ax, bx
+    ; mov ax, 18
+    ; div [sixteen]
+
+    ; xchg ax, dx
+
+    ; mul [two]
+    ; mov bx, ax
+    ; mov ax, word[deckMethods + si-2]
+    ; mov si, word[deckMethods + si]
+
+
+    ; mov bx, [deckMethods + bx]
+
+    ; and ax, 0x00FF
+
+    ; and si, 0xFF00
+    ; add si, ax
+    ; ; dec si
         
     push [XCurrCard] [YCurrCard] [CARDWIDTH] [CARDHEIGHT]
-    call word[deckMethods + si]
+    call word[deckMethods + bx]
 
 
-    ; jne Process.EndProcess
+    jne Process.EndProcess
         
     ; push [XCurrCard] [YCurrCard]
     ; call Board.XORCard
  
-    jmp Process.EndProcess
+
+
+
+
+    ; jmp Process.EndProcess
 
     esc_button_pressed:
     pop bx
@@ -456,8 +481,8 @@ ret 4
 
 
  
-deck dw 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
-     dw 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16
+deck dw 3, 0, 1, 6, 8, 9, 7, 12, 2, 13, 11, 10, 15, 4, 5, 14
+     dw 13, 1, 10, 0, 3, 14, 15, 11, 12, 2, 7, 9, 8, 6, 5, 4
 
 
 
