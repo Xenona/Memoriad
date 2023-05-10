@@ -166,6 +166,7 @@ FirstCardIndex dw ?
 SecondCardIndex dw ?
 
 two dw 2
+sixteen dw 16
 
 ; ------------------- CLEAR SCREEN
 
@@ -339,11 +340,26 @@ Process.PressedKey:
     mov al, [es:di]
     cmp al, byte[CARDCOLOR]
     ; if card has its face, not change it
-    jne Process.EndProcess
 
+
+
+    ; jne check_arrow_key
+    mov ax, [CurrIndex]
+    div [sixteen]
+
+    xchg ax, dx
+    mul [two]
+    mov si, ax
         
-    push [XCurrCard] [YCurrCard]
-    call Board.XORCard
+    push [XCurrCard] [YCurrCard] [CARDWIDTH] [CARDHEIGHT]
+    call word[deckMethods + si]
+
+
+    ; jne Process.EndProcess
+        
+    ; push [XCurrCard] [YCurrCard]
+    ; call Board.XORCard
+ 
     jmp Process.EndProcess
 
     esc_button_pressed:
