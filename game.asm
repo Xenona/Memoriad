@@ -14,9 +14,9 @@ NEEDEDPAIRS dw 16
 EntryPoint:
 
 
-
-    ; call Random.CreateArray
-
+    
+    call Random.CreateArray
+    
 
     mov ah, $0F
     int 10h
@@ -421,19 +421,16 @@ Random.Initialize:
     mov bp, sp 
 
 
-     mov        ah, $2C
-     int        21h
-     mov        [Random.wPrevNumber], dx
-     mov        [seed], dx
+    mov        ah, $2C
+    int        21h
+    mov        [Random.wPrevNumber], dx
+    ;  mov        [seed], dx
 
     pop bp 
 ret
       
  
-    seed dw 0x123
-    f1 dw 0x0001
-    f2 dw 0x0002
-    
+ 
 
 Random.Get:
      
@@ -451,6 +448,7 @@ Random.Get:
     rol        ax, 7
     adc        ax, 23
     mov        [Random.wPrevNumber], ax
+    inc     [Random.wPrevNumber]
 
     ; mov ax, [seed]    ; текущий элемент последовательности
     ; mov bx, [f1]      ; первый элемент Фибоначчи
@@ -461,6 +459,8 @@ Random.Get:
     ; mov cx, 6547
     ; div cx
     ; xchg ax, dx
+
+
 
 
     
@@ -481,9 +481,14 @@ ret 4
 
 
  
-deck dw 3, 0, 1, 6, 8, 9, 7, 12, 2, 13, 11, 10, 15, 4, 5, 14
-     dw 13, 1, 10, 0, 3, 14, 15, 11, 12, 2, 7, 9, 8, 6, 5, 4
+; deck dw 3, 0, 1, 6, 8, 9, 7, 12, 2, 13, 11, 10, 15, 4, 5, 14
+;      dw 13, 1, 10, 0, 3, 14, 15, 11, 12, 2, 7, 9, 8, 6, 5, 4
 
+
+deck dw 5, 14, 3, 9, 8, 12, 8, 13, 1, 5, 10, 0, 3, 4, 11, 1  
+     dw 6, 7, 15, 14, 6, 10, 13, 0, 11, 15, 4, 9, 2, 2, 12, 7
+
+; skip2 dw 0, 0, 0, 0
 
 
 deckMethods dw Cards.Card1, Cards.Card2, Cards.Card3
@@ -496,6 +501,8 @@ deckMethods dw Cards.Card1, Cards.Card2, Cards.Card3
 ; deck dw 32 dup 0
 deckCounts dw 40 dup 0
 
+sixfour dw 64
+
 Random.CreateArray:
     push bp 
     mov bp, sp
@@ -504,59 +511,83 @@ Random.CreateArray:
     ;   randomize
     call Random.Initialize
 
+    xor si, si
+    createArrayLoop:
 
-    
-    CreateDeck:
-
-
-
-        push 1 40 
+        push 0 si 
         call Random.Get
-        
 
+        mul [two]
+        div [sixfour]
+        xchg ax, dx
         mov bx, ax
+        mov cx, [deck + bx]
+        xchg [deck + si], cx
+        mov [deck + bx], cx
 
-        genRand1:
+
+
+    add si, 2
+    cmp si, 64
+    jnz createArrayLoop
+
+     
         
-        push 0 31 
-        call Random.Get
+
+     
+    
+
+    ; CreateDeck:
+
+
+
+    ;     push 1 40 
+    ;     call Random.Get
+        
+
+    ;     mov bx, ax
+
+    ;     genRand1:
+        
+    ;     push 0 31 
+    ;     call Random.Get
         
         
-        mov si, ax
-        cmp [deck + si], 0
-        jnz genRand1
+    ;     mov si, ax
+    ;     cmp [deck + si], 0
+    ;     jnz genRand1
 
-        cmp word[deckCounts + bx], 2
-        jge CreateDeck
+    ;     cmp word[deckCounts + bx], 2
+    ;     jge CreateDeck
 
-        mov [deck + si], bx
-        inc [deckCounts + bx]
+    ;     mov [deck + si], bx
+    ;     inc [deckCounts + bx]
 
 
 
-        genRand2:
+    ;     genRand2:
         
-        push 1 32 
-        call Random.Get
+    ;     push 1 32 
+    ;     call Random.Get
         
-        mov si, ax
-        cmp [deck + si], 0
-        jnz genRand2
+    ;     mov si, ax
+    ;     cmp [deck + si], 0
+    ;     jnz genRand2
 
-        mov [deck + si], bx
-        add [deckCounts + bx], 1
+    ;     mov [deck + si], bx
+    ;     add [deckCounts + bx], 1
 
-        add word[seed], 1
+    ;     add word[seed], 1
 
-        mov ax, 0
-        mov di, deck
-        mov cx, 32
-        repnz scasb
+    ;     mov ax, 0
+    ;     mov di, deck
+    ;     mov cx, 32
+    ;     repnz scasb
 
     
 
     
-    jz CreateDeck
+    ; jz CreateDeck
 
 
 
@@ -781,34 +812,276 @@ Cards.Card1:
     push bp
     mov bp, sp
  
-    ; bp + 4 - height
-    ; bp + 6 - width
-    ; bp + 8 - Y
-    ; bp + 10 - X
-    ; bp + 12 - color
+    ; push 13h word[bp + 10] word[bp + 8] word[bp + 6] word[bp + 4] 
+    ; call Board.DrawFace
+
+        
+        push word[XCurrCard]
+        pop word[XDraw]
+
+        push word[YCurrCard]
+        pop word[YDraw]
+
+    ; bg sky
+    push 65h [XDraw] [YDraw] [CARDWIDTH] 25
+    call Board.DrawFace
+
+    ; bg sea
+    push [YDraw]
+    add [YDraw], 25
+    push 3h [XDraw] [YDraw] [CARDWIDTH] 17
+    call Board.DrawFace
+    pop [YDraw]
+
+    ; wawes
+    push [YDraw]
+    add [YDraw], 40
+    push 64h [XDraw] [YDraw] [CARDWIDTH] 2
+    call Board.DrawFace
+
+    dec [YDraw]
+    push 64h [XDraw] [YDraw] [CARDWIDTH] 1
+    call Board.DrawFace
+
+    push [XDraw]
+    add [XDraw], 3
+    push 3h [XDraw] [YDraw] 5 1
+    call Board.DrawFace
+
+    add [XDraw], 10
+    push 3h [XDraw] [YDraw] 1 1
+    call Board.DrawFace
+
+    add [XDraw], 6
+    push 3h [XDraw] [YDraw] 2 1
+    call Board.DrawFace
+    pop [XDraw]
+    pop [YDraw]
+
+    ; ---------------------
+    push [YDraw] [XDraw]
+
+    add [YDraw], 36
+    inc [XDraw]
+    push 64h [XDraw] [YDraw] 3 1 
+    call Board.DrawFace
+
+    dec [YDraw]
+    add [XDraw], 3
+    push 64h [XDraw] [YDraw] 2 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    add [XDraw], 2
+    push 64h [XDraw] [YDraw] 3 1 
+    call Board.DrawFace
+
+    dec [YDraw]
+    add [XDraw], 3
+    push 64h [XDraw] [YDraw] 2 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    add [XDraw], 2
+    push 64h [XDraw] [YDraw] 3 1 
+    call Board.DrawFace
+
+    dec [YDraw]
+    add [XDraw], 3
+    push 64h [XDraw] [YDraw] 5 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    add [XDraw], 5
+    push 64h [XDraw] [YDraw] 3 1 
+    call Board.DrawFace
+
+
+    inc [YDraw]
+    add [XDraw], 3
+    push 64h [XDraw] [YDraw] 2 1 
+    call Board.DrawFace
+
+    dec [YDraw]
+    add [XDraw], 2
+    push 64h [XDraw] [YDraw] 2 1
+    call Board.DrawFace
+
+    pop [XDraw] [YDraw]
+    ; ------------
+
+    push [YDraw] [XDraw]
+
+    add [YDraw], 33
+    push 64h [XDraw] [YDraw] 3 1 
+    call Board.DrawFace
+
+    dec [YDraw]
+    add [XDraw], 3
+    push 64h [XDraw] [YDraw] 2 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    add [XDraw], 2
+    push 64h [XDraw] [YDraw] 3 1 
+    call Board.DrawFace
+
+    dec [YDraw]
+    add [XDraw], 3
+    push 64h [XDraw] [YDraw] 2 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    add [XDraw], 2
+    push 64h [XDraw] [YDraw] 3 1 
+    call Board.DrawFace
+
+    dec [YDraw]
+    add [XDraw], 3
+    push 64h [XDraw] [YDraw] 5 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    add [XDraw], 5
+    push 64h [XDraw] [YDraw] 3 1 
+    call Board.DrawFace
+
  
-    mov cx, [bp + 4]
-    mov ax, 2*2*80
-    mul word[bp + 8]
-    mov di, ax
-    add di, [bp + 10]
 
-    mov al, 01h
-    rectangleLoop1:
-        push cx
+    pop [XDraw] [YDraw]
+    ; ------------
 
-            mov cx, [bp + 6]   
-            
-            rep stosb
+        push [YDraw] [XDraw]
 
-            sub di, [bp + 6]
-            add di, 80*2*2
+    add [YDraw], 29
+    push 64h [XDraw] [YDraw] 3 1 
+    call Board.DrawFace
 
-        pop cx
-    loop rectangleLoop1
+    dec [YDraw]
+    add [XDraw], 3
+    push 64h [XDraw] [YDraw] 2 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    add [XDraw], 2
+    push 64h [XDraw] [YDraw] 3 1 
+    call Board.DrawFace
+
+ 
+
+ 
+ 
+
+    pop [XDraw] [YDraw]
+
+    ; -------------
+
+    ; beach 
+    push [YDraw] [XDraw]
+    add [YDraw], 24
+    add [XDraw], 6
+
+    push 5Ch [XDraw] [YDraw] 24  3
+    call Board.DrawFace
+
+    inc [YDraw]
+    sub [XDraw], 2
+    push 5Ch [XDraw] [YDraw] 2 2
+    call Board.DrawFace
+
+    add [YDraw], 2
+    add [XDraw], 3
+    push 5Ch [XDraw] [YDraw] 3 1
+    call Board.DrawFace
+
+    add [XDraw], 3
+    push 5Ch [XDraw] [YDraw] 9 2
+    call Board.DrawFace
+
+    add [XDraw], 9
+    push 5Ch [XDraw] [YDraw] 11 3
+    call Board.DrawFace
+
+    add [YDraw], 2
+    add [XDraw], 3
+    push 5Ch [XDraw] [YDraw] 4 1 
+    call Board.DrawFace 
+
+    inc [YDraw]
+    add [XDraw], 2
+    push 5Ch [XDraw] [YDraw]  6 1
+    call Board.DrawFace
+
+    ; clouds
+    pop [XDraw] [YDraw]
+
+    push [XDraw] [YDraw]
+    add [YDraw], 9
+    push 0fh [XDraw] [YDraw] 4 4 
+    call Board.DrawFace
+
+    add [XDraw], 4
+    push 0fh [XDraw] [YDraw] 5 3
+    call Board.DrawFace
+
+    sub [YDraw], 3
+    inc [XDraw]
+    push 0fh [XDraw] [YDraw] 9 4
+    call Board.DrawFace
+
+    add [XDraw], 4
+    sub [YDraw], 3
+    push 0fh [XDraw] [YDraw] 11 5
+    call Board.DrawFace
+
+    dec [YDraw]
+    inc [XDraw]
+    push 0fh [XDraw] [YDraw] 19 3
+    call Board.DrawFace
+
+
+    pop [YDraw] [XDraw]
+
+    ; trees
+    push [XDraw] [YDraw]
+    add [XDraw], 17
+    add [YDraw], 20
+    push 0x76 [XDraw] [YDraw] 13 5
+    call Board.DrawFace
+
+    inc [YDraw]
+    sub [XDraw], 3
+    push 0x76 [XDraw] [YDraw] 3 4
+    call Board.DrawFace
+
+    sub [XDraw], 2
+    add [YDraw], 2
+    push 0x76 [XDraw] [YDraw] 2 2 
+    call Board.DrawFace
+
+    sub [YDraw], 4
+    add [XDraw], 5
+    push 0x76 [XDraw] [YDraw] 3 1
+    call Board.DrawFace
+
+    dec [YDraw]
+    add [XDraw], 6
+    push 0x76 [XDraw] [YDraw] 6 2 
+    call Board.DrawFace
+    pop [YDraw] [XDraw]
+
+    ; sun
+    add [XDraw], 3
+    add [YDraw], 5
+    push 2ch [XDraw] [YDraw] 4 4
+    call Board.DrawFace
+
 
     pop bp
 ret 8
+
+XDraw dw ?
+YDraw dw ? 
 
 Cards.Card2:
     push bp
