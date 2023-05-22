@@ -5,11 +5,6 @@ org 100h
 
 ; ------------------------------- START
 
-bOldMode db ?
-bOldPage db ?
-
-MatchedPairs dw 0
-NEEDEDPAIRS dw 16
 
 EntryPoint:
 
@@ -21,9 +16,7 @@ EntryPoint:
 
 
 
-    
-    call Random.CreateArray
-    
+
 
     mov ah, $0F
     int 10h
@@ -33,6 +26,10 @@ EntryPoint:
     int 10h
 
 
+    StartAgain:
+    
+    call Random.CreateArray
+    
 
 ;   randomize
     call Random.Initialize
@@ -46,9 +43,10 @@ EntryPoint:
     pop es
 
 
+
     call Screen.Start
 
-    call Screen.Finish
+
  
 
     push [BGCOLOR]
@@ -133,18 +131,13 @@ EntryPoint:
 
     WHILE_MATCH_LESS_NEEDED.End:
     mov ax, [MatchedPairs]
+    inc [tries]
     cmp ax, word[NEEDEDPAIRS]    
     jne WHILE_MATCH_LESS_NEEDED
 
     ; поздравить юзера  
-
-
-    mov ax, $0C08
-    int 21h
-    test al, al
-    jnz @f
-    mov ah, $08
-    int 21h
+    call Screen.Finish
+ 
 
 @@:
 EntryPoint.EndProc:
@@ -160,8 +153,17 @@ EntryPoint.EndProc:
 
 
 
-    ret
+ret
 
+bOldMode db ?
+bOldPage db ?
+
+MatchedPairs dw 0
+NEEDEDPAIRS dw 16
+
+tries dw 0
+stringTries dw 0, 10 dup ?
+;---------------------
 BGCOLOR dw 0x13;221
 
 CARDCOLOR dw 0xa0
@@ -221,24 +223,35 @@ Screen.Start:
     jmp whileKeyNotPressed
 
 @@:
+
+    mov ah, 0
+    int 16h
     pop bp 
 ret 
 
 
-string1 db 10, 13, 10, 13, 10, 13, '       Congrats for you, o winner!!!', 13, 10, '$'
-string2 db 'String2', 13, 10, '$'
-string3 db 'String3', 13, 10, '$'
+string1 db 10, 13, 10, 13, 10, 13, '      CONGRATS FOR YOU, O WINNER!!!', 13, 10, '$'
+string2 db 10, 13, 10, 13, 10, 13, '                IT TOOK   ', 13, 10, '$'
+string3 db 10, 13, '                  ---', 13, 10, '$'
+string4 db 10, 13, '          MOVES FOR YOU TO WIN', 10, 13, '$'
 
-; color1 dw 
+string5_1 db 10, 13, 10, 13, 10, 13, '    SOMEDAY YOU WILL BECOME A LEGEND', 10, 13, '$'
+string5_2 db 10, 13, 10, 13, 10, 13, '       NICE TRY, YOU MADE IT WELL!', 10, 13, '$'
+string5_3 db 10, 13, 10, 13, 10, 13, '         YOU COULD DO IT BETTER', 10, 13, '$'
+string5_4 db 10, 13, 10, 13, 10, 13, '   HOLY MOLY, IT TOOK SO LONG, MAN...', 10, 13, '$'
 
+; string6 db 10, 13, 10, 13, 10, 13, 10, 13, 10, 13,'  press 1 to play again, or  ', 10, 13, '$'
+; string7 db '  any other key to exit.  ', 10, 13, '$'
+
+string8 db 10, 13, 10, 13, 10, 13, 10, 13, 10, 13, 10, 13, '  press any key to exit.  ', 10, 13, '$'
 Screen.Finish:
     push bp 
     mov bp, sp 
     
-    push 0xb1
+    push 0xFF
     call Screen.Clear
 
-    ; whileKeyNotPressed:
+
     ; push [color]
     ; call Screen.Clear
 
@@ -246,56 +259,170 @@ Screen.Finish:
 
 
 
-
-    mov bl, 0x0f
-    mov bh, 0x0f
+ 
 
     mov ah, 09h
-    mov bl, 0x02
     mov dx, string1
     int 21h
     mov ah, 09h
     mov dx, string2 
     int 21h
+
+
+    ; call Process.transformToString
     mov ah, 09h
     mov dx, string3
     int 21h
+    mov ah, 09h
+    mov dx, string4
+    int 21h
+
+
+    cmp [tries], 32
+    jle best
+    cmp [tries], 100
+    jle nice
+    cmp [tries], 130
+    jle well 
+    mov dx, string5_4
+    jmp @f
+    
+    best:
+    mov dx, string5_1
+    jmp @f
+
+    well: 
+    mov dx, string5_3
+    jmp @f 
+
+    nice:
+    mov dx, string5_2    
+    jmp @f
+
+    @@:
+    mov ah, 09h
+    int 21h
+ 
+
+    mov ah, 09h
+    mov dx, string8
+    int 21h
+ 
+
+    awaitKeyStroke:
 
     push 0x25 0 0 320 200
-    call Board.DrawFace
-    push 0x23 3 3 314 194
-    call Board.DrawFace
-    push 0x22 6 6 308 188
-    call Board.DrawFace
-    push 0x21 9 9 302 182
-    call Board.DrawFace
-    push 0xFF 15 15 290 170
-    call Board.DrawFace
-
-    ; mov ah, 1
-    ; int 16h
-    ; jnz @f
+    call Board.DrawBorder
+    push 0x23 4 4 312 192
+    call Board.DrawBorder
+    push 0x22 8 8 304 184
+    call Board.DrawBorder
+    push 0x21 12 12 296 176
+    call Board.DrawBorder
  
 
-    ; jmp whileKeyNotPressed
+    push 1
+    call Just.Wait
 
+
+    push 0x23 0 0 320 200
+    call Board.DrawBorder
+    push 0x22 4 4 312 192
+    call Board.DrawBorder
+    push 0x21 8 8 304 184
+    call Board.DrawBorder
+    push 0x25 12 12 296 176
+    call Board.DrawBorder
+
+    push 1
+    call Just.Wait
+
+
+    push 0x22 0 0 320 200
+    call Board.DrawBorder
+    push 0x21 4 4 312 192
+    call Board.DrawBorder
+    push 0x25 8 8 304 184
+    call Board.DrawBorder
+    push 0x23 12 12 296 176
+    call Board.DrawBorder
+
+
+    push 1
+    call Just.Wait
+
+
+    push 0x21 0 0 320 200
+    call Board.DrawBorder
+    push 0x25 4 4 312 192
+    call Board.DrawBorder
+    push 0x23 8 8 304 184
+    call Board.DrawBorder
+    push 0x22 12 12 296 176
+    call Board.DrawBorder
+
+    push 1
+    call Just.Wait
 
  
 
-
-@@:
-
-    mov ax, $0C08
-    int 21h
-    test al, al
+    mov ah, 1
+    int 16h
     jnz @f
-    mov ah, $08
-    int 21h
+
+
+    jmp awaitKeyStroke
+ 
 
 @@:
+ 
     pop bp
+
 ret
 
+decimal2 dw 2
+
+; Process.transformToString:
+
+;     pusha
+
+
+;     mov bx, [decimal2]
+;     mov ax, 2;[tries]
+;     mov si, stringTries
+    
+
+;     xor cx, cx
+;     @@:
+
+;         inc cx
+;         inc si
+
+;         div bx
+;         add dl, '0'
+;         mov [si], dl 
+;         xor dx, dx
+    
+
+;         cmp ax, 0
+        
+;     jnz @b
+
+;     printLoop: 
+
+;         mov ah, 02h
+;         mov dl, byte[si]
+;         int 21h
+
+;         dec si 
+
+;     loop printLoop
+ 
+
+   
+;     popa
+
+; ret
 
 
 
