@@ -121,6 +121,7 @@ EntryPoint:
 
         @@:
 
+        push 3
         call Just.Wait
 
         push [CARDCOLOR] [FirstCardX] [FirstCardY] [CARDWIDTH] [CARDHEIGHT]
@@ -208,7 +209,7 @@ Screen.Start:
 
         inc [color]
 
-        push 3
+        push 1
         call Just.Wait
 
 
@@ -223,7 +224,8 @@ Screen.Start:
     pop bp 
 ret 
 
-string1 db 'Congrats', 13, 10, '$'
+
+string1 db 10, 13, 10, 13, 10, 13, '       Congrats for you, o winner!!!', 13, 10, '$'
 string2 db 'String2', 13, 10, '$'
 string3 db 'String3', 13, 10, '$'
 
@@ -242,6 +244,23 @@ Screen.Finish:
 
     ; inc [color]
 
+
+
+
+    mov bl, 0x0f
+    mov bh, 0x0f
+
+    mov ah, 09h
+    mov bl, 0x02
+    mov dx, string1
+    int 21h
+    mov ah, 09h
+    mov dx, string2 
+    int 21h
+    mov ah, 09h
+    mov dx, string3
+    int 21h
+
     push 0x25 0 0 320 200
     call Board.DrawFace
     push 0x23 3 3 314 194
@@ -252,21 +271,6 @@ Screen.Finish:
     call Board.DrawFace
     push 0xFF 15 15 290 170
     call Board.DrawFace
-
-
-    mov bl, 0x0f
-    mov bh, 0x0f
-
-    mov ah, 09h
-    mov bl, 0x0F
-    mov dx, string1
-    int 21h
-    mov ah, 09h
-    mov dx, string2 
-    int 21h
-    mov ah, 09h
-    mov dx, string3
-    int 21h
 
     ; mov ah, 1
     ; int 16h
@@ -297,11 +301,15 @@ ret
 
 ; --------------------------------------------- WAIT
 
+
+
 Just.Wait:
     push bp 
     mov bp, sp 
     ; bp + 4 - seconds to wait
     
+    mov ax, [bp + 4]
+    mul word[nineteen]
     push ax ds si
 
 
@@ -309,8 +317,7 @@ Just.Wait:
     pop ds
 
     mov si, 0x046C
-    mov ax, [bp + 10]
-    mul [nineteen]
+
     add ax, [si] ;time to finish
 
 
@@ -319,13 +326,13 @@ Just.Wait:
 
     cmp ax, [si]
 
-    jnl simpleLoop
+    jnb simpleLoop
 
     pop si ds ax
     pop bp 
 
 ret 2 
-nineteen dw 19
+nineteen dw 5
 timeStart dw 0
 timeFinish dw 0
 
