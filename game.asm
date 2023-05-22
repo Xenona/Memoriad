@@ -14,6 +14,13 @@ NEEDEDPAIRS dw 16
 EntryPoint:
 
 
+
+
+
+
+
+
+
     
     call Random.CreateArray
     
@@ -26,6 +33,7 @@ EntryPoint:
     int 10h
 
 
+
 ;   randomize
     call Random.Initialize
 
@@ -36,6 +44,11 @@ EntryPoint:
    
     push $A000
     pop es
+
+
+    call Screen.Start
+
+    call Screen.Finish
  
 
     push [BGCOLOR]
@@ -122,7 +135,7 @@ EntryPoint:
     cmp ax, word[NEEDEDPAIRS]    
     jne WHILE_MATCH_LESS_NEEDED
 
-    ; поздравить юзера
+    ; поздравить юзера  
 
 
     mov ax, $0C08
@@ -148,9 +161,9 @@ EntryPoint.EndProc:
 
     ret
 
-BGCOLOR dw 221
+BGCOLOR dw 0x13;221
 
-CARDCOLOR dw 2ah
+CARDCOLOR dw 0xa0
 
 BORDERCOLOR dw 15
 CARDWIDTH dw 30
@@ -182,25 +195,139 @@ Screen.Clear:
     pop bp 
 ret 2
 
+
+color dw 0x00b1
+Screen.Start:
+    push bp
+    mov bp, sp 
+
+
+    whileKeyNotPressed:
+        push [color]
+        call Screen.Clear
+
+        inc [color]
+
+        push 3
+        call Just.Wait
+
+
+        mov ah, 1
+        int 16h
+        jnz @f
+ 
+
+    jmp whileKeyNotPressed
+
+@@:
+    pop bp 
+ret 
+
+string1 db 'Congrats', 13, 10, '$'
+string2 db 'String2', 13, 10, '$'
+string3 db 'String3', 13, 10, '$'
+
+; color1 dw 
+
+Screen.Finish:
+    push bp 
+    mov bp, sp 
+    
+    push 0xb1
+    call Screen.Clear
+
+    ; whileKeyNotPressed:
+    ; push [color]
+    ; call Screen.Clear
+
+    ; inc [color]
+
+    push 0x25 0 0 320 200
+    call Board.DrawFace
+    push 0x23 3 3 314 194
+    call Board.DrawFace
+    push 0x22 6 6 308 188
+    call Board.DrawFace
+    push 0x21 9 9 302 182
+    call Board.DrawFace
+    push 0xFF 15 15 290 170
+    call Board.DrawFace
+
+
+    mov bl, 0x0f
+    mov bh, 0x0f
+
+    mov ah, 09h
+    mov bl, 0x0F
+    mov dx, string1
+    int 21h
+    mov ah, 09h
+    mov dx, string2 
+    int 21h
+    mov ah, 09h
+    mov dx, string3
+    int 21h
+
+    ; mov ah, 1
+    ; int 16h
+    ; jnz @f
+ 
+
+    ; jmp whileKeyNotPressed
+
+
+ 
+
+
+@@:
+
+    mov ax, $0C08
+    int 21h
+    test al, al
+    jnz @f
+    mov ah, $08
+    int 21h
+
+@@:
+    pop bp
+ret
+
+
+
+
 ; --------------------------------------------- WAIT
 
 Just.Wait:
     push bp 
     mov bp, sp 
+    ; bp + 4 - seconds to wait
+    
+    push ax ds si
 
-    mov cx, 1000
+
+    push 0
+    pop ds
+
+    mov si, 0x046C
+    mov ax, [bp + 10]
+    mul [nineteen]
+    add ax, [si] ;time to finish
+
+
     simpleLoop: 
 
-        mov dx, 20000
-        @@: 
-            dec dx
-        jnz @B
 
-    loop simpleLoop
+    cmp ax, [si]
 
+    jnl simpleLoop
+
+    pop si ds ax
     pop bp 
 
-ret 
+ret 2 
+nineteen dw 19
+timeStart dw 0
+timeFinish dw 0
 
 ; ------------------------------- ARROWS AND SPACE
 
@@ -450,16 +577,7 @@ Random.Get:
     mov        [Random.wPrevNumber], ax
     inc     [Random.wPrevNumber]
 
-    ; mov ax, [seed]    ; текущий элемент последовательности
-    ; mov bx, [f1]      ; первый элемент Фибоначчи
-    ; add bx, [f2]      ; второй элемент Фибоначчи
-    ; mov [seed], bx    ; сохраняем текущий элемент в seed
-    ; mov [f1], bx      ; перезаписываем первый элемент
-    ; mov [f2], ax 
-    ; mov cx, 6547
-    ; div cx
-    ; xchg ax, dx
-
+ 
 
 
 
@@ -534,60 +652,7 @@ Random.CreateArray:
      
         
 
-     
-    
-
-    ; CreateDeck:
-
-
-
-    ;     push 1 40 
-    ;     call Random.Get
-        
-
-    ;     mov bx, ax
-
-    ;     genRand1:
-        
-    ;     push 0 31 
-    ;     call Random.Get
-        
-        
-    ;     mov si, ax
-    ;     cmp [deck + si], 0
-    ;     jnz genRand1
-
-    ;     cmp word[deckCounts + bx], 2
-    ;     jge CreateDeck
-
-    ;     mov [deck + si], bx
-    ;     inc [deckCounts + bx]
-
-
-
-    ;     genRand2:
-        
-    ;     push 1 32 
-    ;     call Random.Get
-        
-    ;     mov si, ax
-    ;     cmp [deck + si], 0
-    ;     jnz genRand2
-
-    ;     mov [deck + si], bx
-    ;     add [deckCounts + bx], 1
-
-    ;     add word[seed], 1
-
-    ;     mov ax, 0
-    ;     mov di, deck
-    ;     mov cx, 32
-    ;     repnz scasb
-
-    
-
-    
-    ; jz CreateDeck
+ 
 
 
 
