@@ -43,7 +43,7 @@ EntryPoint:
     pop es
 
 
-
+    ; no hard coding, ha-ha, of coooourse 
     call Screen.Start
 
 
@@ -184,8 +184,7 @@ SecondCardIndex dw ?
 two dw 2
 sixteen dw 16
 
-; ------------------- CLEAR SCREEN
-
+; ------------------- CLEAR SCR
 Screen.Clear:
     push bp 
     mov bp, sp 
@@ -198,7 +197,7 @@ Screen.Clear:
     pop bp 
 ret 2
 
-
+ 
 color dw 0x00b1
 Screen.Start:
     push bp
@@ -206,6 +205,10 @@ Screen.Start:
 
     push 0xb1
     call Screen.Clear
+
+    mov ah, 09h
+    mov dx, newl
+    int 21h
 
     whileKeyNotPressed:
 
@@ -267,6 +270,12 @@ Screen.Start:
         push 100 100
         call Board.ShiftWater
 
+        mov ah, 09h
+        mov dx, string_1
+        int 21h
+
+
+
     jmp whileKeyNotPressed
         ; push 0x35  200 100 1 100
         ; call Board.DrawFace
@@ -278,6 +287,12 @@ Screen.Start:
     int 16h
     pop bp 
 ret 
+
+newl db 10, 13, '$'
+
+string_1 db  13, '         WELCOME TO MEMORY GAME        ', 13,  '$'
+string_2 db 10, 13,  '   TIME TO TEST YOU :)' , 10, 13, '$'
+string_3 db 10, 13, 10, 13, 10, 13, 10, 13, 10, 13,  'press any key to continue' , 10, 13, '$'
 
 
 string1 db 10, 13, 10, 13, 10, 13, '      CONGRATS FOR YOU, O WINNER!!!', 13, 10, '$'
@@ -920,71 +935,7 @@ Board.DrawFace:
     pop bp
 ret 10
 
-; Board.XORCard:
-;     push bp     
-;     mov bp, sp 
-
-;     mov ax, 80*2*2
-;     mul word[bp + 4]
-;     add ax, word[bp + 6]
-;     mov di, ax  
-
-;     push  0ah 0eh
-;     call Random.Get
  
-;     mov cx, [CARDHEIGHT]
-;     DrawLines:
-
-;         push cx
-;         mov cx, [CARDWIDTH]
-;         Lines:
-
-;             mov byte[es:di], al
-;             ; xor word[es:di], ax
-;             inc di
-;         loop Lines
-;         sub di, [CARDWIDTH]
-;         add di, 320 
-;         pop cx
-;     loop DrawLines
-
-
-;     ; mov cx, [CARDHEIGHT]
-;     ; DrawLines:
-;     ;     push cx
-;     ;         mov []
-;     ;     pop cx
-;     ; loop DrawLines
-    
-
-;     pop bp
-; ret 4
-
-; Board.GetColor:
-
-;     ; bp + 4 - Y
-;     ; bp + 6 - X
-
-
-;     push bp 
-;     mov bp, sp
-
-;     mov ax, 80*2*2
-;     mul word[bp + 4]
-;     add ax, word[bp + 6]
-;     mov di, ax
-    
-;     ; mov word[es:di], 0Fh
-;     ; mov ax, byte[es:di]
-;     ; mov word[bp + 8], ax
-
-;     mov ax, word[es:di]
-;     mov [CurrColor], ax 
-
-
-;     pop bp
-; ret 4
-
 Board.DrawBorder:
     push bp 
     mov bp, sp 
