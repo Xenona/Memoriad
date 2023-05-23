@@ -204,23 +204,73 @@ Screen.Start:
     push bp
     mov bp, sp 
 
+    push 0xb1
+    call Screen.Clear
 
     whileKeyNotPressed:
-        push [color]
-        call Screen.Clear
 
-        inc [color]
+        ; inc [color]
 
-        push 1
+        push 2
         call Just.Wait
 
 
         mov ah, 1
         int 16h
         jnz @f
- 
+
+        
+
+
+        ;sky 
+
+        push 0x7f 0 20 320 20
+        call Board.DrawFace 
+        push 0x37 0 40 320 20 
+        call Board.DrawFace
+        push 0x36 0 50 320 10 
+        call Board.DrawFace
+        push 0x35 0 55 320 5
+        call Board.DrawFace
+        push 0x33 0 60 320 5
+        call Board.DrawFace 
+        push 0x44 0 65 320 5 
+        call Board.DrawFace
+        push 0x43 0 70 320 10
+        call Board.DrawFace
+        push 0x2b 0 80 320 5
+        call Board.DrawFace
+        push 0x2b 0 85 320 10
+        call Board.DrawFace
+        push 0x27 0 95 320 5 
+        call Board.DrawFace
+
+         ; sun
+        push 0x2a 140 70 40 40
+        call Board.DrawFace
+
+        push 0x28 145 65 30 50
+        call Board.DrawFace
+
+        push 0x28 135 75 50 30
+        call Board.DrawFace
+
+
+        call Board.MoveClouds
+
+        ; sea
+        push 0x68  0 100 320 100
+        call Board.DrawFace
+
+        
+
+        push 100 100
+        call Board.ShiftWater
 
     jmp whileKeyNotPressed
+        ; push 0x35  200 100 1 100
+        ; call Board.DrawFace
+
 
 @@:
 
@@ -870,70 +920,70 @@ Board.DrawFace:
     pop bp
 ret 10
 
-Board.XORCard:
-    push bp     
-    mov bp, sp 
+; Board.XORCard:
+;     push bp     
+;     mov bp, sp 
 
-    mov ax, 80*2*2
-    mul word[bp + 4]
-    add ax, word[bp + 6]
-    mov di, ax  
+;     mov ax, 80*2*2
+;     mul word[bp + 4]
+;     add ax, word[bp + 6]
+;     mov di, ax  
 
-    push  0ah 0eh
-    call Random.Get
+;     push  0ah 0eh
+;     call Random.Get
  
-    mov cx, [CARDHEIGHT]
-    DrawLines:
+;     mov cx, [CARDHEIGHT]
+;     DrawLines:
 
-        push cx
-        mov cx, [CARDWIDTH]
-        Lines:
+;         push cx
+;         mov cx, [CARDWIDTH]
+;         Lines:
 
-            mov byte[es:di], al
-            ; xor word[es:di], ax
-            inc di
-        loop Lines
-        sub di, [CARDWIDTH]
-        add di, 320 
-        pop cx
-    loop DrawLines
+;             mov byte[es:di], al
+;             ; xor word[es:di], ax
+;             inc di
+;         loop Lines
+;         sub di, [CARDWIDTH]
+;         add di, 320 
+;         pop cx
+;     loop DrawLines
 
 
-    ; mov cx, [CARDHEIGHT]
-    ; DrawLines:
-    ;     push cx
-    ;         mov []
-    ;     pop cx
-    ; loop DrawLines
+;     ; mov cx, [CARDHEIGHT]
+;     ; DrawLines:
+;     ;     push cx
+;     ;         mov []
+;     ;     pop cx
+;     ; loop DrawLines
     
 
-    pop bp
-ret 4
+;     pop bp
+; ret 4
 
-Board.GetColor:
+; Board.GetColor:
 
-    ; bp + 4 - Y
-    ; bp + 6 - X
+;     ; bp + 4 - Y
+;     ; bp + 6 - X
 
 
-    push bp 
-    mov bp, sp
+;     push bp 
+;     mov bp, sp
 
-    mov ax, 80*2*2
-    mul word[bp + 4]
-    add ax, word[bp + 6]
-    mov di, ax
+;     mov ax, 80*2*2
+;     mul word[bp + 4]
+;     add ax, word[bp + 6]
+;     mov di, ax
     
-    ; mov word[es:di], 0Fh
-    ; mov ax, byte[es:di]
-    ; mov word[bp + 8], ax
+;     ; mov word[es:di], 0Fh
+;     ; mov ax, byte[es:di]
+;     ; mov word[bp + 8], ax
 
-    mov ax, word[es:di]
-    mov [CurrColor], ax 
+;     mov ax, word[es:di]
+;     mov [CurrColor], ax 
 
 
-    pop bp
-ret 4
+;     pop bp
+; ret 4
 
 Board.DrawBorder:
     push bp 
@@ -1003,7 +1053,199 @@ Board.DrawBorder:
 
 ret 10
  
+Board.ShiftWater: 
+    push bp 
+    mov bp, sp
+    push ax
 
+    mov ax, 320
+    mul word[bp + 4]
+    mov [FirstToShift], ax
+    mov cx, word[bp + 6]
+    mov [NumToShift], cx
+
+    mov di, [FirstToShift]
+    add di, 318
+
+    push 0x28 [v1x] 102 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v2x] 103 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v3x] 104 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v4x] 105 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v6x] 107 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v7x] 108 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v8x] 109 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v9x] 110 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v10x] 111 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v11x] 112 [vlen] 1
+    call Board.DrawFace
+
+
+    push 0x28 [v14x] 115 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v15x] 116 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v16x] 117 [vlen] 1
+    call Board.DrawFace
+    push 0x28 [v17x] 118 [vlen] 1
+    call Board.DrawFace
+
+    add [v1x], 6
+    add [v2x], 6
+    add [v3x], 6
+    add [v4x], 6
+    add [v6x], 6
+    add [v7x], 6
+    add [v8x], 6
+    add [v9x], 6
+    add [v10x], 6
+    add [v11x], 6
+    add [v14x], 6
+    add [v15x], 6
+    add [v16x], 6
+    add [v17x], 6
+ 
+
+    push 0x28 [v1x2] 152 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v2x2] 153 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v3x2] 154 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v4x2] 155 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v6x2] 157 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v7x2] 158 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v8x2] 159 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v9x2] 160 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v10x2] 171 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v11x2] 172 [vlen2] 1
+    call Board.DrawFace
+
+
+    push 0x28 [v14x2] 175 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v15x2] 176 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v16x2] 187 [vlen2] 1
+    call Board.DrawFace
+    push 0x28 [v17x2] 188 [vlen2] 1
+    call Board.DrawFace
+
+    add [v1x], 1
+    add [v2x], 1
+    add [v3x], 1
+    add [v4x], 1
+    add [v6x], 1
+    add [v7x], 1
+    add [v8x], 1
+    add [v9x], 1
+    add [v10x], 1
+    add [v11x], 1
+    add [v14x], 1
+    add [v15x], 1
+    add [v16x], 1
+    add [v17x], 1
+
+    add [v1x2], 6
+    add [v2x2], 6
+    add [v3x2], 6
+    add [v4x2], 6
+    add [v6x2], 6
+    add [v7x2], 6
+    add [v8x2], 6
+    add [v9x2], 6
+    add [v10x2], 6
+    add [v11x2], 6
+    add [v14x2], 6
+    add [v15x2], 6
+    add [v16x2], 6
+    add [v17x2], 6
+ 
+
+
+
+
+    pop ax
+    pop bp
+ret 4
+
+vlen dw 80
+v1x dw 0 
+v2x dw 20 
+v3x dw 40 
+v4x dw 60 
+v6x dw 80
+v7x dw 100 
+v8x dw 120 
+v9x dw 140 
+
+v17x dw 0 
+v16x dw 20 
+v15x dw 40 
+v14x dw 60 
+v11x dw 120 
+v10x dw 140 
+
+vlen2 dw 120
+v1x2 dw 100 
+v2x2 dw 120 
+v3x2 dw 140 
+v4x2 dw 160 
+v6x2 dw 180
+v7x2 dw 200 
+v8x2 dw 220 
+v9x2 dw 240 
+
+v17x2 dw 100 
+v16x2 dw 120 
+v15x2 dw 140 
+v14x2 dw 160 
+v11x2 dw 220 
+v10x2 dw 240 
+FirstToShift dw 0 
+NumToShift dw 0
+
+randX dw 0 
+randY dw 0
+
+Board.MoveClouds:
+    push bp 
+    mov bp, sp 
+
+
+    push 0xb3 [cloud1x] [cloud1y] 80 45
+    call Board.DrawFace
+    push 0xb3 [cloud2x] [cloud2y] 50 30
+    call Board.DrawFace
+    push 0xb3 [cloud3x] [cloud3y] 160 30
+    call Board.DrawFace
+
+    dec [cloud1x]
+    dec [cloud2x]
+    dec [cloud3x]
+
+    pop bp 
+ret
+cloud1x dw 3
+cloud1y dw 50
+cloud2x dw 50
+cloud2y dw 30
+cloud3x dw 00 
+cloud3y dw 50
 
 ; -----------------------  CARD SECTION 
 
