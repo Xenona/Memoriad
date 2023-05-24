@@ -48,7 +48,7 @@ EntryPoint:
     ; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     call Screen.Start
 
-    call Screen.Finish
+    ; call Screen.Finish
 
 
  
@@ -201,11 +201,20 @@ Screen.Clear:
     pop bp 
 ret 2
 
+Buffer dw ?
  
 color dw 0x00b1
 Screen.Start:
     push bp
     mov bp, sp 
+    push es ds
+
+    mov ax, cs
+    add ax, 1000h
+    mov word[Buffer], ax
+
+    push [Buffer]
+    pop es
 
     push 0xb1
     call Screen.Clear
@@ -218,7 +227,7 @@ Screen.Start:
 
         ; inc [color]
 
-        push 2
+        push 1
         call Just.Wait
 
 
@@ -274,12 +283,22 @@ Screen.Start:
         push 100 100
         call Board.ShiftWater
 
+
+        push ds es
+        mov ds, word[Buffer]
+        push $A000
+        pop es
+        mov cx, 64000
+        xor si, si 
+        xor di, di
+        rep movsb
+
+        pop es ds 
+
+
         mov ah, 09h
         mov dx, string_1
         int 21h
-
-
-
     jmp whileKeyNotPressed
         ; push 0x35  200 100 1 100
         ; call Board.DrawFace
@@ -289,6 +308,8 @@ Screen.Start:
 
     mov ah, 0
     int 16h
+
+    pop ds es
     pop bp 
 ret 
 
