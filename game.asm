@@ -28,6 +28,7 @@ EntryPoint:
 
     StartAgain:
     
+    ; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     call Random.CreateArray
     
 
@@ -44,7 +45,10 @@ EntryPoint:
 
 
     ; no hard coding, ha-ha, of coooourse 
+    ; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     call Screen.Start
+
+    call Screen.Finish
 
 
  
@@ -297,7 +301,7 @@ string_3 db 10, 13, 10, 13, 10, 13, 10, 13, 10, 13,  'press any key to continue'
 
 string1 db 10, 13, 10, 13, 10, 13, '      CONGRATS FOR YOU, O WINNER!!!', 13, 10, '$'
 string2 db 10, 13, 10, 13, 10, 13, '                IT TOOK   ', 13, 10, '$'
-string3 db 10, 13, '                  ---', 13, 10, '$'
+string3 db 10, 13, '                  ',  '$'
 string4 db 10, 13, '          MOVES FOR YOU TO WIN', 10, 13, '$'
 
 string5_1 db 10, 13, 10, 13, 10, 13, '    SOMEDAY YOU WILL BECOME A LEGEND', 10, 13, '$'
@@ -308,12 +312,15 @@ string5_4 db 10, 13, 10, 13, 10, 13, '   HOLY MOLY, IT TOOK SO LONG, MAN...', 10
 ; string6 db 10, 13, 10, 13, 10, 13, 10, 13, 10, 13,'  press 1 to play again, or  ', 10, 13, '$'
 ; string7 db '  any other key to exit.  ', 10, 13, '$'
 
-string8 db 10, 13, 10, 13, 10, 13, 10, 13, 10, 13, 10, 13, '  press any key to exit.  ', 10, 13, '$'
+string8 db  10, 13, 10, 13, 10, 13, 10, 13, 10, 13, '  press any key to exit.  ', 10, 13, '$'
 Screen.Finish:
     push bp 
     mov bp, sp 
+
+    push 3
+    call Just.Wait
     
-    push 0xFF
+    push 0x00
     call Screen.Clear
 
 
@@ -333,21 +340,28 @@ Screen.Finish:
     mov dx, string2 
     int 21h
 
-
-    ; call Process.transformToString
     mov ah, 09h
     mov dx, string3
     int 21h
+
+    call Process.transformToString
+
+    mov ah, 09h
+    mov dx, newl
+    int 21h
+
     mov ah, 09h
     mov dx, string4
     int 21h
 
+    
 
-    cmp [tries], 32
+
+    cmp [tries], 16
     jle best
-    cmp [tries], 100
+    cmp [tries], 50
     jle nice
-    cmp [tries], 130
+    cmp [tries], 80
     jle well 
     mov dx, string5_4
     jmp @f
@@ -445,49 +459,51 @@ Screen.Finish:
 
 ret
 
-decimal2 dw 2
+decimal2 dw 10
 
-; Process.transformToString:
+Process.transformToString:
 
-;     pusha
+    push bp 
+    mov bp, sp 
 
-
-;     mov bx, [decimal2]
-;     mov ax, 2;[tries]
-;     mov si, stringTries
+    xor dx, dx
+    mov bx, [decimal2]
+    mov ax, [tries]
+    ; mul [decimal2
+    mov si, stringTries
     
 
-;     xor cx, cx
-;     @@:
+    xor cx, cx
+    @@:
 
-;         inc cx
-;         inc si
+        inc cx
+        inc si
 
-;         div bx
-;         add dl, '0'
-;         mov [si], dl 
-;         xor dx, dx
+        div bx
+        add dx, '0'
+        mov [si], dx
+        xor dx, dx
     
 
-;         cmp ax, 0
+        cmp ax, 0
         
-;     jnz @b
+    jnz @b
 
-;     printLoop: 
+    printLoop: 
 
-;         mov ah, 02h
-;         mov dl, byte[si]
-;         int 21h
+        mov ah, 02h
+        mov dx, word[si]
+        int 21h
 
-;         dec si 
+        dec si 
 
-;     loop printLoop
+    loop printLoop
  
 
    
-;     popa
+    pop bp 
 
-; ret
+ret
 
 
 
@@ -527,6 +543,41 @@ ret 2
 nineteen dw 5
 timeStart dw 0
 timeFinish dw 0
+
+
+
+Board.XORCard:
+    push bp     
+    mov bp, sp 
+
+    mov ax, 80*2*2
+    mul word[bp + 4]
+    add ax, word[bp + 6]
+    mov di, ax  
+
+    mov ax, word[bp + 8]
+ 
+    mov cx, [CARDHEIGHT]
+    DrawLines:
+
+        push cx
+        mov cx, [CARDWIDTH]
+        Lines:
+
+            ; mov byte[es:di], al
+            xor word[es:di], ax
+            inc di
+        loop Lines
+        sub di, [CARDWIDTH]
+        add di, 320 
+        pop cx
+    loop DrawLines
+ 
+    
+
+    pop bp
+ret 6
+
 
 ; ------------------------------- ARROWS AND SPACE
 
@@ -802,8 +853,12 @@ ret 4
 ;      dw 13, 1, 10, 0, 3, 14, 15, 11, 12, 2, 7, 9, 8, 6, 5, 4
 
 
-deck dw 5, 14, 3, 9, 8, 12, 8, 13, 1, 5, 10, 0, 3, 4, 11, 1  
-     dw 6, 7, 15, 14, 6, 10, 13, 0, 11, 15, 4, 9, 2, 2, 12, 7
+; deck dw 5, 14, 3, 9, 8, 12, 8, 13, 1, 5, 10, 0, 3, 4, 11, 1  
+;      dw 6, 7, 15, 14, 6, 10, 13, 0, 11, 15, 4, 9, 2, 2, 12, 7
+
+
+deck dw 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8
+     dw 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15
 
 ; skip2 dw 0, 0, 0, 0
 
@@ -1491,19 +1546,91 @@ Cards.Card2:
     mov di, ax
     add di, [bp + 10]
 
-    mov al, 02h
-    rectangleLoop2:
-        push cx
 
-            mov cx, [bp + 6]   
-            
-            rep stosb
+    push word[XCurrCard]
+    pop word[XDraw]
 
-            sub di, [bp + 6]
-            add di, 80*2*2
+    push word[YCurrCard]
+    pop word[YDraw]
+    
+    
+    push [XDraw] [YDraw]
 
-        pop cx
-    loop rectangleLoop2
+    ; sky
+    push 0x28 [XDraw] [YDraw] 30 21 
+    call Board.DrawFace
+    
+    push 0x29 [XDraw] [YDraw] 30 15
+    call Board.DrawFace 
+
+    push 0x2a [XDraw] [YDraw] 30 10
+    call Board.DrawFace
+
+    push 0x2b [XDraw] [YDraw] 30 5
+    call Board.DrawFace
+
+    add [XDraw], 12
+    add [YDraw], 16
+    ;sum
+    push 0x0F [XDraw] [YDraw] 7 5  
+    call Board.DrawFace
+    sub [XDraw], 12
+    sub [YDraw], 16
+
+    ;sea
+
+    add [YDraw], 21
+    push 0x68 [XDraw] [YDraw] 30 21    
+    call Board.DrawFace
+
+    add [YDraw], 2
+    add [XDraw], 10 
+    push 0x29 [XDraw] [YDraw] 20 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    sub [XDraw], 10
+    push 0x2a [XDraw] [YDraw] 15 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    add [XDraw], 12
+    push 0x0F [XDraw] [YDraw] 7 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    sub [XDraw], 5
+    push 0x2a [XDraw] [YDraw] 5 1
+    call Board.DrawFace
+
+    add [YDraw], 2
+    add [XDraw], 2
+    push 0x0F [XDraw] [YDraw] 5 1
+    call Board.DrawFace
+
+    add [YDraw], 2
+    add [XDraw], 6
+    push 0x0F [XDraw] [YDraw] 7 1
+    call Board.DrawFace
+
+
+    add [YDraw], 3
+    sub [XDraw], 8
+    push 0x0F [XDraw] [YDraw] 3 1
+    call Board.DrawFace
+
+    add [YDraw], 3
+    add [XDraw], 17
+    push 0x0F [XDraw] [YDraw] 2 1
+    call Board.DrawFace
+
+    add [YDraw], 3
+    sub [XDraw], 8
+    push 0x0F [XDraw] [YDraw] 1 1
+    call Board.DrawFace
+    
+
+    pop [YDraw] [XDraw]
 
     pop bp
 ret 8
@@ -1524,19 +1651,120 @@ Cards.Card3:
     mov di, ax
     add di, [bp + 10]
 
-    mov al, 03h
-    rectangleLoop3:
-        push cx
+ 
 
-            mov cx, [bp + 6]   
-            
-            rep stosb
+    push word[XCurrCard]
+    pop word[XDraw]
 
-            sub di, [bp + 6]
-            add di, 80*2*2
+    push word[YCurrCard]
+    pop word[YDraw]
 
-        pop cx
-    loop rectangleLoop3
+    push 0x80 [XDraw] [YDraw] 30 42 
+    call Board.DrawFace
+
+
+    ; green  
+    push [XDraw] [YDraw] 
+    add [XDraw], 17
+    add [YDraw], 24
+    push 0x78 [XDraw] [YDraw] 4 8
+    call Board.DrawFace
+
+    add [XDraw], 2
+    add [YDraw], 5
+    push 0x78 [XDraw] [YDraw] 4 8
+    call Board.DrawFace
+
+     add [XDraw], 2
+    add [YDraw], 5
+    push 0x78 [XDraw] [YDraw] 4 8
+    call Board.DrawFace
+
+    pop [YDraw] [XDraw]
+
+
+
+    ; center
+    push [XDraw] [YDraw] 
+    add [XDraw], 13
+    add [YDraw], 18
+    push 0x2b [XDraw] [YDraw] 7 7  
+    call Board.DrawFace
+
+    sub [YDraw], 10
+    push 0x0F [XDraw] [YDraw] 4 10
+    call Board.DrawFace
+
+    add [XDraw], 3
+    add [YDraw], 7
+    push 0x0F [XDraw] [YDraw] 4 4
+    call Board.DrawFace
+
+    add [XDraw], 3
+    sub [YDraw], 3
+    push 0x0F [XDraw] [YDraw] 4 4
+    call Board.DrawFace
+
+    sub [XDraw], 5
+    add [YDraw], 6
+    sub [XDraw], 3
+    sub [YDraw], 3
+    push 0x0F [XDraw] [YDraw] 4 4
+    call Board.DrawFace
+
+    sub [XDraw], 3
+    sub [YDraw], 3
+    push 0x0F [XDraw] [YDraw] 4 4
+    call Board.DrawFace
+
+    add [XDraw], 7
+    add [YDraw], 7
+    add [XDraw], 3
+    add [YDraw], 3
+    push 0x0F [XDraw] [YDraw] 4 4
+    call Board.DrawFace
+
+    add [XDraw], 3
+    add [YDraw], 3
+    push 0x0F [XDraw] [YDraw] 4 4
+    call Board.DrawFace
+
+    sub [XDraw], 8
+    sub [YDraw], 5
+
+    sub [XDraw], 3
+    add [YDraw], 3
+    push 0x0F [XDraw] [YDraw] 4 4
+    call Board.DrawFace
+
+    sub [XDraw], 3
+    add [YDraw], 3
+    push 0x0F [XDraw] [YDraw] 4 4
+    call Board.DrawFace
+
+    sub [YDraw], 7
+    sub [XDraw], 2
+    push 0x0F [XDraw] [YDraw] 8 4
+    call Board.DrawFace
+
+    add [XDraw], 14
+    push 0x0F [XDraw] [YDraw] 8 4
+    call Board.DrawFace
+
+    add [YDraw], 5
+    sub [XDraw], 5
+      push 0x0F [XDraw] [YDraw] 4 8
+    call Board.DrawFace  
+
+
+
+    pop [YDraw] [XDraw]
+
+        add [XDraw], 17
+    add [YDraw], 24
+    push 0x78 [XDraw] [YDraw] 4 8
+    call Board.DrawFace
+ 
 
     pop bp
 ret 8
@@ -1557,19 +1785,123 @@ Cards.Card4:
     mov di, ax
     add di, [bp + 10]
 
-    mov al, 04h
-    rectangleLoop4:
-        push cx
+    push word[XCurrCard]
+    pop word[XDraw]
 
-            mov cx, [bp + 6]   
-            
-            rep stosb
+    push word[YCurrCard]
+    pop word[YDraw]
+ 
+    push [XDraw] [YDraw]
+      push 0x4e [XDraw] [YDraw] 30 42
+    call Board.DrawFace
 
-            sub di, [bp + 6]
-            add di, 80*2*2
 
-        pop cx
-    loop rectangleLoop4
+    add [YDraw],30
+    push 0x75 [XDraw] [YDraw] 30 12
+    call Board.DrawFace
+    sub [YDraw], 30 
+
+   add [XDraw], 13
+    add [YDraw], 21
+    push 0xd0 [XDraw] [YDraw] 3 20
+    call Board.DrawFace
+
+  
+
+        pop  [YDraw] [XDraw]
+
+    push [XDraw] [YDraw]
+
+ 
+    add [XDraw], 15
+    add [YDraw], 8
+    push 0xbf [XDraw] [YDraw] 14 14
+    call Board.DrawFace
+
+    sub [XDraw], 6
+    add [YDraw], 3
+     push 0xbf [XDraw] [YDraw] 14 14
+    call Board.DrawFace 
+
+    sub [XDraw], 6
+    add [YDraw], 3
+     push 0xbf [XDraw] [YDraw] 14 14
+    call Board.DrawFace  
+    pop  [YDraw] [XDraw]
+
+    push [XDraw] [YDraw]
+    add [XDraw], 10
+    add [YDraw], 16
+    push 0xbf [XDraw] [YDraw] 14 14
+    call Board.DrawFace
+
+    sub [XDraw], 6
+    add [YDraw], 3
+     push 0xbf [XDraw] [YDraw] 14 14
+    call Board.DrawFace 
+
+    pop  [YDraw] [XDraw]
+
+    push [XDraw] [YDraw]
+    add [XDraw], 4
+    add [YDraw], 8
+    push 0xbf [XDraw] [YDraw] 14 14
+    call Board.DrawFace
+
+    add [XDraw], 6
+    sub [YDraw], 3
+       push 0xbf [XDraw] [YDraw] 14 14
+    call Board.DrawFace 
+
+ 
+    pop [YDraw] [XDraw]
+
+    ;flowers
+   
+    push [XDraw] [YDraw] 
+    add [YDraw], 10
+    add [XDraw], 15
+    push 0x0f [XDraw] [YDraw] 2 2
+    call Board.DrawFace 
+
+    add [XDraw], 10
+    add [YDraw], 3    
+    push 0x0f [XDraw] [YDraw] 2 2
+    call Board.DrawFace
+
+    sub [XDraw], 18
+    add [YDraw], 3
+    push 0x0f [XDraw] [YDraw] 2 2
+    call Board.DrawFace
+    
+    add [XDraw], 8
+    inc [YDraw]
+    push 0x0f [XDraw] [YDraw] 2 2
+    call Board.DrawFace   
+
+    add [XDraw], 4
+    inc [YDraw]
+    push 0x0f [XDraw] [YDraw] 2 2
+    call Board.DrawFace
+
+    sub [XDraw], 15
+    add [YDraw], 3
+    push 0x0f [XDraw] [YDraw] 2 2
+    call Board.DrawFace
+
+    add [XDraw], 10
+    add [YDraw], 3
+    push 0x0f [XDraw] [YDraw] 2 2
+    call Board.DrawFace
+
+    sub [XDraw], 7
+    add [YDraw], 3
+    push 0x0f [XDraw] [YDraw] 2 2
+    call Board.DrawFace
+    pop [YDraw] [XDraw]
+
+
+
 
     pop bp
 ret 8
@@ -1590,19 +1922,186 @@ Cards.Card5:
     mov di, ax
     add di, [bp + 10]
 
-    mov al, 05h
-    rectangleLoop5:
-        push cx
+ 
+    push word[XCurrCard]
+    pop word[XDraw]
 
-            mov cx, [bp + 6]   
-            
-            rep stosb
+    push word[YCurrCard]
+    pop word[YDraw]
 
-            sub di, [bp + 6]
-            add di, 80*2*2
+    ; bg
+    push [XDraw] [YDraw] 
+    
+        ;sky
+    push 0x36 [XDraw] [YDraw] 30 18
+    call Board.DrawFace
 
-        pop cx
-    loop rectangleLoop5
+        ;beach
+    add [YDraw], 18
+    push 0x43 [XDraw] [YDraw] 30 24
+    call Board.DrawFace
+
+        ;sea
+
+    push 0x4f [XDraw] [YDraw] 30 4
+    call Board.DrawFace
+
+    add [YDraw], 4
+    push 0x4f [XDraw] [YDraw]  23 1
+    call Board.DrawFace
+
+    inc [YDraw]
+    push 0x4f [XDraw] [YDraw] 9 1 
+    call Board.DrawFace
+
+    inc [YDraw]
+    push 0x4f [XDraw] [YDraw] 6 1 
+    call Board.DrawFace
+
+    inc [YDraw]
+    push 0x4f [XDraw] [YDraw] 5 2 
+    call Board.DrawFace
+
+    inc [YDraw]
+    push 0x4f [XDraw] [YDraw] 2 1 
+    call Board.DrawFace
+ 
+    pop [YDraw] [XDraw]
+
+        ;crab
+    push [XDraw] [YDraw]
+      add [XDraw], 11
+      add [YDraw], 28
+      push 0x27 [XDraw] [YDraw] 11 6
+      call Board.DrawFace
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw]
+      add [XDraw], 10
+      add [YDraw], 29
+      push 0x27 [XDraw] [YDraw] 13 6
+      call Board.DrawFace
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw]
+       add [XDraw], 10
+      add [YDraw], 35
+      push 0x27 [XDraw] [YDraw] 2 3
+      call Board.DrawFace
+
+      add [XDraw], 3
+      push 0x27 [XDraw] [YDraw] 2 3
+      call Board.DrawFace
+
+      add [XDraw], 6
+      push 0x27 [XDraw] [YDraw] 2 3
+      call Board.DrawFace
+        
+      add [XDraw], 3
+      push 0x27 [XDraw] [YDraw] 2 3
+      call Board.DrawFace
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw]
+      add [XDraw], 14
+      add [YDraw], 25
+      push 0x27 [XDraw] [YDraw] 2 3
+      call Board.DrawFace
+      add [XDraw], 4
+      push 0x27 [XDraw] [YDraw] 2 3
+      call Board.DrawFace
+
+
+    pop [YDraw] [XDraw]
+
+
+    push [XDraw] [YDraw]
+      add [XDraw], 4
+      add [YDraw], 24
+      push 0x27 [XDraw] [YDraw] 2 3
+      call Board.DrawFace
+
+      add [YDraw], 3
+      inc [XDraw]
+      push 0x27 [XDraw] [YDraw] 2 1
+      call Board.DrawFace
+
+      inc [YDraw]
+      inc [XDraw]
+      push 0x27 [XDraw] [YDraw] 3 1
+      call Board.DrawFace
+
+      inc [YDraw]
+      inc [XDraw]
+      push 0x27 [XDraw] [YDraw] 3 1
+      call Board.DrawFace
+
+      inc [YDraw]
+      add [XDraw], 3
+      push 0x27 [XDraw] [YDraw] 2 2
+      call Board.DrawFace
+
+         
+
+
+    pop [YDraw] [XDraw]
+
+        push [XDraw] [YDraw]
+      add [XDraw], 27
+      add [YDraw], 24
+      push 0x27 [XDraw] [YDraw] 2 3
+      call Board.DrawFace
+
+      add [YDraw], 3
+      dec [XDraw]
+      push 0x27 [XDraw] [YDraw] 2 1
+      call Board.DrawFace
+
+    ;   inc [YDraw] 
+      dec [XDraw]
+      push 0x27 [XDraw] [YDraw] 3 1
+      call Board.DrawFace
+
+      add  [YDraw],1
+      dec [XDraw]
+      push 0x27 [XDraw] [YDraw] 3 1
+      call Board.DrawFace
+
+      inc [YDraw]
+      dec [XDraw]
+      push 0x27 [XDraw] [YDraw] 2 2
+      call Board.DrawFace
+
+         
+
+
+    pop [YDraw] [XDraw]
+
+  
+
+    push [XDraw] [YDraw]
+      add [XDraw], 7
+      add [YDraw], 25
+      push 0x27 [XDraw] [YDraw] 1 5
+      call Board.DrawFace
+
+    add [XDraw], 17 
+      push 0x27 [XDraw] [YDraw] 1 5
+      call Board.DrawFace
+         
+
+
+    pop [YDraw] [XDraw]
+
+ 
+    push [XDraw] [YDraw]
+      add [XDraw], 19
+      add [YDraw], 6
+      push 0x2b [XDraw] [YDraw] 5 5
+      call Board.DrawFace
+ 
+
+    pop [YDraw] [XDraw]
 
     pop bp
 ret 8
@@ -1623,19 +2122,165 @@ Cards.Card6:
     mov di, ax
     add di, [bp + 10]
 
-    mov al, 06h
-    rectangleLoop6:
-        push cx
+    push word[XCurrCard]
+    pop word[XDraw]
 
-            mov cx, [bp + 6]   
-            
-            rep stosb
+    push word[YCurrCard]
+    pop word[YDraw]
 
-            sub di, [bp + 6]
-            add di, 80*2*2
+    ; bg
+    push [XDraw] [YDraw] 
+    
+        push 0x65 [XDraw] [YDraw] 30 19
+        call Board.DrawFace
 
-        pop cx
-    loop rectangleLoop6
+        add [YDraw], 19
+        push 0x36 [XDraw] [YDraw] 30 23
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+    
+    push [XDraw] [YDraw] 
+        add [XDraw], 12
+        add [YDraw], 24
+
+    
+        push 0x43 [XDraw] [YDraw] 18 8
+        call Board.DrawFace
+
+        add [XDraw], 10
+        dec [YDraw]
+        push 0x43 [XDraw] [YDraw] 7 1
+        call Board.DrawFace  
+
+        sub [XDraw], 3
+        add [YDraw], 9
+        push 0x43 [XDraw] [YDraw] 8 1
+        call Board.DrawFace 
+
+
+
+    pop [YDraw] [XDraw]
+
+        push [XDraw] [YDraw] 
+        add [XDraw], 10
+        add [YDraw], 26
+
+    
+        push 0x43 [XDraw] [YDraw] 2 6
+        call Board.DrawFace
+ 
+    pop [YDraw] [XDraw]
+ 
+
+    push [XDraw] [YDraw] 
+        add [XDraw], 16
+        add [YDraw], 17
+
+    
+        push 0x70 [XDraw] [YDraw] 1 11
+        call Board.DrawFace
+
+        inc [XDraw]
+        push 0x06 [XDraw] [YDraw] 2 11
+        call Board.DrawFace      
+ 
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+        add [XDraw],  7
+        add [YDraw], 15
+
+    
+        push 0x02 [XDraw] [YDraw] 1 2
+        call Board.DrawFace
+
+        inc [XDraw]
+        dec [YDraw]
+        push 0x02 [XDraw] [YDraw] 1 2
+        call Board.DrawFace
+
+        inc [XDraw]
+        dec [YDraw]
+        push 0x02 [XDraw] [YDraw] 5 3
+        call Board.DrawFace       
+
+        inc [YDraw]
+        add [XDraw], 5
+        push 0x02 [XDraw] [YDraw] 10 3
+        call Board.DrawFace 
+
+        inc [XDraw]
+        sub [YDraw], 2
+        push 0x02 [XDraw] [YDraw] 4 2
+        call Board.DrawFace  
+
+ 
+    pop [YDraw] [XDraw]
+    
+
+        push [XDraw] [YDraw] 
+        add [XDraw],  11
+        add [YDraw], 19
+
+    
+        push 0x02 [XDraw] [YDraw] 3 3
+        call Board.DrawFace
+
+        inc [XDraw]
+        dec [YDraw]
+        push 0x02 [XDraw] [YDraw] 3 2
+        call Board.DrawFace
+
+        inc [XDraw]
+        dec [YDraw]
+        push 0x02 [XDraw] [YDraw] 4 2
+        call Board.DrawFace  
+
+        add [XDraw], 5 
+        push 0x02 [XDraw] [YDraw] 4 2
+        call Board.DrawFace     
+
+        inc [YDraw]
+        inc [XDraw]
+        push 0x02 [XDraw] [YDraw] 4 3
+        call Board.DrawFace 
+
+        add [YDraw], 3
+        inc [XDraw]
+        push 0x02 [XDraw] [YDraw] 3 1
+        call Board.DrawFace  
+
+ 
+    pop [YDraw] [XDraw]
+ 
+    
+    push [XDraw] [YDraw] 
+        add [XDraw],  22
+        add [YDraw], 3
+
+    
+        push 0x2c [XDraw] [YDraw] 4 4
+        call Board.DrawFace
+
+       
+
+ 
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+        add [XDraw],  22
+        add [YDraw], 3
+
+    
+        push 0x2c [XDraw] [YDraw] 4 4
+        call Board.DrawFace
+
+       
+
+ 
+    pop [YDraw] [XDraw]
 
     pop bp
 ret 8
@@ -1656,19 +2301,224 @@ Cards.Card7:
     mov di, ax
     add di, [bp + 10]
 
-    mov al, 07h
-    rectangleLoop7:
-        push cx
+    push word[XCurrCard]
+    pop word[XDraw]
 
-            mov cx, [bp + 6]   
-            
-            rep stosb
+    push word[YCurrCard]
+    pop word[YDraw]
 
-            sub di, [bp + 6]
-            add di, 80*2*2
+    ; bg
+    push [XDraw] [YDraw] 
+ 
+        push 0x6a [XDraw] [YDraw] 30 42
+        call Board.DrawFace 
+        
 
-        pop cx
-    loop rectangleLoop7
+    pop [YDraw] [XDraw]
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  28
+        add [YDraw], 3
+ 
+        push 0x1d [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  23
+        add [YDraw], 9
+ 
+        push 0x1d [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  18
+        add [YDraw], 16
+ 
+        push 0x1d [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  8
+        add [YDraw], 23
+ 
+        push 0x1d [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  26
+        add [YDraw], 23
+ 
+        push 0x1d [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  6
+        add [YDraw], 33
+ 
+        push 0x1d [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  18
+        add [YDraw], 34
+ 
+        push 0x1d [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  14
+        add [YDraw], 40
+ 
+        push 0x1d [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  29
+        add [YDraw], 38
+ 
+        push 0x1d [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+    
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  3
+        add [YDraw], 17
+ 
+        push 0x2b [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+        
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  27
+        add [YDraw], 16
+ 
+        push 0x2b [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+        
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  17
+        add [YDraw], 24
+ 
+        push 0x2b [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+        
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  4
+        add [YDraw], 39
+ 
+        push 0x2b [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+        
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  23
+        add [YDraw], 38
+ 
+        push 0x2b [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+        
+
+    pop [YDraw] [XDraw]
+
+        
+    push [XDraw] [YDraw] 
+    
+        add [XDraw],  5
+        add [YDraw], 7
+
+        push 0x0f [XDraw] [YDraw] 5 4
+        call Board.DrawFace 
+
+        inc [XDraw]
+        sub [YDraw], 2
+        push 0x0f [XDraw] [YDraw] 5 2
+        call Board.DrawFace 
+
+        inc [XDraw]
+        dec [YDraw]
+        push 0x0f [XDraw] [YDraw] 7 2
+        call Board.DrawFace 
+
+        add [XDraw], 2
+        dec [YDraw]
+        push 0x0f [XDraw] [YDraw] 3 2
+        call Board.DrawFace 
+
+        add [XDraw], 4
+        add [YDraw], 3
+        push 0x0f [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+    pop [YDraw] [XDraw]
+    push [XDraw] [YDraw] 
+    
+        add [XDraw], 6
+        add [YDraw], 10
+
+        push 0x0f [XDraw] [YDraw] 5 2
+        call Board.DrawFace 
+
+        inc [XDraw]
+        add [YDraw], 2
+        push 0x0f [XDraw] [YDraw] 7 2
+        call Board.DrawFace 
+ 
+        add [XDraw], 2
+        inc [YDraw]
+        push 0x0f [XDraw] [YDraw] 3 2
+        call Board.DrawFace 
+
+        add [XDraw], 4
+        sub [YDraw], 3
+        push 0x0f [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+    pop [YDraw] [XDraw]
 
     pop bp
 ret 8
@@ -1689,19 +2539,152 @@ Cards.Card8:
     mov di, ax
     add di, [bp + 10]
 
-    mov al, 08h
-    rectangleLoop8:
-        push cx
+    push word[XCurrCard]
+    pop word[XDraw]
 
-            mov cx, [bp + 6]   
-            
-            rep stosb
+    push word[YCurrCard]
+    pop word[YDraw]
 
-            sub di, [bp + 6]
-            add di, 80*2*2
+    ; bg
+    push [XDraw] [YDraw] 
+ 
+        push 0x66 [XDraw] [YDraw] 30 42
+        call Board.DrawFace 
 
-        pop cx
-    loop rectangleLoop8
+        add [YDraw], 20
+        push 0x76 [XDraw] [YDraw] 30 22
+        call Board.DrawFace        
+        
+
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+        
+        add [YDraw], 16
+ 
+        push 0xbf [XDraw] [YDraw] 11 9
+        call Board.DrawFace 
+      
+        
+
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+        add [XDraw], 5
+        add [YDraw], 14
+ 
+        push 0xbf [XDraw] [YDraw] 7 11
+        call Board.DrawFace 
+      
+        
+
+    pop [YDraw] [XDraw]
+    push [XDraw] [YDraw] 
+        add [XDraw], 12
+        add [YDraw], 11
+ 
+        push 0xbf [XDraw] [YDraw] 8 16
+        call Board.DrawFace 
+      
+        
+
+    pop [YDraw] [XDraw]
+    push [XDraw] [YDraw] 
+        add [XDraw], 20
+        add [YDraw], 12
+ 
+        push 0xbf [XDraw] [YDraw] 9 5
+        call Board.DrawFace 
+      
+        
+
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+        add [XDraw], 25
+        add [YDraw], 11
+ 
+        push 0xbf [XDraw] [YDraw] 5 5
+        call Board.DrawFace 
+      
+        
+
+    pop [YDraw] [XDraw]
+    push [XDraw] [YDraw] 
+        add [XDraw], 13
+        add [YDraw], 6
+ 
+        push 0x04 [XDraw] [YDraw] 6 23
+        call Board.DrawFace 
+        inc [XDraw]
+        push 0x04 [XDraw] [YDraw] 4 24
+        call Board.DrawFace    
+      
+        
+
+    pop [YDraw] [XDraw]
+    push [XDraw] [YDraw] 
+        add [XDraw], 19
+        add [YDraw], 14
+ 
+        push 0x70 [XDraw] [YDraw] 2 15
+        call Board.DrawFace 
+       
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+        add [XDraw], 21
+        add [YDraw], 16
+ 
+        push 0x04 [XDraw] [YDraw] 9 13
+        call Board.DrawFace 
+       
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+        add [XDraw], 23
+        add [YDraw], 14
+ 
+        push 0x04 [XDraw] [YDraw] 2 2
+        call Board.DrawFace 
+
+        add [XDraw], 4
+        push 0x04 [XDraw] [YDraw] 2 2
+        call Board.DrawFace        
+       
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+        add [XDraw], 14
+        add [YDraw], 6
+ 
+        push 0x66 [XDraw] [YDraw] 1 3 
+        call Board.DrawFace 
+        push 0x66 [XDraw] [YDraw]  3 1 
+        call Board.DrawFace 
+
+        add [XDraw], 3
+        push 0x66 [XDraw] [YDraw] 1 3
+        call Board.DrawFace        
+       
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+        add [XDraw], 15
+        add [YDraw], 12
+ 
+        push 0x14 [XDraw] [YDraw] 2 3 
+        call Board.DrawFace 
+    
+
+        add [YDraw], 5
+        push 0x14 [XDraw] [YDraw] 2 3
+        call Board.DrawFace  
+                add [YDraw], 5
+        push 0x14 [XDraw] [YDraw] 2 3
+        call Board.DrawFace        
+       
+    pop [YDraw] [XDraw]
 
     pop bp
 ret 8
@@ -1722,19 +2705,137 @@ Cards.Card9:
     mov di, ax
     add di, [bp + 10]
 
-    mov al, 09h
-    rectangleLoop9:
-        push cx
+    push word[XCurrCard]
+    pop word[XDraw]
 
-            mov cx, [bp + 6]   
-            
-            rep stosb
+    push word[YCurrCard]
+    pop word[YDraw]
 
-            sub di, [bp + 6]
-            add di, 80*2*2
+    ; bg
+    push [XDraw] [YDraw] 
+ 
+        push 0x37 [XDraw] [YDraw] 30 42
+        call Board.DrawFace 
 
-        pop cx
-    loop rectangleLoop9
+        add [YDraw], 20
+        push 0x0F [XDraw] [YDraw] 30 4 
+        call Board.DrawFace        
+
+        add [YDraw], 2
+        push 0x66 [XDraw] [YDraw] 30 8 
+        call Board.DrawFace   
+
+        add [YDraw], 2
+        push 0x4e [XDraw] [YDraw] 30 4
+        call Board.DrawFace 
+
+        add [YDraw], 2
+        push 0x4b [XDraw] [YDraw] 30 16 
+        call Board.DrawFace        
+
+        
+
+    pop [YDraw] [XDraw]
+
+    push [XDraw] [YDraw] 
+ 
+        add [XDraw], 7
+        add [YDraw], 7
+
+        push 0x00 [XDraw] [YDraw] 2 1 
+        call Board.DrawFace  
+        
+        inc [YDraw]
+        inc [XDraw]
+        push 0x00 [XDraw] [YDraw] 4 1 
+        call Board.DrawFace       
+
+        inc [YDraw]
+        inc [XDraw]
+        push 0x00 [XDraw] [YDraw] 2 1 
+        call Board.DrawFace  
+
+        sub [YDraw], 2
+        add [XDraw], 2
+        push 0x00 [XDraw] [YDraw] 3 1 
+        call Board.DrawFace  
+
+        dec [YDraw]
+        add [XDraw], 2
+        push 0x00 [XDraw] [YDraw] 1 1 
+        call Board.DrawFace  
+
+
+
+        
+        
+
+    pop [YDraw] [XDraw]
+
+
+    push [XDraw] [YDraw] 
+ 
+        add [XDraw], 18
+        add [YDraw], 11
+
+        push 0x00 [XDraw] [YDraw] 2 1 
+        call Board.DrawFace  
+        
+        inc [YDraw]
+        inc [XDraw]
+        push 0x00 [XDraw] [YDraw] 4 1 
+        call Board.DrawFace       
+
+        inc [YDraw]
+        inc [XDraw]
+        push 0x00 [XDraw] [YDraw] 2 1 
+        call Board.DrawFace  
+
+        sub [YDraw], 2
+        add [XDraw], 2
+        push 0x00 [XDraw] [YDraw] 3 1 
+        call Board.DrawFace  
+
+        dec [YDraw]
+        add [XDraw], 2
+        push 0x00 [XDraw] [YDraw] 2 1 
+        call Board.DrawFace  
+
+ 
+    pop [YDraw] [XDraw]
+    
+    push [XDraw] [YDraw] 
+ 
+        add [XDraw], 11
+        add [YDraw], 19
+
+        push 0x00 [XDraw] [YDraw] 1 1 
+        call Board.DrawFace  
+        
+        inc [YDraw]
+        inc [XDraw]
+        push 0x00 [XDraw] [YDraw] 4 1 
+        call Board.DrawFace       
+
+        inc [YDraw]
+        inc [XDraw]
+        push 0x00 [XDraw] [YDraw] 2 1 
+        call Board.DrawFace  
+
+        sub [YDraw], 2
+        add [XDraw], 2
+        push 0x00 [XDraw] [YDraw] 3 1 
+        call Board.DrawFace  
+
+        dec [YDraw]
+        add [XDraw], 2
+        push 0x00 [XDraw] [YDraw] 2 1 
+        call Board.DrawFace  
+
+ 
+    pop [YDraw] [XDraw]
+
+
 
     pop bp
 ret 8
@@ -1748,26 +2849,12 @@ Cards.CardA:
     ; bp + 8 - Y
     ; bp + 10 - X
     ; bp + 12 - color
- 
-    mov cx, [bp + 4]
-    mov ax, 2*2*80
-    mul word[bp + 8]
-    mov di, ax
-    add di, [bp + 10]
+    
+    push [XCurrCard] [YCurrCard] [CARDWIDTH] [CARDHEIGHT] 
+    Call Cards.Card9 
+    push 10 [XCurrCard] [YCurrCard] 
+    call Board.XORCard
 
-    mov al, 0ah
-    rectangleLoopA:
-        push cx
-
-            mov cx, [bp + 6]   
-            
-            rep stosb
-
-            sub di, [bp + 6]
-            add di, 80*2*2
-
-        pop cx
-    loop rectangleLoopA
 
     pop bp
 ret 8
@@ -1781,27 +2868,12 @@ Cards.CardB:
     ; bp + 8 - Y
     ; bp + 10 - X
     ; bp + 12 - color
- 
-    mov cx, [bp + 4]
-    mov ax, 2*2*80
-    mul word[bp + 8]
-    mov di, ax
-    add di, [bp + 10]
 
-    mov al, 0Bh
-    rectangleLoopB:
-        push cx
-
-            mov cx, [bp + 6]   
-            
-            rep stosb
-
-            sub di, [bp + 6]
-            add di, 80*2*2
-
-        pop cx
-    loop rectangleLoopB
-
+    push [XCurrCard] [YCurrCard] [CARDWIDTH] [CARDHEIGHT] 
+    Call Cards.Card2
+    push 200 [XCurrCard] [YCurrCard] 
+    call Board.XORCard
+  
     pop bp
 ret 8
 
@@ -1814,26 +2886,11 @@ Cards.CardC:
     ; bp + 8 - Y
     ; bp + 10 - X
     ; bp + 12 - color
- 
-    mov cx, [bp + 4]
-    mov ax, 2*2*80
-    mul word[bp + 8]
-    mov di, ax
-    add di, [bp + 10]
-
-    mov al, 0Ch
-    rectangleLoopC:
-        push cx
-
-            mov cx, [bp + 6]   
-            
-            rep stosb
-
-            sub di, [bp + 6]
-            add di, 80*2*2
-
-        pop cx
-    loop rectangleLoopC
+     push [XCurrCard] [YCurrCard] [CARDWIDTH] [CARDHEIGHT] 
+    Call Cards.Card3
+    push 50 [XCurrCard] [YCurrCard] 
+    call Board.XORCard
+   
 
     pop bp
 ret 8
@@ -1847,26 +2904,11 @@ Cards.CardD:
     ; bp + 8 - Y
     ; bp + 10 - X
     ; bp + 12 - color
+      push [XCurrCard] [YCurrCard] [CARDWIDTH] [CARDHEIGHT] 
+    Call Cards.Card7
+    push 100 [XCurrCard] [YCurrCard] 
+    call Board.XORCard
  
-    mov cx, [bp + 4]
-    mov ax, 2*2*80
-    mul word[bp + 8]
-    mov di, ax
-    add di, [bp + 10]
-
-    mov al, 0Dh
-    rectangleLoopD:
-        push cx
-
-            mov cx, [bp + 6]   
-            
-            rep stosb
-
-            sub di, [bp + 6]
-            add di, 80*2*2
-
-        pop cx
-    loop rectangleLoopD
 
     pop bp
 ret 8
@@ -1881,25 +2923,11 @@ Cards.CardE:
     ; bp + 10 - X
     ; bp + 12 - color
  
-    mov cx, [bp + 4]
-    mov ax, 2*2*80
-    mul word[bp + 8]
-    mov di, ax
-    add di, [bp + 10]
-
-    mov al, 0Eh
-    rectangleLoopE:
-        push cx
-
-            mov cx, [bp + 6]   
-            
-            rep stosb
-
-            sub di, [bp + 6]
-            add di, 80*2*2
-
-        pop cx
-    loop rectangleLoopE
+    push [XCurrCard] [YCurrCard] [CARDWIDTH] [CARDHEIGHT] 
+    Call Cards.Card4
+    push 50 [XCurrCard] [YCurrCard] 
+    call Board.XORCard
+ 
 
     pop bp
 ret 8
@@ -1913,27 +2941,12 @@ Cards.CardF:
     ; bp + 8 - Y
     ; bp + 10 - X
     ; bp + 12 - color
+  
+    push [XCurrCard] [YCurrCard] [CARDWIDTH] [CARDHEIGHT] 
+    Call Cards.Card8
+    push 100 [XCurrCard] [YCurrCard] 
+    call Board.XORCard
  
-    mov cx, [bp + 4]
-    mov ax, 2*2*80
-    mul word[bp + 8]
-    mov di, ax
-    add di, [bp + 10]
-
-    mov al, 0Fh
-    rectangleLoopF:
-        push cx
-
-            mov cx, [bp + 6]   
-            
-            rep stosb
-
-            sub di, [bp + 6]
-            add di, 80*2*2
-
-        pop cx
-    loop rectangleLoopF
-
     pop bp
 ret 8
 
@@ -1947,25 +2960,11 @@ Cards.Card10:
     ; bp + 10 - X
     ; bp + 12 - color
  
-    mov cx, [bp + 4]
-    mov ax, 2*2*80
-    mul word[bp + 8]
-    mov di, ax
-    add di, [bp + 10]
-
-    mov al, 6bh
-    rectangleLoop10:
-        push cx
-
-            mov cx, [bp + 6]   
-            
-            rep stosb
-
-            sub di, [bp + 6]
-            add di, 80*2*2
-
-        pop cx
-    loop rectangleLoop10
+  
+    push [XCurrCard] [YCurrCard] [CARDWIDTH] [CARDHEIGHT] 
+    Call Cards.Card6
+    push 10 [XCurrCard] [YCurrCard] 
+    call Board.XORCard
 
     pop bp
 ret 8
