@@ -2035,6 +2035,29 @@ Cards.Card5:
 
     pop [YDraw] [XDraw]
 
+    push [XDraw] [YDraw]
+      add [XDraw], 14
+      add [YDraw], 23
+      push 0x0f [XDraw] [YDraw] 2 3
+      call Board.DrawFace
+      add [XDraw], 4
+      push 0x0f [XDraw] [YDraw] 2 3
+      call Board.DrawFace
+
+    pop [YDraw] [XDraw]
+
+        push [XDraw] [YDraw]
+      add [XDraw], 14
+      add [YDraw], 23
+      push 0x00 [XDraw] [YDraw] 2 2
+      call Board.DrawFace
+      add [XDraw], 4
+      push 0x00 [XDraw] [YDraw] 2 2
+      call Board.DrawFace
+
+
+    pop [YDraw] [XDraw]
+
 
     push [XDraw] [YDraw]
       add [XDraw], 4
