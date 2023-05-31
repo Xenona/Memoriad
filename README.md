@@ -1,7 +1,7 @@
 # CardMatchingAssemblyGame
 Fancy game for your MS-DOS. ENJOY!
 
-Okay, must notice that code is far from clean
+Okay, must notice that the code is far from clean
 
 ## TODOs:
 - [ ] Rewrite some parts of the code to clearify what's going on
