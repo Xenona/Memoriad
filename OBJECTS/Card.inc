@@ -1,6 +1,5 @@
     CardVertCount     dd       108
 
-    ZeroPoint dd 2.0
 
             ;       x    y   z
     v0      equ     2.0, 0.0, 0.0
