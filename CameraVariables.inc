@@ -1,19 +1,20 @@
       ; camera section 
 
-        CamX dq 0.0
-        CamY dq 300.0
-        CamZ dq 1.0
+        CamX dq 0.0;0.0
+        CamY dq 90.0
+        CamZ dq 190.0
 
         WatchX dq 0.0
         WatchY dq 0.0 
-        WatchZ dq 0.0;-100.0
+        WatchZ dq -100.0 ; 0.0
         
         UpvecX dq 0.0
         UpvecY dq 1.0
         UpvecZ dq 0.0
 
-        waveAxisX dd 0.01
-        waveXStep dd 0.1
+        waveX dd 0.01
+        waveStep dd 0.1
+        waveSin dd ?
 
         
         one       db 1       ; java moment

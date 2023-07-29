@@ -193,74 +193,27 @@ proc Just.Wait uses eax ecx, toWait:DWORD
 
         ret 
 endp
+ 
 
-
-; proc Object.wave uses ebx esi ecx, vertArray:DWORD, vCount:DWORD, axis:WORD
-;         ; waves camera by 2sin(x) !!!!!!!!!!!!!!!!!!!!!
-
-;         ; x is stored in waveAxisX,
-;         ; its step - in waveXStep (suddenly)
-
-;         ; fld     [waveAxisX]             ; load curr X
-;         ; fsin                            ; sin(x)
-;         ; fmul    [two]                   ; 2*sin(x)
-;         ; fstp    [CamY]                  ; 2*sin(x) -> camY
-;         xor ebx, ebx
-;         xor esi, esi
-
-;         mov esi, [vertArray]
-
-;         mov ebx, dword[axis] ; 1,  2 or 3
-;         @@:
-;         ;       fld       [waveXStep]
-;         ;       fld       [waveAxisX]
-;         ;       fsub      st1, st0
-;         ;       fld       dword[esi + ebx]
-;         ;       fld       st1
-;         ;       fsin 
-;         ;       fsubp                 
-
-
-
-;         ;       fxch
-
-
-
-
-
-                
-
-;         add ebx, 3
-;         cmp ebx, [vCount]
-;         jbe @b 
-
-;         fld     [waveAxisX]             ; load curr X
-;         fadd    [waveXStep]             ; X+step 
-;         fstp   [waveAxisX]             ; X+step -> X 
-
-;         ret 
-; endp
+        trMatr matrix 
 
 proc Object.move uses esi ebx, vArr, vCount, x, y, z
-        locals
-                translMatr matrix 
-        endl
 
-        mov [translMatr.m11], 1.0 
-        mov [translMatr.m22], 1.0
-        mov [translMatr.m33], 1.0
-        mov [translMatr.m44], 1.0
+        mov [trMatr.m11], 1.0 
+        mov [trMatr.m22], 1.0
+        mov [trMatr.m33], 1.0
+        mov [trMatr.m44], 1.0
 
         mov esi, dword[x]
-        mov [translMatr.m14], esi
+        mov [trMatr.m14], esi
         mov esi, dword[y]
-        mov [translMatr.m24], esi 
+        mov [trMatr.m24], esi 
         mov esi, dword[z] 
-        mov [translMatr.m34], esi
+        mov [trMatr.m34], esi
 
-        lea ebx, translMatr
+        mov esi, dword[vCount]
 
-        stdcall Matrix.MultOnXYZ1,  [vArr]
+        stdcall Matrix.MultOnXYZ1, trMatr, [vArr], dword[esi]
 
         ret     
 endp 
@@ -273,10 +226,18 @@ proc Draw
                 currentTime dd ?
         endl
 
-        stdcall Just.Wait, 20
+        stdcall Just.Wait, 15
 
-        ; stdcall Camera.wave ; object
-        stdcall Object.move, seaVertices, SeaPlaneVertCount, 1, 2, 3
+        fld     [waveX]
+        fsin    
+        fstp    [waveSin]
+
+        fld     [waveX]
+        fadd    [waveStep]
+        fstp    [waveX]
+
+
+        stdcall Object.move, seaVertices, SeaPlaneVertCount, 0.0, [waveSin] , 0.0
 
         ; FOR ROTATE
         fld     [angle]
