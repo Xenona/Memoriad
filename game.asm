@@ -31,27 +31,7 @@ macro JumpIf value, label
         je      label
 }
 
-struct matrix
-        m11     dd      ? 
-        m12     dd      ? 
-        m13     dd      ? 
-        m14     dd      ? 
 
-        m21     dd      ? 
-        m22     dd      ? 
-        m23     dd      ? 
-        m24     dd      ? 
-
-        m31     dd      ? 
-        m32     dd      ? 
-        m33     dd      ? 
-        m34     dd      ? 
-
-        m41     dd      ? 
-        m42     dd      ? 
-        m43     dd      ? 
-        m44     dd      ? 
-ends
 
 data import
 
@@ -195,14 +175,16 @@ proc Just.Wait uses eax ecx, toWait:DWORD
 endp
  
 
-        trMatr matrix 
 
-proc Object.move uses esi ebx, vArr, vCount, x, y, z
 
-        mov [trMatr.m11], 1.0 
-        mov [trMatr.m22], 1.0
-        mov [trMatr.m33], 1.0
-        mov [trMatr.m44], 1.0
+
+proc Object.move uses esi, vArr, vCount, x, y, z
+        ; esi - 'cause there's no mem to mem mov
+        ; vArr - array of vertices to move
+        ; vCount - number of those vertices
+        ; x, y, z - the dist the obj will be moved
+
+        stdcall Matrix.setDefault
 
         mov esi, dword[x]
         mov [trMatr.m14], esi
@@ -211,9 +193,7 @@ proc Object.move uses esi ebx, vArr, vCount, x, y, z
         mov esi, dword[z] 
         mov [trMatr.m34], esi
 
-        mov esi, dword[vCount]
-
-        stdcall Matrix.MultOnXYZ1, trMatr, [vArr], dword[esi]
+        stdcall Matrix.MultOnXYZ1, trMatr, [vArr], [vCount]
 
         ret     
 endp 
@@ -230,6 +210,9 @@ proc Draw
 
         fld     [waveX]
         fsin    
+        fdiv    dword[twodd]
+        fdiv    dword[twodd]
+        fdiv    dword[twodd]
         fstp    [waveSin]
 
         fld     [waveX]
@@ -237,7 +220,7 @@ proc Draw
         fstp    [waveX]
 
 
-        stdcall Object.move, seaVertices, SeaPlaneVertCount, 0.0, [waveSin] , 0.0
+        stdcall Object.move, seaVertices, [SeaPlaneVertCount], 0.0, [waveSin] , 0.0
 
         ; FOR ROTATE
         fld     [angle]

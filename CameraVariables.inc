@@ -1,8 +1,8 @@
       ; camera section 
 
         CamX dq 0.0;0.0
-        CamY dq 90.0
-        CamZ dq 190.0
+        CamY dq 0.0
+        CamZ dq 90.0
 
         WatchX dq 0.0
         WatchY dq 0.0 
@@ -19,5 +19,6 @@
         
         one       db 1       ; java moment
         two       db 2
-        three     db 3        
+        three     db 3    
+        twodd     dd 2.0    
  
