@@ -201,7 +201,7 @@ endp
 ; !!!!!!!!!!!!!!!!!!!!!!!!!!!
 ; When I've figured it out how do I print text, 
 ; will add here text addr params or smth
-proc DrawRect, hasBorder, R, G, B, x1, y1, x2, y2 
+proc DrawRect, hasBorder, R, G, B, x1, y1, x2, y2      
         ; hasBorder - either 1 or 0 for xy1xy2 rect border 
         ; R, G, B - colors of the xy1xy2 rect
         ; x1, y1, x2, y2 - coords of xy1xy2 rect 
@@ -211,7 +211,7 @@ proc DrawRect, hasBorder, R, G, B, x1, y1, x2, y2
         endl
 
         invoke glColor3f, [R], [G], [B]                 ; setting color
-        invoke glRectf, [x1], [y1], [x2], [y2]          ; and drawing main rect
+        invoke glRectf, [x1], [y1], [x2], [y2]          ; and drawing main rect, z=0
         
         cmp [hasBorder], 1                              ; checking for border
         jne notSelected                                 ; exit if there's no one
@@ -239,7 +239,7 @@ proc DrawRect, hasBorder, R, G, B, x1, y1, x2, y2
         push [coord]
 
         ; actually this sht above must be optimized using loop and
-        ; ebp+N for all coords. For the sake of bytes I'll do that later 
+        ; ebp+N for all coords. For the sake of bytes, I'll do that later 
 
         invoke glRectf ; all parameters were pushed above
 
@@ -255,7 +255,7 @@ proc Draw
                 currentTime dd ?
         endl
 
-        stdcall Just.Wait, 30
+        stdcall Just.Wait, 30                           
 
         fld     [waveX]
         fsin    
@@ -278,7 +278,7 @@ proc Draw
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
 
-        invoke  gluLookAt, double [CamX], double [CamY], double [CamZ],\
+        invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
                            double [WatchX], double [WatchY], double [WatchZ],\
                            double [UpvecX], double [UpvecY], double [UpvecZ]
  
@@ -287,8 +287,12 @@ proc Draw
         stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount]
         stdcall PutObject, sunVertices, sunColors, dword[sunPlaneVertCount]
  
-
-        stdcall DrawRect, 1, 0.0, 0.0, 0.0, 0.0, 0.0, 20.0, 20.0
+                      ; Brdr  R    G    B    X1   Y1   X2    Y2
+        stdcall DrawRect, 0, 0.0, 1.0, 1.0, 25.0, 26.0, 85.0, 43.0
+        stdcall DrawRect, 0, 0.0, 0.0, 1.0, 25.0, 3.0, 85.0, 20.0
+        stdcall DrawRect, 0, 0.0, 1.0, 0.0, 25.0, -20.0, 85.0, -3.0
+        stdcall DrawRect, 1, 1.0, 0.0, 0.0, 25.0, -43.0, 85.0, -26.0
+        
 
 
 

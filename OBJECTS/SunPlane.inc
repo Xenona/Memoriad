@@ -10,13 +10,13 @@ sunZeroPoint equ 0.0
     ; sun5 equ sunZeroPoint+37.32, sunZeroPoint+10.0, sunZeroPoint
     ; sun6 equ sunZeroPoint+40.0, sunZeroPoint, sunZeroPoint
 
-    sun0 equ -80.0, -10.0, -1.0
-    sun1 equ -77.42, -0.18, -1.0
-    sun2 equ -70.18, 7.22, -1.0
-    sun3 equ -60.0, 10.0, -1.0
-    sun4 equ -50.0, 7.32, -1.0
-    sun5 equ -42.68, 0.0, -1.0
-    sun6 equ -40.0, -10.0, -1.0
+    sun0 equ -80.0, -10.0, -8.0
+    sun1 equ -77.42, -0.18, -8.0
+    sun2 equ -70.18, 7.22, -8.0
+    sun3 equ -60.0, 10.0, -8.0
+    sun4 equ -50.0, 7.32, -8.0
+    sun5 equ -42.68, 0.0, -8.0
+    sun6 equ -40.0, -10.0, -8.0
 
 sunVertices         dd  sun0, sun2, sun4,\
                         sun0, sun4, sun6,\
