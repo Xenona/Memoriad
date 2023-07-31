@@ -1,4 +1,4 @@
-    SkyPlaneVertCount dd 63
+skyPlaneVertCount dd 42 ; 7*2*3
 
     sky0    equ     -110.0, -12.0, -10.0
     sky1    equ     -110.0, -4.8 , -10.0
@@ -17,17 +17,7 @@
     sky14   equ     110.0, -4.8, -10.0
     sky15   equ     110.0, -12.0, -10.0
 
-
-
-    darkBlue    equ     0.0, 0.1294, 0.2196
-    blue        equ     0.33, 0.4, 1.0
-    liBlue      equ     0.3921, 0.745, 1.0
-    green       equ     0.6039, 1.0, 0.5411 
-    yellow      equ     0.9608, 0.886, 0.196
-    orange      equ     1.0, 0.6039, 0.1412 
-    red         equ     0.9921, 0.0, 0.0
-
-    skyVertices     dd  sky0, sky1, sky14,\
+skyVertices         dd  sky0, sky1, sky14,\
                         sky0, sky14,sky15,\
                         sky1, sky2, sky13,\
                         sky1, sky13,sky14,\
@@ -42,7 +32,17 @@
                         sky6, sky7, sky8,\
                         sky6, sky8, sky9
 
-    skyColors       dd  red, orange, orange,\
+
+
+    darkBlue    equ     0.0, 0.1294, 0.2196
+    blue        equ     0.33, 0.4, 1.0
+    liBlue      equ     0.3921, 0.745, 1.0
+    green       equ     0.6039, 1.0, 0.5411 
+    yellow      equ     0.9608, 0.886, 0.196
+    orange      equ     1.0, 0.6039, 0.1412 
+    red         equ     0.9921, 0.0, 0.0
+
+skyColors           dd  red, orange, orange,\
                         red, orange, red,\
                         orange, yellow, yellow,\
                         orange, yellow, orange,\
@@ -56,4 +56,9 @@
                         blue, darkBlue, blue,\
                         darkBlue, darkBlue, darkBlue,\
                         darkBlue, darkBlue, darkBlue
+
+
+
+
+
 
