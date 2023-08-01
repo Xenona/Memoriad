@@ -1,7 +1,7 @@
       ; camera section 
 
-        CamX dq 00.0;0.0
-        CamY dq 00.0
+        CamX dq 0.0;0.0
+        CamY dq 0.0
         CamZ dq 90.0
 
         WatchX dq 0.0

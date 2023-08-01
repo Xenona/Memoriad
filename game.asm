@@ -1,9 +1,9 @@
 format  PE GUI 5.0
 entry   WinMain
 
-        include         ".\INCLUDE\win32ax.inc"
+        include         ".\INCLUDE\win32ax.inc"         ; himxrmnski 
 
-        include         ".\INCLUDE\api\kernel32.inc"
+        include         ".\INCLUDE\api\kernel32.inc"    ;)
         include         ".\INCLUDE\api\user32.inc"
         include         ".\INCLUDE\api\gdi32.inc"
         include         ".\INCLUDE\api\opengl.inc"
@@ -25,11 +25,20 @@ entry   WinMain
                                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\
                                                 COLOR_DEPTH, 0, 0, PFD_MAIN_PLANE, 0, PFD_MAIN_PLANE
 
-macro JumpIf value, label
+ 
+
+macro switch value
 {
-        cmp     eax, value
-        je      label
+        xor eax, eax
+        mov eax, value
 }
+
+macro case value, label 
+{
+        cmp eax, value 
+        je  label
+}
+ 
 
 
 
@@ -43,16 +52,61 @@ data import
 
 end data
 
-        className       db      "MEMORY GAME (C) XENONA GAMES 2023", 0
+        className       db      "MEMORIAD (C) XENONA GAMES 2023", 0
         clientRect      RECT
         hdcBack         dd      ?
-        time            dd      ?
         hdc             dd      ?
-        angle           dd      110.0
-        step            dd      3.14
 
+
+        windowID        db    0
+
+        ; main menu 
+        buttStartX1   dd      25.0    
+        buttStartY1   dd      26.0
+        buttStartZ1    dd        0.0
+
+        buttStartX2   dd      85.0
+        buttStartY2   dd      43.0
+        buttStartZ2    dd        0.0
+
+        buttViewX1    dd      25.0
+        buttViewY1    dd      3.0
+        buttViewZ1    dd      0.0
+
+        buttViewX2    dd      85.0
+        buttViewY2    dd      20.0
+        buttViewZ2    dd      0.0
+        
+        buttSettsX1   dd      25.0
+        buttSettsY1   dd      -20.0
+        buttSettsZ1   dd      0.0
+
+        buttSettsX2   dd      85.0
+        buttSettsY2   dd      -3.0
+        buttSettsZ2   dd      0.0
+
+        buttExitX1    dd      25.0
+        buttExitY1    dd      -43.0
+        buttExitZ1    dd      0.0
+
+        buttExitX2    dd      85.0
+        buttExitY2    dd      -26.0
+        buttExitZ2    dd      0.0
+
+        buttStartBrdr dd      0
+        buttViewBrdr  dd      0
+        buttSettsBrdr dd      0  
+        buttExitBrdr  dd      0
+
+
+        
+
+        
         include "CameraVariables.inc"
         include "Matrix.inc"
+        params matrix
+
+
 
 proc WinMain
 
@@ -70,9 +124,11 @@ proc WinMain
         mov     [hMainWindow], eax
 
         invoke  GetClientRect, eax, clientRect
-        invoke  ShowCursor, ebx
-        invoke  GetTickCount
-        mov     [time], eax
+
+
+        ; !!!!!!!!!!!!!!! return cursor to its normal state !!!!!!!!!!!!
+        ; invoke  ShowCursor, ebx
+
 
         invoke  GetDC, [hMainWindow]
         mov     [hdc], eax
@@ -88,10 +144,22 @@ proc WinMain
         invoke  glMatrixMode, GL_PROJECTION
         invoke  glLoadIdentity
 
+
+        ; invoke  glPushMatrix
+        ; invoke  glMultMatrixf, params 
+        ; invoke  glMultMatrixf, params2
+        ; invoke  glGetFloatv, GL_PROJECTION_MATRIX, params
+        ; invoke  glPopMatrix
+        
+
+
         fild    [clientRect.right]      ; width
         fidiv   [clientRect.bottom]     ; width / height
         fstp    [aspect]                ;
         invoke  gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR
+
+
+
 
         invoke  glEnable, GL_DEPTH_TEST
         invoke  glShadeModel, GL_SMOOTH
@@ -106,33 +174,79 @@ proc WinMain
 
 endp
 
-proc WindowProc uses ebx,\
-     hWnd, uMsg, wParam, lParam
+proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
-        xor     ebx, ebx
+        locals 
 
-        mov     eax, [uMsg]
-        JumpIf  WM_PAINT,       .Paint
-        JumpIf  WM_DESTROY,     .Destroy
-        JumpIf  WM_KEYDOWN,     .KeyDown
+                mouseX  dd ? 
+                mouseY  dd ?
+        endl
 
-        invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
-        jmp     .Return
+        
 
-.Paint:
-        stdcall Draw
-        jmp     .ReturnZero
-.KeyDown:
-        cmp     [wParam], VK_ESCAPE
-        jne     .ReturnZero
+        switch  windowID 
+        case    0,      .window0
 
-.Destroy:
-        invoke  ExitProcess, ebx
 
-.ReturnZero:
+
+        .window0: 
+
+                xor     ebx, ebx
+
+                switch  [uMsg]
+                case    WM_PAINT,       .onPaint
+                case    WM_DESTROY,     .onDestroy
+                case    WM_KEYDOWN,     .onKeyDown
+                case    WM_MOUSEMOVE,   .onMouseMove
+
+                invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
+                
+                
+                jmp     .Return
+
+                .onPaint:
+                stdcall DrawWindow0
+                jmp     .ReturnZero
+                
+                .onKeyDown:
+                cmp     [wParam], VK_ESCAPE
+                je     .onDestroy
+
+
+                .onMouseMove: 
+
+                mov eax, [lParam]
+                movsx ebx, ax
+                mov dword[mouseX], ebx
+                sar eax, 16 
+                mov [mouseY], eax
+
+                stdcall On.Hover, 4, buttStartX1, buttStartBrdr, [mouseX], [mouseY]
+
+                ; cvtss2si eax, [buttStartX1]
+
+                ; cmp [mouseX], eax 
+                ; jle .set1
+                ; .set0:
+                ; mov [buttStartBrdr], 0
+                ; jmp .ReturnZero
+                ; .set1:
+                ; mov [buttStartBrdr], 1
+
+                
+                
+
+
+
+                jmp     .ReturnZero
+        
+        .onDestroy:
+        invoke  ExitProcess, 0
+
+        .ReturnZero:
         xor     eax, eax
 
-.Return:
+        .Return:        
         ret
 endp
 
@@ -173,10 +287,67 @@ proc Just.Wait uses eax ecx, toWait:DWORD
 
         ret 
 endp
- 
+
+
+proc WorldToScreen worldX, worldY, worldZ      
+; shall return 3 params via registers: 
+                        ; screenX, Y and Z
+
+        ; get projection matrix
+        ; get view matrix 
+        ; get vector matrix 
+
+        ; get M(x, y, z, w) = proj*view*vect
+
+        ; get M = M(x/w, y/w, z/w)
+
+        ; get screenX = (M[0]+1.0) * screenWidth * 0.5
+        ; get screenY = (1.0 - M[1]) * screenHeight * 0.5
+        ; get screenZ = (M[2] + 1.0) * 0.5
+
+        ; check for intersection, but later, it's 2a.m.
+
+        invoke glPushMatrix
+        invoke glLoadIdentity 
+        invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
+                        double [WatchX], double [WatchY], double [WatchZ],\
+                        double [UpvecX], double [UpvecY], double [UpvecZ]
+        invoke gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR
+        ; that's proj*view already 
+
+        invoke glPopMatrix
+
+        ret 
+endp 
+
+proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler, x, y
+
+        locals 
+
+        endl
+
+        xor ecx, ecx
+
+        mov ebx, [objArr]
+        mov esi, [brdrHandler]
+
+        mov ecx, numOfObjs
+        @@: 
+                stdcall [ebx], [ebx+4], [ebx+8]
+                ; eax, edx, edi 
+
+                ; check whether xy got inside 
+
+
+                add esi, 4
+                add ebx, 12
 
 
 
+        loop @b
+
+        ret 
+endp
 
 proc Object.move uses esi, vArr, vCount, x, y, z
         ; esi - 'cause there's no mem to mem mov
@@ -199,7 +370,7 @@ proc Object.move uses esi, vArr, vCount, x, y, z
 endp 
 
 ; !!!!!!!!!!!!!!!!!!!!!!!!!!!
-; When I've figured it out how do I print text, 
+; Once I've figured it out how do I print text, 
 ; will add here text addr params or smth
 proc DrawRect, hasBorder, R, G, B, x1, y1, x2, y2      
         ; hasBorder - either 1 or 0 for xy1xy2 rect border 
@@ -213,7 +384,7 @@ proc DrawRect, hasBorder, R, G, B, x1, y1, x2, y2
         invoke glColor3f, [R], [G], [B]                 ; setting color
         invoke glRectf, [x1], [y1], [x2], [y2]          ; and drawing main rect, z=0
         
-        cmp [hasBorder], 1                              ; checking for border
+        cmp byte[hasBorder], 1                              ; checking for border
         jne notSelected                                 ; exit if there's no one
 
         invoke glColor3f, 1.0, 1.0, 1.0                 ; setting border color
@@ -250,7 +421,7 @@ proc DrawRect, hasBorder, R, G, B, x1, y1, x2, y2
 endp
 
 
-proc Draw
+proc DrawWindow0
         locals 
                 currentTime dd ?
         endl
@@ -287,11 +458,10 @@ proc Draw
         stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount]
         stdcall PutObject, sunVertices, sunColors, dword[sunPlaneVertCount]
  
-                      ; Brdr  R    G    B    X1   Y1   X2    Y2
-        stdcall DrawRect, 0, 0.0, 1.0, 1.0, 25.0, 26.0, 85.0, 43.0
-        stdcall DrawRect, 0, 0.0, 0.0, 1.0, 25.0, 3.0, 85.0, 20.0
-        stdcall DrawRect, 0, 0.0, 1.0, 0.0, 25.0, -20.0, 85.0, -3.0
-        stdcall DrawRect, 1, 1.0, 0.0, 0.0, 25.0, -43.0, 85.0, -26.0
+        stdcall DrawRect, [buttStartBrdr], 0.0, 1.0, 1.0, dword[buttStartX1], dword[buttStartY1], dword[buttStartX2], dword[buttStartY2]
+        stdcall DrawRect, [buttViewBrdr], 0.0, 0.0, 1.0, dword[buttViewX1], dword[buttViewY1], dword[buttViewX2], dword[buttViewY2]
+        stdcall DrawRect, [buttSettsBrdr], 0.0, 1.0, 0.0, dword[buttSettsX1], dword[buttSettsY1], dword[buttSettsX2], dword[buttSettsY2]
+        stdcall DrawRect, [buttExitBrdr], 1.0, 0.0, 0.0, dword[buttExitX1], dword[buttExitY1], dword[buttExitX2], dword[buttExitY2] 
         
 
 

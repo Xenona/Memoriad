@@ -30,7 +30,7 @@ proc Matrix.MultOnXYZ1 uses esi ebx ecx, M, vARR, vCOUNT
     ; ecx - loop counter (stores num of verts in outer and 3 in inner)
     ; M - addr of matrix being multiplicated 
     ; vARR - array of vertices of the object being transformed
-    ; vCOUNT - length of array 
+    ; vCOUNT - length of array of vertices
 
     xor ebx, ebx
     xor ecx, ecx 
