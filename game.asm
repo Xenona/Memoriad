@@ -1,3 +1,6 @@
+; todo
+; 1. Check whether it'd be more effective to use gl's loadIdentity instead of my Matrix.SetDefault
+
 format  PE GUI 5.0
 entry   WinMain
 
@@ -60,6 +63,8 @@ end data
         hdcBack         dd      ?
         hdc             dd      ?
 
+        currMode        dd ?
+        matrixWtS matrix
 
         windowID        db    0
 
@@ -215,20 +220,6 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 .onMouseMove: 
 
-                nop 
-                fnop
-                                nop 
-                fnop
-                                nop 
-                fnop
-                
-                                nop 
-                fnop
-                                nop 
-                fnop
-
-                fnop
-
                 mov eax, [lParam]
                 movsx ebx, ax
                 mov dword[mouseX], ebx
@@ -236,21 +227,6 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 mov [mouseY], eax
 
                 stdcall On.Hover, 4, buttStartX1, buttStartBrdr
-
-                ; cvtss2si eax, [buttStartX1]
-
-                ; cmp [mouseX], eax 
-                ; jle .set1
-                ; .set0:
-                ; mov [buttStartBrdr], 0
-                ; jmp .ReturnZero
-                ; .set1:
-                ; mov [buttStartBrdr], 1
-
-                
-                
-
-
 
                 jmp     .ReturnZero
         
@@ -302,48 +278,61 @@ proc Just.Wait uses eax ecx, toWait:DWORD
         ret 
 endp
 
-                currMode        dd ?
-                matrixWtS matrix
 
-proc WorldToScreen uses esi ecx, worldX, worldY, worldZ      
-        ; esi - 
-        ; eax edx edi
 
+proc WorldToScreen uses ecx, worldX, worldY, worldZ             ; ! CHANGES EAX EDX EDI !
         locals 
                 currX           dd ?
                 currY           dd ?
                 currZ           dd ?
         endl
+        ; ecx - has to be pushed 'cause gl funcs change its contents
+        ; worldX, Y, Z - coordinates of a particular vertex in world system of coords
+        ; currX, Y, Z - temp vars for fpu
 
-        ; get projection matrix
-        ; get view matrix 
-        ; get vector matrix 
+        ; eax edx edi - return parameters
 
-        ; get M(x, y, z, w) = proj*view*vect
+        ; basic algorithm of transformation: 
+        ; (1) - get projection matrix (Pm).
+        ; (2) - get view matrix (Vm).
+        ; (3) - get vector of a vertex (Vv).
+        ;       ! Important: OpenGL assumes all matrix that are 
+        ;       passed to its func are stored in transposed form,
+        ;       but they're multiplied as ususal.
+        ;       ! Notice: for the vector I used identity matrix 
+        ;       with m41-m43 are filled with X, Y, Z.
+        ; (4) - multiply Pm*Vm*Vv.
+        ;       ! Notice: normally there'd be a vector as a result,
+        ;       but as I used matrix instead of vector, matrix is 
+        ;       the result.
+        ; (5) - extract m41-m43 as X, Y, Z
+        ; (6) - divide X, Y, Z by m44
+        ; (7) - calculate screen coordinates using formulas below:
+        ;       screenX = (X + 1.0) * screenWidth * 0.5;
+        ;       screenY = (1.0 - Y) * screenHeight * 0.5;
+        ;       screenZ = (Z + 1.0) * 0.5;
+        ;       ! Notice: screenZ is usually used to find object that is 
+        ;       closest to camera. Useful when vertices intersect: the 
+        ;       smaller screenZ the closer the vertex.
 
-        ; get M = M(x/w, y/w, z/w)
-
-        ; get screenX = (M[0]+1.0) * screenWidth * 0.5
-        ; get screenY = (1.0 - M[1]) * screenHeight * 0.5
-        ; get screenZ = (M[2] + 1.0) * 0.5
-
-        invoke glGetFloatv, GL_MATRIX_MODE, currMode 
-        invoke glMatrixMode, GL_PROJECTION
+        ; I do not multiply matrices manually. Instead, I use glMultMatrixf,
+        ; so it's necessary to save initial state of set matrix stack;
+        invoke glGetFloatv, GL_MATRIX_MODE, currMode                            ; saving old mode
+        invoke glMatrixMode, GL_PROJECTION                                      ; setting new mode
 
 
-        invoke glPushMatrix
-        invoke glLoadIdentity 
+        invoke glPushMatrix                                                     ; copying top matrix
+        invoke glLoadIdentity                                                   ; replacing it with indentity
 
-        invoke gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR
+                                                                                ; (1)
+        invoke gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR 
 
+                                                                                ; (2) and Pm*Vm simultaneously
         invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
                         double [WatchX], double [WatchY], double [WatchZ],\
                         double [UpvecX], double [UpvecY], double [UpvecZ]
-        ; that's proj*view already, according to the docs matrix 
-        ; matrix of gluPerspective is being multiplied with
-        ; current matrix 
 
-        stdcall Matrix.setDefault, matrixWtS
+        stdcall Matrix.setDefault, matrixWtS                                    ; preparing Vm
         mov edi, [worldX]
         mov [matrixWtS.m41], edi
         mov edi, [worldY]
@@ -351,17 +340,17 @@ proc WorldToScreen uses esi ecx, worldX, worldY, worldZ
         mov edi, [worldZ]
         mov [matrixWtS.m43], edi
         
-        invoke glMultMatrixf, matrixWtS
-        invoke glGetFloatv, GL_PROJECTION_MATRIX, matrixWtS
+        invoke glMultMatrixf, matrixWtS                                         ; (4)
+        invoke glGetFloatv, GL_PROJECTION_MATRIX, matrixWtS                     ; saving to extract X, Y, Z
 
-        fld [matrixWtS.m41]
+        fld [matrixWtS.m41]                                                     ; calculating screenX
         fdiv [matrixWtS.m44]
         fadd [onedd]
         fimul [clientRect.right]
         fdiv [twodd]
         fistp [currX]
 
-        fld [matrixWtS.m42]
+        fld [matrixWtS.m42]                                                     ; calculating screenY
         fdiv [matrixWtS.m44]
         fchs 
         fadd [onedd]
@@ -369,16 +358,16 @@ proc WorldToScreen uses esi ecx, worldX, worldY, worldZ
         fdiv [twodd]
         fistp [currY]
 
-        fld [matrixWtS.m43]
+        fld [matrixWtS.m43]                                                     ; calculating screenZ
         fdiv [matrixWtS.m44]
         fadd [onedd]
         fdiv [twodd]
         fistp [currZ]
 
-        invoke glPopMatrix
-        invoke glMatrixMode, [currMode]
+        invoke glPopMatrix                                                      ; restoring matrix stack
+        invoke glMatrixMode, [currMode]                                         ; restoring old mode 
 
-        mov eax, [currX]
+        mov eax, [currX]                                                        ; returning values
         mov edx, [currY]
         mov edi, [currZ]
 
@@ -387,54 +376,56 @@ endp
 
 
 proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
+        ; ecx - for main loop (stores num of Objects)
+        ; ebx - access to coords of a corner 
+        ; esi - access to bool for border existing
+        ; edi, eax, edx - WorldToScreen uses those to return x, y, z  
+        ; numOfObjs - 4 if on a curr screen there are 4 buttons
+        ; objArr - ptr to arr xyz1, xyz2, xyz1, xyz2... 
+        ; brdrHandler - prt to arr 1stButtBrdr, 2ndButtBrdr... [0 or 1]
 
-        locals 
-        endl
+        ; x, y - mouse position
+        ; ----------------------------------------> x increases
+        ; |                  y less'n y2
+        ; |
+        ; |                              x2,
+        ; |               ----------------- y2
+        ; |  x less       |     object    |      x bigger
+        ; |  than x1      |   projection  |      than x2
+        ; |               |               |
+        ; |            x1, ----------------
+        ; |               y1
+        ; |         
+        ; |                 y bigger'n 1
+        ; *
+        ; y increases
 
-        xor ecx, ecx
-
-        mov ebx, [objArr]
+        mov ebx, [objArr]       
         mov esi, [brdrHandler]
 
+        xor ecx, ecx
         mov ecx, [numOfObjs]
         @@: 
-                nop
-                nop
-                nop
-                nop
-                nop
-                nop
-                nop
-                nop
-                nop
-                nop
-                mov dword[esi], 0
+                mov dword[esi], 0                                               ; clearing border before start
 
-                stdcall WorldToScreen, dword[ebx], dword[ebx+4], dword[ebx+8] ; eax edx edi
-                cmp [mouseX], eax
+                stdcall WorldToScreen, dword[ebx], dword[ebx+4], dword[ebx+8]   ; for X1, Y1
+                cmp [mouseX], eax                                               ; the choice of all jumps is justified above
                 jl noBorder
                 cmp [mouseY], edx
                 jg noBorder 
-
+                                                                                ; for X2, Y2
                 stdcall WorldToScreen, dword[ebx+12], dword[ebx+16], dword[ebx+20]
                 cmp [mouseX], eax
                 jg noBorder
                 cmp [mouseY], edx
                 jl noBorder 
 
-                mov dword[esi], 1
+                mov dword[esi], 1                                               ; if got there -> mouse got on the obj
 
-                noBorder:
+                noBorder:                                                       ; otherwise continue to the next obj
 
-                 
-
-                 ; check whether xy got inside 
-
-
-                add esi, 4
-                add ebx, 24
-
-
+                add esi, 4                                                      ; skip one brdrHandler
+                add ebx, 24                                                     ; skip two corners (xyz1, xyz2)
 
         loop @b
 
@@ -442,14 +433,12 @@ proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
 endp
 
 proc Object.move uses esi, vArr, vCount, x, y, z
-        ; esi - 'cause there's no mem to mem mov
+        ; esi - to escape 'mem to mem' mov
         ; vArr - array of vertices to move
         ; vCount - number of those vertices
-        ; x, y, z - the dist the obj will be moved
+        ; x, y, z - the distance the obj will be moved
 
-        stdcall Matrix.setDefault, trMatr
-        
-
+        stdcall Matrix.setDefault, trMatr               ; trMatr is defined in Matrix.inc
 
         mov esi, dword[x]
         mov [trMatr.m14], esi
