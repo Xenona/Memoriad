@@ -13,6 +13,9 @@ entry   WinMain
         include ".\OBJECTS\SkyPlane.inc"
         include ".\OBJECTS\SunPlane.inc"
 
+        include ".\CODE\Matrix.inc"
+        include ".\CODE\Draw.inc"
+
         COLOR_DEPTH     =       24
         PFD_FLAGS       =       PFD_SUPPORT_OPENGL or PFD_DOUBLEBUFFER or PFD_DRAW_TO_WINDOW
         WINDOW_STYLE    =       WS_VISIBLE or WS_MAXIMIZE or WS_POPUP
@@ -102,9 +105,9 @@ end data
         
 
         
-        include "CameraVariables.inc"
-        include "Matrix.inc"
+        include ".\DATA\CameraVariables.inc"
         params matrix
+        aspect          dq      ?
 
 
 
@@ -113,7 +116,6 @@ proc WinMain
         locals
                 hMainWindow     dd      ?
                 msg             MSG
-                aspect          dq      ?
         endl
 
         xor     ebx, ebx
@@ -145,11 +147,11 @@ proc WinMain
         invoke  glLoadIdentity
 
 
-        ; invoke  glPushMatrix
-        ; invoke  glMultMatrixf, params 
-        ; invoke  glMultMatrixf, params2
-        ; invoke  glGetFloatv, GL_PROJECTION_MATRIX, params
-        ; invoke  glPopMatrix
+        invoke  glPushMatrix
+        invoke  glMultMatrixf, params 
+        invoke  glMultMatrixf, params
+        invoke  glGetFloatv, GL_PROJECTION_MATRIX, params
+        invoke  glPopMatrix
         
 
 
@@ -205,7 +207,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jmp     .Return
 
                 .onPaint:
-                stdcall DrawWindow0
+                stdcall Draw.Window0
                 jmp     .ReturnZero
                 
                 .onKeyDown:
@@ -223,15 +225,15 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 stdcall On.Hover, 4, buttStartX1, buttStartBrdr, [mouseX], [mouseY]
 
-                ; cvtss2si eax, [buttStartX1]
+                cvtss2si eax, [buttStartX1]
 
-                ; cmp [mouseX], eax 
-                ; jle .set1
-                ; .set0:
-                ; mov [buttStartBrdr], 0
-                ; jmp .ReturnZero
-                ; .set1:
-                ; mov [buttStartBrdr], 1
+                cmp [mouseX], eax 
+                jle .set1
+                .set0:
+                mov [buttStartBrdr], 0
+                jmp .ReturnZero
+                .set1:
+                mov [buttStartBrdr], 1
 
                 
                 
@@ -288,10 +290,23 @@ proc Just.Wait uses eax ecx, toWait:DWORD
         ret 
 endp
 
+                currMode        dd ?
+                nop
+                nop
+                nop
+                nop
+                nop
+                matrixWtS matrix
 
-proc WorldToScreen worldX, worldY, worldZ      
+proc WorldToScreen uses esi ecx, worldX, worldY, worldZ      
 ; shall return 3 params via registers: 
                         ; screenX, Y and Z
+
+        locals 
+                currX           dd ?
+                currY           dd ?
+                currZ           dd ?
+        endl
 
         ; get projection matrix
         ; get view matrix 
@@ -305,20 +320,76 @@ proc WorldToScreen worldX, worldY, worldZ
         ; get screenY = (1.0 - M[1]) * screenHeight * 0.5
         ; get screenZ = (M[2] + 1.0) * 0.5
 
-        ; check for intersection, but later, it's 2a.m.
+
+
+
+        invoke glGetFloatv, GL_MATRIX_MODE, currMode 
+        invoke glMatrixMode, GL_PROJECTION
+
 
         invoke glPushMatrix
         invoke glLoadIdentity 
+
+        invoke gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR
+
+      
+
+
+
         invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
                         double [WatchX], double [WatchY], double [WatchZ],\
                         double [UpvecX], double [UpvecY], double [UpvecZ]
-        invoke gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR
-        ; that's proj*view already 
+        ; that's proj*view already, according to the docs matrix 
+        ; matrix of gluPerspective is being multiplied with
+        ; current matrix 
+
+        stdcall Matrix.setDefault, matrixWtS
+        mov edi, [worldX]
+        mov [matrixWtS.m41], edi
+        mov edi, [worldY]
+        mov [matrixWtS.m42], edi
+        mov edi, [worldZ]
+        mov [matrixWtS.m43], edi
+        
+        invoke glMultMatrixf, matrixWtS
+        invoke glGetFloatv, GL_PROJECTION_MATRIX, matrixWtS
+
+        fld [matrixWtS.m41]
+        fdiv [matrixWtS.m44]
+        fadd [onedd]
+        fmul [clientRect.right]
+        fdiv [twodd]
+        fstp [currX]
+
+
+        fld [matrixWtS.m42]
+        fdiv [matrixWtS.m44]
+        fchs 
+        fadd [onedd]
+        fmul [clientRect.bottom]
+        fdiv [twodd]
+        fstp [currY]
+
+        fld [matrixWtS.m43]
+        fdiv [matrixWtS.m44]
+        fadd [onedd]
+        fdiv [twodd]
+        fstp [currZ]
+
+
 
         invoke glPopMatrix
+        invoke glMatrixMode, [currMode]
+
+        mov eax, [currX]
+        mov edx, [currY]
+        mov edi, [currZ]
+
+
 
         ret 
 endp 
+
 
 proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler, x, y
 
@@ -331,12 +402,15 @@ proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler, x, 
         mov ebx, [objArr]
         mov esi, [brdrHandler]
 
-        mov ecx, numOfObjs
+        mov ecx, [numOfObjs]
         @@: 
-                stdcall [ebx], [ebx+4], [ebx+8]
+                nop
+                nop
+                nop
+                stdcall WorldToScreen, dword[ebx], dword[ebx+4], dword[ebx+8]
                 ; eax, edx, edi 
 
-                ; check whether xy got inside 
+                 ; check whether xy got inside 
 
 
                 add esi, 4
@@ -355,7 +429,9 @@ proc Object.move uses esi, vArr, vCount, x, y, z
         ; vCount - number of those vertices
         ; x, y, z - the dist the obj will be moved
 
-        stdcall Matrix.setDefault
+        stdcall Matrix.setDefault, trMatr
+        
+
 
         mov esi, dword[x]
         mov [trMatr.m14], esi
@@ -368,106 +444,3 @@ proc Object.move uses esi, vArr, vCount, x, y, z
 
         ret     
 endp 
-
-; !!!!!!!!!!!!!!!!!!!!!!!!!!!
-; Once I've figured it out how do I print text, 
-; will add here text addr params or smth
-proc DrawRect, hasBorder, R, G, B, x1, y1, x2, y2      
-        ; hasBorder - either 1 or 0 for xy1xy2 rect border 
-        ; R, G, B - colors of the xy1xy2 rect
-        ; x1, y1, x2, y2 - coords of xy1xy2 rect 
-
-        locals 
-                coord dd ? ; just a temp var for fpu 
-        endl
-
-        invoke glColor3f, [R], [G], [B]                 ; setting color
-        invoke glRectf, [x1], [y1], [x2], [y2]          ; and drawing main rect, z=0
-        
-        cmp byte[hasBorder], 1                              ; checking for border
-        jne notSelected                                 ; exit if there's no one
-
-        invoke glColor3f, 1.0, 1.0, 1.0                 ; setting border color
-
-        fld dword[y2]                                   ; calculating border xy's 
-        fadd dword[onedd]
-        fstp [coord]
-        push [coord]
-
-        fld dword[x2]
-        fadd dword[onedd]
-        fstp [coord]
-        push [coord]
-        
-        fld dword[y1]
-        fsub dword[onedd]
-        fstp [coord]
-        push [coord]
-
-        fld dword[x1] 
-        fsub dword[onedd]
-        fstp [coord]
-        push [coord]
-
-        ; actually this sht above must be optimized using loop and
-        ; ebp+N for all coords. For the sake of bytes, I'll do that later 
-
-        invoke glRectf ; all parameters were pushed above
-
-
-        notSelected:                                    ; exiting when there's no border
-
-        ret
-endp
-
-
-proc DrawWindow0
-        locals 
-                currentTime dd ?
-        endl
-
-        stdcall Just.Wait, 30                           
-
-        fld     [waveX]
-        fsin    
-        fdiv    dword[twodd]
-        fdiv    dword[twodd]
-        fdiv    dword[twodd]
-        fstp    [waveSin]
-
-        fld     [waveX]
-        fadd    [waveStep]
-        fstp    [waveX]
-
-
-
-        stdcall Object.move, seaVertices, [seaPlaneVertCount], 0.0, [waveSin] , 0.0
- 
-        invoke  glClearColor, 0.1, 0.1, 0.6, 1.0
-        invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
-
-        invoke  glMatrixMode, GL_MODELVIEW
-        invoke  glLoadIdentity
-
-        invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
-                           double [WatchX], double [WatchY], double [WatchZ],\
-                           double [UpvecX], double [UpvecY], double [UpvecZ]
- 
-
-        stdcall PutObject, skyVertices, skyColors, dword[skyPlaneVertCount]
-        stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount]
-        stdcall PutObject, sunVertices, sunColors, dword[sunPlaneVertCount]
- 
-        stdcall DrawRect, [buttStartBrdr], 0.0, 1.0, 1.0, dword[buttStartX1], dword[buttStartY1], dword[buttStartX2], dword[buttStartY2]
-        stdcall DrawRect, [buttViewBrdr], 0.0, 0.0, 1.0, dword[buttViewX1], dword[buttViewY1], dword[buttViewX2], dword[buttViewY2]
-        stdcall DrawRect, [buttSettsBrdr], 0.0, 1.0, 0.0, dword[buttSettsX1], dword[buttSettsY1], dword[buttSettsX2], dword[buttSettsY2]
-        stdcall DrawRect, [buttExitBrdr], 1.0, 0.0, 0.0, dword[buttExitX1], dword[buttExitY1], dword[buttExitX2], dword[buttExitY2] 
-        
-
-
-
-
-        invoke  SwapBuffers, [hdc]
-
-        ret
-endp

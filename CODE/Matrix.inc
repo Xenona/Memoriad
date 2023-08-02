@@ -76,28 +76,18 @@ proc Matrix.MultOnXYZ1 uses esi ebx ecx, M, vARR, vCOUNT
     ret 
 endp
 
-proc Matrix.setDefault 
+proc Matrix.setDefault uses esi ecx, oldMatr
 
-    mov [trMatr.m11], 1.0
-    mov [trMatr.m12], 0.0
-    mov [trMatr.m13], 0.0
-    mov [trMatr.m14], 0.0
-
-    mov [trMatr.m21], 0.0
-    mov [trMatr.m22], 1.0
-    mov [trMatr.m23], 0.0
-    mov [trMatr.m24], 0.0
-
-    mov [trMatr.m31], 0.0
-    mov [trMatr.m32], 0.0
-    mov [trMatr.m33], 1.0
-    mov [trMatr.m34], 0.0
-
-    mov [trMatr.m41], 0.0
-    mov [trMatr.m42], 0.0
-    mov [trMatr.m43], 0.0
-    mov [trMatr.m44], 1.0
-
+    mov esi, [oldMatr]
+    mov ecx, 15
+    @@:
+        mov dword[esi], 0.0
+        add esi, 4
+    loop @b 
+    mov dword[esi], 1.0 
+    mov dword[esi-20], 1.0
+    mov dword[esi-40], 1.0
+    mov dword[esi-60], 1.0
 
     ret 
 endp
