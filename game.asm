@@ -66,11 +66,11 @@ end data
         ; main menu 
         buttStartX1   dd      25.0    
         buttStartY1   dd      26.0
-        buttStartZ1    dd        0.0
+        buttStartZ1   dd      0.0
 
         buttStartX2   dd      85.0
         buttStartY2   dd      43.0
-        buttStartZ2    dd        0.0
+        buttStartZ2   dd     0.0
 
         buttViewX1    dd      25.0
         buttViewY1    dd      3.0
@@ -110,6 +110,8 @@ end data
         aspect          dq      ?
 
 
+        mouseX  dd ? 
+        mouseY  dd ?
 
 proc WinMain
 
@@ -176,13 +178,9 @@ proc WinMain
 
 endp
 
+
 proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
-
-        locals 
-
-                mouseX  dd ? 
-                mouseY  dd ?
-        endl
+ 
 
         
 
@@ -217,23 +215,37 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 .onMouseMove: 
 
+                nop 
+                fnop
+                                nop 
+                fnop
+                                nop 
+                fnop
+                
+                                nop 
+                fnop
+                                nop 
+                fnop
+
+                fnop
+
                 mov eax, [lParam]
                 movsx ebx, ax
                 mov dword[mouseX], ebx
                 sar eax, 16 
                 mov [mouseY], eax
 
-                stdcall On.Hover, 4, buttStartX1, buttStartBrdr, [mouseX], [mouseY]
+                stdcall On.Hover, 4, buttStartX1, buttStartBrdr
 
-                cvtss2si eax, [buttStartX1]
+                ; cvtss2si eax, [buttStartX1]
 
-                cmp [mouseX], eax 
-                jle .set1
-                .set0:
-                mov [buttStartBrdr], 0
-                jmp .ReturnZero
-                .set1:
-                mov [buttStartBrdr], 1
+                ; cmp [mouseX], eax 
+                ; jle .set1
+                ; .set0:
+                ; mov [buttStartBrdr], 0
+                ; jmp .ReturnZero
+                ; .set1:
+                ; mov [buttStartBrdr], 1
 
                 
                 
@@ -291,16 +303,11 @@ proc Just.Wait uses eax ecx, toWait:DWORD
 endp
 
                 currMode        dd ?
-                nop
-                nop
-                nop
-                nop
-                nop
                 matrixWtS matrix
 
 proc WorldToScreen uses esi ecx, worldX, worldY, worldZ      
-; shall return 3 params via registers: 
-                        ; screenX, Y and Z
+        ; esi - 
+        ; eax edx edi
 
         locals 
                 currX           dd ?
@@ -320,9 +327,6 @@ proc WorldToScreen uses esi ecx, worldX, worldY, worldZ
         ; get screenY = (1.0 - M[1]) * screenHeight * 0.5
         ; get screenZ = (M[2] + 1.0) * 0.5
 
-
-
-
         invoke glGetFloatv, GL_MATRIX_MODE, currMode 
         invoke glMatrixMode, GL_PROJECTION
 
@@ -331,10 +335,6 @@ proc WorldToScreen uses esi ecx, worldX, worldY, worldZ
         invoke glLoadIdentity 
 
         invoke gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR
-
-      
-
-
 
         invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
                         double [WatchX], double [WatchY], double [WatchZ],\
@@ -357,26 +357,23 @@ proc WorldToScreen uses esi ecx, worldX, worldY, worldZ
         fld [matrixWtS.m41]
         fdiv [matrixWtS.m44]
         fadd [onedd]
-        fmul [clientRect.right]
+        fimul [clientRect.right]
         fdiv [twodd]
-        fstp [currX]
-
+        fistp [currX]
 
         fld [matrixWtS.m42]
         fdiv [matrixWtS.m44]
         fchs 
         fadd [onedd]
-        fmul [clientRect.bottom]
+        fimul [clientRect.bottom]
         fdiv [twodd]
-        fstp [currY]
+        fistp [currY]
 
         fld [matrixWtS.m43]
         fdiv [matrixWtS.m44]
         fadd [onedd]
         fdiv [twodd]
-        fstp [currZ]
-
-
+        fistp [currZ]
 
         invoke glPopMatrix
         invoke glMatrixMode, [currMode]
@@ -385,16 +382,13 @@ proc WorldToScreen uses esi ecx, worldX, worldY, worldZ
         mov edx, [currY]
         mov edi, [currZ]
 
-
-
         ret 
 endp 
 
 
-proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler, x, y
+proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
 
         locals 
-
         endl
 
         xor ecx, ecx
@@ -407,14 +401,38 @@ proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler, x, 
                 nop
                 nop
                 nop
-                stdcall WorldToScreen, dword[ebx], dword[ebx+4], dword[ebx+8]
-                ; eax, edx, edi 
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                nop
+                mov dword[esi], 0
+
+                stdcall WorldToScreen, dword[ebx], dword[ebx+4], dword[ebx+8] ; eax edx edi
+                cmp [mouseX], eax
+                jl noBorder
+                cmp [mouseY], edx
+                jg noBorder 
+
+                stdcall WorldToScreen, dword[ebx+12], dword[ebx+16], dword[ebx+20]
+                cmp [mouseX], eax
+                jg noBorder
+                cmp [mouseY], edx
+                jl noBorder 
+
+                mov dword[esi], 1
+
+                noBorder:
+
+                 
 
                  ; check whether xy got inside 
 
 
                 add esi, 4
-                add ebx, 12
+                add ebx, 24
 
 
 
