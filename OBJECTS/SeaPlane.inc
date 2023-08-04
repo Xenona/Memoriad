@@ -8,8 +8,11 @@ seaPlaneVertCount dd 6
 seaVertices         dd  sea0, sea1, sea3,\ ; x, y, z, x, y, z, x, y, z, 
                         sea1, sea2, sea3
 
-seaColors          dd  2 dup (0.0, 0.5, 0.5),\ 
-                       1 dup (0.0, 0.2745, 0.2745), 1 dup (0.0, 0.5, 0.5),\
-                       2 dup (0.0, 0.2745, 0.2745)
+    seaLight    equ  0.0, 0.5, 0.5
+    seaDark     equ  0.0, 0.2745, 0.2745
+
+seaColors          dd  seaLight, seaLight,\ 
+                       seaDark, seaLight,\
+                       seaDark, seaDark 
 
                 

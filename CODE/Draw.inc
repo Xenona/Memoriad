@@ -50,7 +50,44 @@ proc Draw.Rect, hasBorder, R, G, B, x1, y1, x2, y2
         ret
 endp
 
+ 
+proc Draw.Text uses ecx eax edx
+        invoke glGetFloatv, GL_MATRIX_MODE, currMode                            ; saving old mode
+        invoke glPushMatrix
 
+        invoke glColor3f, 1.0, 1.0, 1.0
+        invoke glLineWidth, 30.0
+        ; invoke glTranslatef, 0, 0, 0
+        invoke glScalef, 0.2, 0.2, 0.2
+        invoke glutStrokeCharacter, GLUT_STROKE_ROMAN, 57h
+        ; ; invoke glRasterPos2i, 50, 10
+
+        ; invoke glMatrixMode, GL_PROJECTION
+        ; invoke glLoadIdentity
+        ; invoke glOrtho, 0, [clientRect.right], 0, [clientRect.bottom], -1, 1
+        ; invoke glMatrixMode, GL_MODELVIEW
+        ; invoke glLoadIdentity
+
+
+        ; invoke glRasterPos2i, 0, 0
+        ; mov ecx, 10
+        ; @@:
+        ;         push ecx
+        ;         invoke glutBitmapCharacter, GLUT_BITMAP_HELVETICA_18, 57h
+        ;         pop ecx 
+        ; loop @b
+
+        ; stdcall Just.Wait, 100
+        
+        invoke glPopMatrix
+        invoke glMatrixMode, [currMode]                                         ; restoring old mode 
+        ret
+endp
+ 
+char dd ''
+
+
+ 
 proc Draw.Window0
         locals 
                 currentTime dd ?
@@ -83,21 +120,23 @@ proc Draw.Window0
                            double [WatchX], double [WatchY], double [WatchZ],\
                            double [UpvecX], double [UpvecY], double [UpvecZ]
  
-
         stdcall PutObject, skyVertices, skyColors, dword[skyPlaneVertCount]
         stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount]
         stdcall PutObject, sunVertices, sunColors, dword[sunPlaneVertCount]
  
-        stdcall Draw.Rect, [buttStartBrdr], 0.0, 1.0, 1.0, dword[buttStartX1], dword[buttStartY1], dword[buttStartX2], dword[buttStartY2]
-        stdcall Draw.Rect, [buttViewBrdr], 0.0, 0.0, 1.0, dword[buttViewX1], dword[buttViewY1], dword[buttViewX2], dword[buttViewY2]
-        stdcall Draw.Rect, [buttSettsBrdr], 0.0, 1.0, 0.0, dword[buttSettsX1], dword[buttSettsY1], dword[buttSettsX2], dword[buttSettsY2]
-        stdcall Draw.Rect, [buttExitBrdr], 1.0, 0.0, 0.0, dword[buttExitX1], dword[buttExitY1], dword[buttExitX2], dword[buttExitY2] 
-        
+        stdcall Draw.Text
 
 
+        stdcall Draw.Rect, [buttStartBrdr], 0.0, 0.5, 0.5, dword[buttStartX1], dword[buttStartY1], dword[buttStartX2], dword[buttStartY2]
+        stdcall Draw.Rect, [buttViewBrdr], 0.0, 0.5, 0.5, dword[buttViewX1], dword[buttViewY1], dword[buttViewX2], dword[buttViewY2]
+        stdcall Draw.Rect, [buttSettsBrdr], 0.0, 0.5, 0.5, dword[buttSettsX1], dword[buttSettsY1], dword[buttSettsX2], dword[buttSettsY2]
+        stdcall Draw.Rect, [buttExitBrdr], 0.0, 0.5, 0.5, dword[buttExitX1], dword[buttExitY1], dword[buttExitX2], dword[buttExitY2] 
 
+
+        ; stdcall Just.Wait, 111
 
         invoke  SwapBuffers, [hdc]
+
 
         ret
 endp

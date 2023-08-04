@@ -10,6 +10,7 @@ entry   WinMain
         include         ".\INCLUDE\api\user32.inc"
         include         ".\INCLUDE\api\gdi32.inc"
         include         ".\INCLUDE\api\opengl.inc"
+        include         ".\INCLUDE\DLL\glut.inc"
 
         include ".\OBJECTS\Card.inc"
         include ".\OBJECTS\SeaPlane.inc"
@@ -54,7 +55,8 @@ data import
                 user32,         "USER32.DLL",\
                 gdi32,          "GDI32.DLL",\
                 opengl32,       "OPENGL32.DLL",\
-                glu32,          "GLU32.DLL"
+                glu32,          "GLU32.DLL",\
+                glut32,         ".\INCLUDE\DLL\glut32.dll"
 
 end data
 
@@ -278,8 +280,6 @@ proc Just.Wait uses eax ecx, toWait:DWORD
         ret 
 endp
 
-
-
 proc WorldToScreen uses ecx, worldX, worldY, worldZ             ; ! CHANGES EAX EDX EDI !
         locals 
                 currX           dd ?
@@ -373,7 +373,6 @@ proc WorldToScreen uses ecx, worldX, worldY, worldZ             ; ! CHANGES EAX 
 
         ret 
 endp 
-
 
 proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
         ; ecx - for main loop (stores num of Objects)
