@@ -1,6 +1,8 @@
 ; todo
 ; 1. Check whether it'd be more effective to use gl's loadIdentity instead of my Matrix.SetDefault
-
+; 2. Fix big: after pressing any key on a start screen, any highlighted button gets unhighlighted
+; 3. Find a way to print some cyrillic too
+; 4. Reduce all local fpu temp variables using only one in mem
 format  PE GUI 5.0
 entry   WinMain
 
@@ -16,36 +18,32 @@ entry   WinMain
         include ".\OBJECTS\SeaPlane.inc"
         include ".\OBJECTS\SkyPlane.inc"
         include ".\OBJECTS\SunPlane.inc"
+        include ".\OBJECTS\MainMenuButtons.inc"
+
 
         include ".\CODE\Matrix.inc"
         include ".\CODE\Draw.inc"
 
-        COLOR_DEPTH     =       24
-        PFD_FLAGS       =       PFD_SUPPORT_OPENGL or PFD_DOUBLEBUFFER or PFD_DRAW_TO_WINDOW
-        WINDOW_STYLE    =       WS_VISIBLE or WS_MAXIMIZE or WS_POPUP
-        FOV             =       60.0
-        Z_NEAR          =       0.001
-        Z_FAR           =       10000.0
+        
+        include ".\DATA\CommonVariables.inc"
+        include ".\DATA\CameraSettings.inc"
+        include ".\DATA\FpuConstants.inc"
+        
 
-        wndClass        WNDCLASS                0, WindowProc, 0, 0, 0, 0, 0, 0, 0, className
-        pfd             PIXELFORMATDESCRIPTOR   sizeof.PIXELFORMATDESCRIPTOR, 1, PFD_FLAGS, PFD_TYPE_RGBA, COLOR_DEPTH,\
-                                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\
-                                                COLOR_DEPTH, 0, 0, PFD_MAIN_PLANE, 0, PFD_MAIN_PLANE
+       
 
- 
+        macro switch value
+        {
+                xor eax, eax
+                mov eax, value
+        }
 
-macro switch value
-{
-        xor eax, eax
-        mov eax, value
-}
-
-macro case value, label 
-{
-        cmp eax, value 
-        je  label
-}
- 
+        macro case value, label 
+        {
+                cmp eax, value 
+                je  label
+        }
+        
 
 
 
@@ -60,65 +58,6 @@ data import
 
 end data
 
-        className       db      "MEMORIAD (C) XENONA GAMES 2023", 0
-        clientRect      RECT
-        hdcBack         dd      ?
-        hdc             dd      ?
-
-        currMode        dd ?
-        matrixWtS matrix
-
-        windowID        db    0
-
-        ; main menu 
-        buttStartX1   dd      25.0    
-        buttStartY1   dd      26.0
-        buttStartZ1   dd      0.0
-
-        buttStartX2   dd      85.0
-        buttStartY2   dd      43.0
-        buttStartZ2   dd     0.0
-
-        buttViewX1    dd      25.0
-        buttViewY1    dd      3.0
-        buttViewZ1    dd      0.0
-
-        buttViewX2    dd      85.0
-        buttViewY2    dd      20.0
-        buttViewZ2    dd      0.0
-        
-        buttSettsX1   dd      25.0
-        buttSettsY1   dd      -20.0
-        buttSettsZ1   dd      0.0
-
-        buttSettsX2   dd      85.0
-        buttSettsY2   dd      -3.0
-        buttSettsZ2   dd      0.0
-
-        buttExitX1    dd      25.0
-        buttExitY1    dd      -43.0
-        buttExitZ1    dd      0.0
-
-        buttExitX2    dd      85.0
-        buttExitY2    dd      -26.0
-        buttExitZ2    dd      0.0
-
-        buttStartBrdr dd      0
-        buttViewBrdr  dd      0
-        buttSettsBrdr dd      0  
-        buttExitBrdr  dd      0
-
-
-        
-
-        
-        include ".\DATA\CameraVariables.inc"
-        params matrix
-        aspect          dq      ?
-
-
-        mouseX  dd ? 
-        mouseY  dd ?
 
 proc WinMain
 
@@ -155,22 +94,10 @@ proc WinMain
         invoke  glMatrixMode, GL_PROJECTION
         invoke  glLoadIdentity
 
-
-        invoke  glPushMatrix
-        invoke  glMultMatrixf, params 
-        invoke  glMultMatrixf, params
-        invoke  glGetFloatv, GL_PROJECTION_MATRIX, params
-        invoke  glPopMatrix
-        
-
-
         fild    [clientRect.right]      ; width
         fidiv   [clientRect.bottom]     ; width / height
-        fstp    [aspect]                ;
+        fstp    [aspect]                 
         invoke  gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR
-
-
-
 
         invoke  glEnable, GL_DEPTH_TEST
         invoke  glShadeModel, GL_SMOOTH
@@ -178,21 +105,18 @@ proc WinMain
 
         lea     esi, [msg]
 
-.cycle:
-        invoke  GetMessage, esi, ebx, ebx, ebx
-        invoke  DispatchMessage, esi
+        .cycle:
+                invoke  GetMessage, esi, ebx, ebx, ebx
+                invoke  DispatchMessage, esi
         jmp     .cycle
 
 endp
 
 
 proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
- 
-
-        
 
         switch  windowID 
-        case    0,      .window0
+        case    0,      .window0                        ; Main menu
 
 
 

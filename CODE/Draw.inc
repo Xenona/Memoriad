@@ -1,7 +1,3 @@
-
-; !!!!!!!!!!!!!!!!!!!!!!!!!!!
-; Once I've figured it out how do I print text, 
-; will add here text addr params or smth
 proc Draw.Rect, hasBorder, R, G, B, x1, y1, x2, y2      
         ; hasBorder - either 1 or 0 for xy1xy2 rect border 
         ; R, G, B - colors of the xy1xy2 rect
@@ -14,7 +10,7 @@ proc Draw.Rect, hasBorder, R, G, B, x1, y1, x2, y2
         invoke glColor3f, [R], [G], [B]                 ; setting color
         invoke glRectf, [x1], [y1], [x2], [y2]          ; and drawing main rect, z=0
         
-        cmp byte[hasBorder], 1                              ; checking for border
+        cmp byte[hasBorder], 1                          ; checking for border
         jne notSelected                                 ; exit if there's no one
 
         invoke glColor3f, 1.0, 1.0, 1.0                 ; setting border color
@@ -51,40 +47,62 @@ proc Draw.Rect, hasBorder, R, G, B, x1, y1, x2, y2
 endp
 
  
-proc Draw.Text uses ecx eax edx
-        invoke glGetFloatv, GL_MATRIX_MODE, currMode                            ; saving old mode
-        invoke glPushMatrix
-
-        invoke glColor3f, 1.0, 1.0, 1.0
-        invoke glLineWidth, 30.0
-        ; invoke glTranslatef, 0, 0, 0
-        invoke glScalef, 0.2, 0.2, 0.2
-        invoke glutStrokeCharacter, GLUT_STROKE_ROMAN, 57h
-        ; ; invoke glRasterPos2i, 50, 10
-
-        ; invoke glMatrixMode, GL_PROJECTION
-        ; invoke glLoadIdentity
-        ; invoke glOrtho, 0, [clientRect.right], 0, [clientRect.bottom], -1, 1
-        ; invoke glMatrixMode, GL_MODELVIEW
-        ; invoke glLoadIdentity
-
-
-        ; invoke glRasterPos2i, 0, 0
-        ; mov ecx, 10
-        ; @@:
-        ;         push ecx
-        ;         invoke glutBitmapCharacter, GLUT_BITMAP_HELVETICA_18, 57h
-        ;         pop ecx 
-        ; loop @b
-
-        ; stdcall Just.Wait, 100
+proc Draw.Text uses ecx eax edx edi, x, y, z, R, G, B, fontSize, stringPtr, isBold
+        locals
+                linearTerm      dd      177.2
+                constantTerm    dd      1.5
+                lineWidth       dd      ?
+        endl
+        ; eax, edx - to preserve their changing in outer procedures 'cause of gl procs
+        ; ecx - for string output loop.
+        ; x, y, z - position of the first letter of the text.
+        ; R, G, B - color of the text being printed.
+        ; fontSize - float used in scale matrix. Displays relative size of font.
+        ; stringPtr - pointer to a null-terminated C-string.
         
+        ; I found a correlation between size of a letter (x) and its
+        ; line width (y), that resulted in such an equation:
+        ;
+        ;                    y = 177.2*x + 1.5
+        ;
+        ; No need to specify which points I originally had, 
+        ; 'cause there was no fancy mathematics, I just liked
+        ; the way a certain proportion looked like. 
+
+        invoke glGetFloatv, GL_MATRIX_MODE, currMode    ; saving old mode (IN QUESTION)
+        invoke glPushMatrix                             ; saving matrix stack state
+
+        fld dword[fontSize]                             ; following the aforementioned equation
+        fmul [linearTerm]
+        fadd [constantTerm]
+        
+        cmp [isBold], 1
+        jne @f
+        fadd [fivedd]
+        @@:
+        fstp [lineWidth]
+                
+        invoke glLineWidth, [lineWidth]                 
+        invoke glTranslatef, [x], [y], [z]
+        invoke glScalef, [fontSize], [fontSize], [fontSize]
+        invoke glColor3f, [R], [G], [B]                        
+
+        mov edi, [stringPtr]
+        @@:
+                movzx eax, byte[edi]
+                cmp eax, 0
+                je .break
+                invoke glutStrokeCharacter, GLUT_STROKE_ROMAN, eax
+                inc edi
+        jmp @b
+
+        .break:
+       
         invoke glPopMatrix
         invoke glMatrixMode, [currMode]                                         ; restoring old mode 
         ret
 endp
  
-char dd ''
 
 
  
@@ -124,16 +142,17 @@ proc Draw.Window0
         stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount]
         stdcall PutObject, sunVertices, sunColors, dword[sunPlaneVertCount]
  
-        stdcall Draw.Text
+        stdcall Draw.Text, 35.0, 29.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.StartButton, 0
+        stdcall Draw.Text, 27.0, 7.5, 0.0, 1.0, 1.0, 1.0, 0.07, Window0.CardsButton, 0
+        stdcall Draw.Text, 28.5, -16.5, 0.0, 1.0, 1.0, 1.0, 0.09, Window0.SettsButton, 0
+        stdcall Draw.Text, 43.0, -40.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.ExitButton, 0
+        stdcall Draw.Text, -85.0, 37.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.WelcomeText0, 1
+        stdcall Draw.Text, -85.0, 23.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.WelcomeText1, 1
 
-
-        stdcall Draw.Rect, [buttStartBrdr], 0.0, 0.5, 0.5, dword[buttStartX1], dword[buttStartY1], dword[buttStartX2], dword[buttStartY2]
-        stdcall Draw.Rect, [buttViewBrdr], 0.0, 0.5, 0.5, dword[buttViewX1], dword[buttViewY1], dword[buttViewX2], dword[buttViewY2]
-        stdcall Draw.Rect, [buttSettsBrdr], 0.0, 0.5, 0.5, dword[buttSettsX1], dword[buttSettsY1], dword[buttSettsX2], dword[buttSettsY2]
-        stdcall Draw.Rect, [buttExitBrdr], 0.0, 0.5, 0.5, dword[buttExitX1], dword[buttExitY1], dword[buttExitX2], dword[buttExitY2] 
-
-
-        ; stdcall Just.Wait, 111
+        stdcall Draw.Rect, [buttStartBrdr], 0.0, 0.5, 0.5, [buttStartX1], [buttStartY1], [buttStartX2], [buttStartY2]
+        stdcall Draw.Rect, [buttCardsBrdr], 0.0, 0.5, 0.5, [buttCardsX1], [buttCardsY1], [buttCardsX2],  [buttCardsY2]
+        stdcall Draw.Rect, [buttSettsBrdr], 0.0, 0.5, 0.5, [buttSettsX1], [buttSettsY1], [buttSettsX2], [buttSettsY2]
+        stdcall Draw.Rect, [buttExitBrdr],  0.0, 0.5, 0.5, [buttExitX1],  [buttExitY1],  [buttExitX2],  [buttExitY2] 
 
         invoke  SwapBuffers, [hdc]
 

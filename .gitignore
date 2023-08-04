@@ -1,4 +1,4 @@
-/INCLUDE
+/INCLUDE/*
 /SOURCE
 /TOOLS
 FASM.EXE
@@ -13,3 +13,4 @@ game.exe.id2
 game.exe.nam
 game.exe.til 
 README.md
+!/INCLUDE/DLL/
