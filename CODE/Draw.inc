@@ -40,12 +40,10 @@ proc Draw.Rect, hasBorder, R, G, B, x1, y1, x2, y2
 
         invoke glRectf ; all parameters were pushed above
 
-
         notSelected:                                    ; exiting when there's no border
 
         ret
 endp
-
  
 proc Draw.Text uses ecx eax edx edi, x, y, z, R, G, B, fontSize, stringPtr, isBold
         locals
@@ -102,10 +100,7 @@ proc Draw.Text uses ecx eax edx edi, x, y, z, R, G, B, fontSize, stringPtr, isBo
         invoke glMatrixMode, [currMode]                                         ; restoring old mode 
         ret
 endp
- 
-
-
- 
+  
 proc Draw.Window0
         locals 
                 currentTime dd ?
@@ -156,6 +151,16 @@ proc Draw.Window0
 
         invoke  SwapBuffers, [hdc]
 
+
+        ret
+endp
+
+proc Draw.Window1
+        invoke  glClearColor, 0.2, 0.2, 0.2, 1.0
+        invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
+        invoke  glMatrixMode, GL_MODELVIEW
+        invoke  glLoadIdentity
+        invoke  SwapBuffers, [hdc]
 
         ret
 endp

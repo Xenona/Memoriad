@@ -1,8 +1,9 @@
 ; todo
 ; 1. Check whether it'd be more effective to use gl's loadIdentity instead of my Matrix.SetDefault
 ; 2. Fix big: after pressing any key on a start screen, any highlighted button gets unhighlighted
-; 3. Find a way to print some cyrillic too
+; 3. Find a way to print some cyrillic too (is this really necessary? thou, can be done with p.5)
 ; 4. Reduce all local fpu temp variables using only one in mem
+; 5. Recompile glut32.dll with corrected chars display
 format  PE GUI 5.0
 entry   WinMain
 
@@ -10,27 +11,22 @@ entry   WinMain
 
         include         ".\INCLUDE\api\kernel32.inc"    ;)
         include         ".\INCLUDE\api\user32.inc"
-        include         ".\INCLUDE\api\gdi32.inc"
+        include         ".\INCLUDE\api\gdi32.inc"       
         include         ".\INCLUDE\api\opengl.inc"
-        include         ".\INCLUDE\DLL\glut.inc"
+        include         ".\INCLUDE\DLL\glut.inc"        ; kdafllnlss
 
-        include ".\OBJECTS\Card.inc"
-        include ".\OBJECTS\SeaPlane.inc"
-        include ".\OBJECTS\SkyPlane.inc"
-        include ".\OBJECTS\SunPlane.inc"
-        include ".\OBJECTS\MainMenuButtons.inc"
+        include         ".\OBJECTS\Card.inc"
+        include         ".\OBJECTS\SeaPlane.inc"
+        include         ".\OBJECTS\SkyPlane.inc"
+        include         ".\OBJECTS\SunPlane.inc"
+        include         ".\OBJECTS\MainMenuButtons.inc"
 
-
-        include ".\CODE\Matrix.inc"
-        include ".\CODE\Draw.inc"
-
+        include         ".\CODE\Matrix.inc"
+        include         ".\CODE\Draw.inc"
         
-        include ".\DATA\CommonVariables.inc"
-        include ".\DATA\CameraSettings.inc"
-        include ".\DATA\FpuConstants.inc"
-        
-
-       
+        include         ".\DATA\CommonVariables.inc"
+        include         ".\DATA\CameraSettings.inc"
+        include         ".\DATA\FpuConstants.inc"
 
         macro switch value
         {
@@ -43,9 +39,6 @@ entry   WinMain
                 cmp eax, value 
                 je  label
         }
-        
-
-
 
 data import
 
@@ -112,49 +105,106 @@ proc WinMain
 
 endp
 
-
 proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
-
-        switch  windowID 
+ 
+ 
+        switch  dword[windowID] 
         case    0,      .window0                        ; Main menu
-
+        case    1,      .window1
 
 
         .window0: 
 
                 xor     ebx, ebx
 
+        
+                ; nop
+                ; nop
+                ; nop
+                ; nop
+
+                ; cmp [objectNumSelected], 4
+                ; je .onDestroy
+
+                ; mov eax, dword[objectNumSelected]
+                ; mov dword[windowID], eax
+
+
                 switch  [uMsg]
-                case    WM_PAINT,       .onPaint
+                case    WM_PAINT,       .onPaint0
                 case    WM_DESTROY,     .onDestroy
-                case    WM_KEYDOWN,     .onKeyDown
+                case    WM_KEYDOWN,     .onKeyDown0
                 case    WM_MOUSEMOVE,   .onMouseMove
+                case    WM_LBUTTONDOWN, .onClick0
+
+
 
                 invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
                 
                 
                 jmp     .Return
 
-                .onPaint:
+                .onPaint0:
                 stdcall Draw.Window0
                 jmp     .ReturnZero
                 
-                .onKeyDown:
-                cmp     [wParam], VK_ESCAPE
-                je     .onDestroy
+                .onKeyDown0:
+                switch [wParam]
+                case VK_ESCAPE, .onDestroy
 
+
+                .onClick0:
+                        ; Object IDs on Window0:
+                        ; 1 - Start Button 
+                        ; 2 - Cards Button
+                        ; 3 - Settings Button
+                        ; 4 - Exit Button
+
+                        cmp [objectNumSelected], 4
+                        je .onDestroy
+
+                        mov eax, dword[objectNumSelected]
+                        mov dword[windowID], eax
+
+
+
+                jmp     .ReturnZero
 
                 .onMouseMove: 
 
-                mov eax, [lParam]
-                movsx ebx, ax
-                mov dword[mouseX], ebx
-                sar eax, 16 
-                mov [mouseY], eax
+                        mov eax, [lParam]
+                        movsx ebx, ax
+                        mov dword[mouseX], ebx
+                        sar eax, 16 
+                        mov [mouseY], eax
 
-                stdcall On.Hover, 4, buttStartX1, buttStartBrdr
+                        stdcall On.Hover, 4, buttStartX1, buttStartBrdr
 
+        jmp     .ReturnZero
+
+        
+        .window1: 
+                xor     ebx, ebx
+
+                switch  [uMsg]
+                case    WM_PAINT,       .onPaint1
+                case    WM_DESTROY,     .onDestroy
+                case    WM_KEYDOWN,     .onKeyDown
+
+                invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
+
+                jmp     .Return
+
+                .onPaint1:
+                        stdcall Draw.Window1
                 jmp     .ReturnZero
+                
+                .onKeyDown:
+                switch [wParam]
+                case VK_ESCAPE, .onDestroy
+
+
+        jmp .ReturnZero
         
         .onDestroy:
         invoke  ExitProcess, 0
@@ -333,24 +383,36 @@ proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
 
                 stdcall WorldToScreen, dword[ebx], dword[ebx+4], dword[ebx+8]   ; for X1, Y1
                 cmp [mouseX], eax                                               ; the choice of all jumps is justified above
-                jl noBorder
+                jl .noBorder
                 cmp [mouseY], edx
-                jg noBorder 
+                jg .noBorder 
                                                                                 ; for X2, Y2
                 stdcall WorldToScreen, dword[ebx+12], dword[ebx+16], dword[ebx+20]
                 cmp [mouseX], eax
-                jg noBorder
+                jg .noBorder
                 cmp [mouseY], edx
-                jl noBorder 
+                jl .noBorder 
+
 
                 mov dword[esi], 1                                               ; if got there -> mouse got on the obj
 
-                noBorder:                                                       ; otherwise continue to the next obj
+                push dword[numOfObjs]                                           ; saving selected object id (list of IDs in winProc)
+                pop dword[objectNumSelected]                                    ; so when user clicks smth no need to check coords   
+                sub [objectNumSelected], ecx                                    ; again
+                inc [objectNumSelected]                                         ; indices of objects start from 1
+
+                jmp .exit
+
+                .noBorder:                                                       ; otherwise continue to the next obj
+
+                mov [objectNumSelected], -1
 
                 add esi, 4                                                      ; skip one brdrHandler
                 add ebx, 24                                                     ; skip two corners (xyz1, xyz2)
 
         loop @b
+
+        .exit: 
 
         ret 
 endp

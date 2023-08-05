@@ -18,8 +18,8 @@ className               db      "MEMORIAD (C) XENONA GAMES 2023", 0
 clientRect              RECT
 hdc                     dd      ?
 aspect                  dq      ?                       ; width/height 
-windowID                db      0                       ; shows, which game screen should be drawn
-
+windowID                dd      0                       ; shows, which game screen should be drawn
+objectNumSelected       dd      -1
 ;______________________________________________________________________________    
 
 
