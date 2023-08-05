@@ -129,9 +129,26 @@ proc Draw.Window0
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
 
-        invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
-                           double [WatchX], double [WatchY], double [WatchZ],\
-                           double [UpvecX], double [UpvecY], double [UpvecZ]
+        nop
+        nop
+        nop
+        nop
+        
+        ; stdcall Camera.Load, 10.0, 0.0, 900.0, 0.0, 0.0, -100.0
+
+        ; mov dword[CamX], 0.0
+        ; mov dword[CamY], 0.0
+        ; mov dword[CamZ], 900.0
+
+        ; mov dword[WatchX], 0.0
+        ; mov dword[WatchY], 0.0
+        ; mov dword[WatchZ], -100.0
+
+        stdcall Matrix.LookAt, cameraPos, targetPos, upVector
+
+        ; invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
+        ;                    double [WatchX], double [WatchY], double [WatchZ],\
+        ;                    double [UpvecX], double [UpvecY], double [UpvecZ]
  
         stdcall PutObject, skyVertices, skyColors, dword[skyPlaneVertCount]
         stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount]
@@ -160,6 +177,21 @@ proc Draw.Window1
         invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
+        
+        mov dword[CamX], 100.0
+        mov dword[CamY], 100.0
+        mov dword[CamZ], 1000.0
+
+        mov dword[WatchX], 0.0
+        mov dword[WatchY], 0.0
+        mov dword[WatchZ], -100.0
+        invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
+                        double [WatchX], double [WatchY], double [WatchZ],\
+                        double [UpvecX], double [UpvecY], double [UpvecZ]
+
+        stdcall PutObject, cardVertices, cardColors, [CardVertCount]
+
+
         invoke  SwapBuffers, [hdc]
 
         ret

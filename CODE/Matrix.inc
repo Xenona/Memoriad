@@ -20,7 +20,6 @@ struct matrix
     m44     dd      ? 
 ends
 
-trMatr matrix                         ; matrix for all transformations
 
 
 
@@ -76,18 +75,112 @@ proc Matrix.MultOnXYZ1 uses esi ebx ecx, M, vARR, vCOUNT
     ret 
 endp
 
-proc Matrix.setDefault uses esi ecx, oldMatr
+proc Matrix.setDefault uses edi ecx eax, oldMatr
 
-    mov esi, [oldMatr]
+    mov edi, [oldMatr]
     mov ecx, 15
-    @@:
-        mov dword[esi], 0.0
-        add esi, 4
-    loop @b 
-    mov dword[esi], 1.0 
-    mov dword[esi-20], 1.0
-    mov dword[esi-40], 1.0
-    mov dword[esi-60], 1.0
+    xor     eax, eax
+    rep     stosd 
+    mov dword[edi], 1.0 
+    mov dword[edi-20], 1.0
+    mov dword[edi-40], 1.0
+    mov dword[edi-60], 1.0
 
     ret 
+endp
+
+proc Matrix.LookAt uses esi edi ebx, camera, target, up
+
+        locals
+                temp    dd              ?
+                matr    matrix
+                zAxis   vector3
+                xAxis   vector3
+                yAxis   vector3
+        endl
+
+        lea     edi, [matr]
+        mov     ecx, 4 * 4
+        xor     eax, eax
+        rep     stosd
+
+        mov     esi, [camera]
+        mov     edi, [target]
+        mov     ebx, [up]
+
+        fld     [edi + vector3.x]
+        fsub    [esi + vector3.x]
+        fstp    [zAxis.x]
+
+        fld     [edi + vector3.y]
+        fsub    [esi + vector3.y]
+        fstp    [zAxis.y]
+
+        fld     [edi + vector3.z]
+        fsub    [esi + vector3.z]
+        fstp    [zAxis.z]
+
+        lea     eax, [zAxis]
+        stdcall Vector3.Normalize, eax
+
+        lea     eax, [zAxis]
+        lea     ecx, [xAxis]
+        stdcall Vector3.Cross, eax, ebx, ecx
+
+        lea     eax, [xAxis]
+        stdcall Vector3.Normalize, eax
+
+        lea     eax, [xAxis]
+        lea     ecx, [zAxis]
+        lea     ebx, [yAxis]
+        stdcall Vector3.Cross, eax, ecx, ebx
+
+        lea     esi, [xAxis]
+        lea     edi, [matr]
+        fld     [esi + vector3.x]
+        fstp    [edi + matrix.m11]
+        fld     [esi + vector3.y]
+        fstp    [edi + matrix.m21]
+        fld     [esi + vector3.z]
+        fstp    [edi + matrix.m31]
+
+        fld     [ebx + vector3.x]
+        fstp    [edi + matrix.m12]
+        fld     [ebx + vector3.y]
+        fstp    [edi + matrix.m22]
+        fld     [ebx + vector3.z]
+        fstp    [edi + matrix.m32]
+
+        lea     esi, [zAxis]
+        fld     [esi + vector3.x]
+        fchs
+        fstp    [edi + matrix.m13]
+        fld     [esi + vector3.y]
+        fchs
+        fstp    [edi + matrix.m23]
+        fld     [esi + vector3.z]
+        fchs
+        fstp    [edi + matrix.m33]
+
+        fld1
+        fstp    [edi + matrix.m44]
+
+        invoke  glMultMatrixf, edi
+
+        mov     esi, [camera]
+        fld     [esi + vector3.z]
+        fchs
+        fstp    [temp]
+        push    [temp]
+        fld     [esi + vector3.y]
+        fchs
+        fstp    [temp]
+        push    [temp]
+        fld     [esi + vector3.x]
+        fchs
+        fstp    [temp]
+        push    [temp]
+        invoke  glTranslatef
+
+        ret
 endp

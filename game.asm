@@ -21,6 +21,7 @@ entry   WinMain
         include         ".\OBJECTS\SunPlane.inc"
         include         ".\OBJECTS\MainMenuButtons.inc"
 
+        include         ".\CODE\Vector3.inc"
         include         ".\CODE\Matrix.inc"
         include         ".\CODE\Draw.inc"
         
@@ -117,19 +118,6 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 xor     ebx, ebx
 
-        
-                ; nop
-                ; nop
-                ; nop
-                ; nop
-
-                ; cmp [objectNumSelected], 4
-                ; je .onDestroy
-
-                ; mov eax, dword[objectNumSelected]
-                ; mov dword[windowID], eax
-
-
                 switch  [uMsg]
                 case    WM_PAINT,       .onPaint0
                 case    WM_DESTROY,     .onDestroy
@@ -137,11 +125,8 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 case    WM_MOUSEMOVE,   .onMouseMove
                 case    WM_LBUTTONDOWN, .onClick0
 
-
-
                 invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
-                
-                
+
                 jmp     .Return
 
                 .onPaint0:
@@ -436,3 +421,10 @@ proc Object.move uses esi, vArr, vCount, x, y, z
 
         ret     
 endp 
+ 
+
+proc Camera.Load, cX, cY, cZ, wX, wY, wZ
+
+
+        ret 
+endp
