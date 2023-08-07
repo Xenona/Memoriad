@@ -129,26 +129,15 @@ proc Draw.Window0
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
 
-        nop
-        nop
-        nop
-        nop
-        
-        ; stdcall Camera.Load, 10.0, 0.0, 900.0, 0.0, 0.0, -100.0
 
-        ; mov dword[CamX], 0.0
-        ; mov dword[CamY], 0.0
-        ; mov dword[CamZ], 900.0
+        mov     dword[cameraPos + vector3.x], 0.0
+        mov     dword[cameraPos + vector3.y], 0.0
+        mov     dword[cameraPos + vector3.z], 90.0
 
-        ; mov dword[WatchX], 0.0
-        ; mov dword[WatchY], 0.0
-        ; mov dword[WatchZ], -100.0
-
+        mov     dword[targetPos + vector3.x], 0.0
+        mov     dword[targetPos + vector3.y], 0.0
+        mov     dword[targetPos + vector3.z], -100.0
         stdcall Matrix.LookAt, cameraPos, targetPos, upVector
-
-        ; invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
-        ;                    double [WatchX], double [WatchY], double [WatchZ],\
-        ;                    double [UpvecX], double [UpvecY], double [UpvecZ]
  
         stdcall PutObject, skyVertices, skyColors, dword[skyPlaneVertCount]
         stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount]
@@ -172,25 +161,129 @@ proc Draw.Window0
         ret
 endp
 
+
 proc Draw.Window1
-        invoke  glClearColor, 0.2, 0.2, 0.2, 1.0
+        invoke  glClearColor, 0.05, 0.1, 0.2, 1.0
         invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
+  
+        fld     [camAngle]
+        fcos    
+        fmul    [camViewRadius]
+        fstp    [cameraPos.z]
+
+        fld     [camAngle]
+        fsin 
+        fmul    [camViewRadius]
+        fstp    [cameraPos.y]
+
+        fld     [distX]
+        fmul    [fourdd]
+        fld     [distX]
+        fsub    [cardWidth]
+        fdiv    [twodd]
+        fsubp 
+        fst     [cameraPos.x]
+        fstp    [targetPos.x]
+
+        fld     [distY]
+        fmul    [threedd]
+        fld     [distY]
+        fsub    [cardHeight]
+        fdiv    [twodd]
+        fsubp
+        fstp     [targetPos.y]
+
+        mov     [targetPos.z], 0.0
+        stdcall Matrix.LookAt, cameraPos, targetPos, upVector
+        invoke glPushMatrix
+
+ 
+
+
+        mov edi, 4
+        .DrawRows: 
+        push edi
+        invoke glPushMatrix
+                mov edi, 8
+                .DrawCols:
+                        stdcall PutObject, cardVertices, cardColors, [CardVertCount]
+                        invoke glTranslatef, [distX], 0.0, 0.0
+                       
+                dec edi
+                cmp edi, 0
+                jne .DrawCols
+        invoke glPopMatrix
+        invoke glTranslatef, 0.0, [distY], 0.0 
         
-        mov dword[CamX], 100.0
-        mov dword[CamY], 100.0
-        mov dword[CamZ], 1000.0
+        pop edi
+        dec edi 
+        cmp edi, 0
+        jne .DrawRows 
+        invoke glPopMatrix
+ 
+        mov  [cardX1],  0.0
+        mov  [cardY1],  0.0
+        mov  [cardX2],  30.0
+        mov  [cardY2],  42.0
 
-        mov dword[WatchX], 0.0
-        mov dword[WatchY], 0.0
-        mov dword[WatchZ], -100.0
-        invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
-                        double [WatchX], double [WatchY], double [WatchZ],\
-                        double [UpvecX], double [UpvecY], double [UpvecZ]
 
-        stdcall PutObject, cardVertices, cardColors, [CardVertCount]
+        mov edi, 4
+        .CheckRows:
+        push edi
+                mov edi, 8
+                .CheckCols:
+                        stdcall On.Hover, 1, cardX1, cardBrdrHandler
 
+                        cmp [cardBrdrHandler], 1
+
+                        jne @f
+                        stdcall Draw.Rect, 0, 1.0, 1.0, 1.0, [cardX1], [cardY1], [cardX2], [cardY2]
+
+                        @@:
+                        fld [cardX1]
+                        fadd [distX]
+                        fstp [cardX1]
+
+                        fld [cardX2]
+                        fadd [distX]
+                        fstp [cardX2]
+
+                        
+                        dec edi 
+                        cmp edi, 0
+                        jne .CheckCols
+
+                        
+                        fld [cardY1]
+                        fadd [distY]
+                        fstp [cardY1]
+
+                        fld [cardY2]
+                        fadd [distY]
+                        fstp [cardY2]
+
+                        fld [cardX1]
+                        fld [distX]
+                        fmul    [eightdd]
+                        fchs
+                        faddp
+                        fstp [cardX1]
+
+                        fld [cardX2]
+                        fld [distX]
+                        fmul    [eightdd]
+                        fchs
+                        faddp
+                        fstp [cardX2]
+
+                
+        pop edi 
+        dec edi
+        cmp edi, 0
+        jne .CheckRows 
+        
 
         invoke  SwapBuffers, [hdc]
 

@@ -1,31 +1,29 @@
     CardVertCount     dd       108
 
-
-            ;       x    y   z
     card0      equ     2.0, 0.0, 0.0
-    card1      equ     2.0, 2.0, 0.0
+    card1      equ     2.0, 0.0, 2.0
     card2      equ     0.0, 2.0, 2.0
-    card3      equ     0.0, 0.0, 2.0
-    card4      equ     30.0, 0.0, 2.0
+    card3      equ     0.0, 2.0, 0.0
+    card4      equ     30.0, 2.0, 0.0
     card5      equ     30.0, 2.0, 2.0
-    card6      equ     28.0, 2.0, 0.0
+    card6      equ     28.0, 0.0, 2.0
     card7      equ     28.0, 0.0, 0.0
-    card8      equ     28.0, 0.0, 42.0
-    card9      equ     28.0, 2.0, 42.0
-    card10     equ     30.0, 2.0, 40.0
-    card11     equ     30.0, 0.0, 40.0
-    card12     equ     0.0, 0.0, 40.0
-    card13     equ     0.0, 2.0, 40.0
-    card14     equ     2.0, 2.0, 42.0
-    card15     equ     2.0, 0.0, 42.0
+    card8      equ     28.0, 42.0, 0.0
+    card9      equ     28.0, 42.0, 2.0
+    card10     equ     30.0, 40.0, 2.0
+    card11     equ     30.0, 40.0, 0.0
+    card12     equ     0.0, 40.0, 0.0
+    card13     equ     0.0, 40.0, 2.0
+    card14     equ     2.0, 42.0, 2.0
+    card15     equ     2.0, 42.0, 0.0
     card16     equ     2.0, 2.0, 2.0
     card17     equ     28.0, 2.0, 2.0
-    card18     equ     28.0, 2.0, 40.0
-    card19     equ     2.0, 2.0, 40.0
-    card20     equ     2.0, 0.0, 2.0
-    card21     equ     28.0, 0.0, 2.0
-    card22     equ     28.0, 0.0, 40.0
-    card23     equ     2.0, 0.0, 40.0
+    card18     equ     28.0, 40.0, 2.0
+    card19     equ     2.0, 40.0, 2.0
+    card20     equ     2.0, 2.0, 0.0
+    card21     equ     28.0, 2.0, 0.0
+    card22     equ     28.0, 40.0, 0.0
+    card23     equ     2.0, 40.0, 0.0
 
     cardVertices    dd      card0, card1, card2,\ ; chamfers
                             card0, card2, card3,\
@@ -75,3 +73,17 @@
                             18       dup     (0.0, 1.0, 1.0)
     
 
+        cardX1   dd      0.0
+        cardY1   dd      0.0
+        cardZ1   dd      1.0
+
+        cardX2   dd      30.0
+        cardY2   dd      42.0
+        cardZ2   dd      1.0
+
+        distX   dd      50.0
+        distY   dd      47.0
+        
+        cardWidth       dd      30.0
+        cardHeight      dd      42.0
+cardBrdrHandler         dd      0

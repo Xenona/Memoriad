@@ -18,7 +18,7 @@ className               db      "MEMORIAD (C) XENONA GAMES 2023", 0
 clientRect              RECT
 hdc                     dd      ?
 aspect                  dq      ?                       ; width/height 
-windowID                dd      0                       ; shows, which game screen should be drawn
+windowID                dd      1                       ; shows, which game screen should be drawn
 objectNumSelected       dd      -1
 ;______________________________________________________________________________    
 
@@ -38,17 +38,19 @@ currMode                dd      ?
 matrixWtS               matrix                      ; type defined in Matrix.inc
 trMatr                  matrix                         ; matrix for all transformations
 
-cameraPos           	vector3         0.0, 0.0, 90.0
-targetPos  	            vector3         0.0, 0.0, -100.0
+cameraPos           	vector3         ?, ?, ? ; 90.0
+targetPos  	            vector3         ?, ?, ?;-100.0
 upVector 	            vector3         0.0, 1.0, 0.0                      
+camAngle                dd              0.46
+camAngleStep            dd              0.01745320
+camViewRadius           dd              300.0
 ;______________________________________________________________________________    
 
 
 
-
 ;__CONTROLLING USER ACTIONS____________________________________________________    
-mouseX                  dd      ? 
-mouseY                  dd      ?
+mouseX                  dd      0 
+mouseY                  dd      0
 ;______________________________________________________________________________    
 
 

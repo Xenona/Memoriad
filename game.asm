@@ -1,9 +1,9 @@
 ; todo
 ; 1. Check whether it'd be more effective to use gl's loadIdentity instead of my Matrix.SetDefault
-; 2. Fix big: after pressing any key on a start screen, any highlighted button gets unhighlighted
 ; 3. Find a way to print some cyrillic too (is this really necessary? thou, can be done with p.5)
 ; 4. Reduce all local fpu temp variables using only one in mem
 ; 5. Recompile glut32.dll with corrected chars display
+; 6. Optimize memory usage: push vertices of all objs I use once, pass to opengl stackaddr, then ret N or add esp N
 format  PE GUI 5.0
 entry   WinMain
 
@@ -26,7 +26,6 @@ entry   WinMain
         include         ".\CODE\Draw.inc"
         
         include         ".\DATA\CommonVariables.inc"
-        include         ".\DATA\CameraSettings.inc"
         include         ".\DATA\FpuConstants.inc"
 
         macro switch value
@@ -122,7 +121,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 case    WM_PAINT,       .onPaint0
                 case    WM_DESTROY,     .onDestroy
                 case    WM_KEYDOWN,     .onKeyDown0
-                case    WM_MOUSEMOVE,   .onMouseMove
+                case    WM_MOUSEMOVE,   .onMouseMove0
                 case    WM_LBUTTONDOWN, .onClick0
 
                 invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
@@ -134,9 +133,9 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jmp     .ReturnZero
                 
                 .onKeyDown0:
-                switch [wParam]
-                case VK_ESCAPE, .onDestroy
-
+                        switch [wParam]
+                        case VK_ESCAPE, .onDestroy
+                jmp     .ReturnZero
 
                 .onClick0:
                         ; Object IDs on Window0:
@@ -155,7 +154,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 jmp     .ReturnZero
 
-                .onMouseMove: 
+                .onMouseMove0: 
 
                         mov eax, [lParam]
                         movsx ebx, ax
@@ -165,8 +164,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         stdcall On.Hover, 4, buttStartX1, buttStartBrdr
 
-        jmp     .ReturnZero
-
+                jmp     .ReturnZero
         
         .window1: 
                 xor     ebx, ebx
@@ -174,7 +172,9 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 switch  [uMsg]
                 case    WM_PAINT,       .onPaint1
                 case    WM_DESTROY,     .onDestroy
-                case    WM_KEYDOWN,     .onKeyDown
+                case    WM_KEYDOWN,     .onKeyDown1
+                case    WM_MOUSEMOVE,   .onMouseMove1
+
 
                 invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
 
@@ -182,14 +182,61 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 .onPaint1:
                         stdcall Draw.Window1
+                        ; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        ; jmp .decCamAngle
                 jmp     .ReturnZero
                 
-                .onKeyDown:
-                switch [wParam]
-                case VK_ESCAPE, .onDestroy
+                .onKeyDown1:
+                        switch [wParam]
+                        case VK_ESCAPE, .onDestroy
+                        case VK_DOWN, .decCamAngle
+                        case VK_UP, .incCamAngle
+                jmp     .ReturnZero
+                
+                .onMouseMove1: 
 
+                        mov eax, [lParam]
+                        movsx ebx, ax
+                        mov dword[mouseX], ebx
+                        sar eax, 16 
+                        mov [mouseY], eax
 
-        jmp .ReturnZero
+                jmp .ReturnZero
+
+                .incCamAngle:
+                nop
+
+                fld     [camAngle]
+                fadd    [camAngleStep]
+                fldpi
+                fmul    [twodd]
+                fcomp   
+                fstsw   ax 
+                shr     ax,  9 
+                jnc     @f
+                fldpi 
+                fmul    [twodd]
+                fsubp 
+                @@:
+                fstp    [camAngle]
+                jmp .ReturnZero
+
+                .decCamAngle:
+
+                fld     [camAngle]
+                fsub    [camAngleStep]
+                fldz 
+                fcomp 
+                fstsw   ax
+                shr     ax, 9
+                jc     @f
+                fcomp 
+                fldpi 
+                fmul    [twodd]
+                @@:
+                fstp    [camAngle]
+                jmp .ReturnZero
+
         
         .onDestroy:
         invoke  ExitProcess, 0
@@ -276,7 +323,9 @@ proc WorldToScreen uses ecx, worldX, worldY, worldZ             ; ! CHANGES EAX 
 
         ; I do not multiply matrices manually. Instead, I use glMultMatrixf,
         ; so it's necessary to save initial state of set matrix stack;
-        invoke glGetFloatv, GL_MATRIX_MODE, currMode                            ; saving old mode
+        fnop
+        invoke glGetIntegerv, GL_MATRIX_MODE, currMode                            ; saving old mode
+        invoke glGetError
         invoke glMatrixMode, GL_PROJECTION                                      ; setting new mode
 
 
@@ -286,11 +335,9 @@ proc WorldToScreen uses ecx, worldX, worldY, worldZ             ; ! CHANGES EAX 
                                                                                 ; (1)
         invoke gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR 
 
-                                                                                ; (2) and Pm*Vm simultaneously
-        invoke  gluLookAt, double [CamX],   double [CamY],   double [CamZ],\
-                        double [WatchX], double [WatchY], double [WatchZ],\
-                        double [UpvecX], double [UpvecY], double [UpvecZ]
-
+        stdcall Matrix.LookAt, cameraPos, targetPos, upVector
+                                                                                   ; (2) and Pm*Vm simultaneously
+     
         stdcall Matrix.setDefault, matrixWtS                                    ; preparing Vm
         mov edi, [worldX]
         mov [matrixWtS.m41], edi
@@ -325,6 +372,7 @@ proc WorldToScreen uses ecx, worldX, worldY, worldZ             ; ! CHANGES EAX 
 
         invoke glPopMatrix                                                      ; restoring matrix stack
         invoke glMatrixMode, [currMode]                                         ; restoring old mode 
+        invoke glGetError
 
         mov eax, [currX]                                                        ; returning values
         mov edx, [currY]
@@ -357,7 +405,6 @@ proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
         ; |                 y bigger'n 1
         ; *
         ; y increases
-
         mov ebx, [objArr]       
         mov esi, [brdrHandler]
 
