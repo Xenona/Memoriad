@@ -35,15 +35,15 @@ waveSin                 dd      ?                       ; value of sin(curr x)
 
 ;__WORKING WITH OPENGL_________________________________________________________    
 currMode                dd      ?
-matrixWtS               matrix                      ; type defined in Matrix.inc
+matrixWtS               matrix                          ; type defined in Matrix.inc
 trMatr                  matrix                         ; matrix for all transformations
 
-cameraPos           	vector3         ?, ?, ? ; 90.0
-targetPos  	            vector3         ?, ?, ?;-100.0
+cameraPos           	vector3         ?, ?, ? 
+targetPos  	            vector3         ?, ?, ? 
 upVector 	            vector3         0.0, 1.0, 0.0                      
 camAngle                dd              0.46
 camAngleStep            dd              0.01745320
-camViewRadius           dd              300.0
+camViewRadius           dd              250.0
 ;______________________________________________________________________________    
 
 

@@ -73,17 +73,219 @@
                             18       dup     (0.0, 1.0, 1.0)
     
 
-        cardX1   dd      0.0
-        cardY1   dd      0.0
-        cardZ1   dd      1.0
+    cardX1          dd      0.0
+    cardY1          dd      0.0
 
-        cardX2   dd      30.0
-        cardY2   dd      42.0
-        cardZ2   dd      1.0
+    cardX2          dd      30.0
+    cardY2          dd      42.0
 
-        distX   dd      50.0
-        distY   dd      47.0
-        
-        cardWidth       dd      30.0
-        cardHeight      dd      42.0
+    distX           dd      50.0
+    distY           dd      47.0
+    
+    cardWidth       dd      30.0
+    cardHeight      dd      42.0
+    
+    marginX         dd      20.0
+    marginY         dd      5.0
 cardBrdrHandler         dd      0
+
+cardMatrix          dd      0, 0, 0, 0, 0, 0, 0, 0,\
+                            0, 0, 0, 0, 0, 0, 0, 0,\
+                            0, 0, 0, 0, 0, 0, 0, 0,\
+                            0, 0, 0, 0, 0, 0, 0, 0
+
+numOfOpened         dd      0 
+
+        card1X1       dd      ?
+        card1Y1       dd      ?
+        card1X2       dd      ?
+        card1Y2       dd      ?
+
+        card2X1       dd      ?
+        card2Y1       dd      ?
+        card2X2       dd      ?
+        card2Y2       dd      ?
+
+        card3X1       dd      ?
+        card3Y1       dd      ?
+        card3X2       dd      ?
+        card3Y2       dd      ?
+
+        card4X1       dd      ?
+        card4Y1       dd      ?
+        card4X2       dd      ?
+        card4Y2       dd      ?
+
+        card5X1       dd      ?
+        card5Y1       dd      ?
+        card5X2       dd      ?
+        card5Y2       dd      ?
+
+        card6X1       dd      ?
+        card6Y1       dd      ?
+        card6X2       dd      ?
+        card6Y2       dd      ?
+
+        card7X1       dd      ?
+        card7Y1       dd      ?
+        card7X2       dd      ?
+        card7Y2       dd      ?
+
+        card8X1       dd      ?
+        card8Y1       dd      ?
+        card8X2       dd      ?
+        card8Y2       dd      ?
+
+        card9X1       dd      ?
+        card9Y1       dd      ?
+        card9X2       dd      ?
+        card9Y2       dd      ?
+
+        card10X1       dd      ?
+        card10Y1       dd      ?
+        card10X2       dd      ?
+        card10Y2       dd      ?
+
+        card11X1       dd      ?
+        card11Y1       dd      ?
+        card11X2       dd      ?
+        card11Y2       dd      ?
+
+        card12X1       dd      ?
+        card12Y1       dd      ?
+        card12X2       dd      ?
+        card12Y2       dd      ?
+
+        card13X1       dd      ?
+        card13Y1       dd      ?
+        card13X2       dd      ?
+        card13Y2       dd      ?
+
+        card14X1       dd      ?
+        card14Y1       dd      ?
+        card14X2       dd      ?
+        card14Y2       dd      ?
+
+        card15X1       dd      ?
+        card15Y1       dd      ?
+        card15X2       dd      ?
+        card15Y2       dd      ?
+
+        card16X1       dd      ?
+        card16Y1       dd      ?
+        card16X2       dd      ?
+        card16Y2       dd      ?
+
+        card17X1       dd      ?
+        card17Y1       dd      ?
+        card17X2       dd      ?
+        card17Y2       dd      ?
+
+        card18X1       dd      ?
+        card18Y1       dd      ?
+        card18X2       dd      ?
+        card18Y2       dd      ?
+
+        card19X1       dd      ?
+        card19Y1       dd      ?
+        card19X2       dd      ?
+        card19Y2       dd      ?
+
+        card20X1       dd      ?
+        card20Y1       dd      ?
+        card20X2       dd      ?
+        card20Y2       dd      ?
+
+        card21X1       dd      ?
+        card21Y1       dd      ?
+        card21X2       dd      ?
+        card21Y2       dd      ?
+
+        card22X1       dd      ?
+        card22Y1       dd      ?
+        card22X2       dd      ?
+        card22Y2       dd      ?
+
+        card23X1       dd      ?
+        card23Y1       dd      ?
+        card23X2       dd      ?
+        card23Y2       dd      ?
+
+        card24X1       dd      ?
+        card24Y1       dd      ?
+        card24X2       dd      ?
+        card24Y2       dd      ?
+
+        card25X1       dd      ?
+        card25Y1       dd      ?
+        card25X2       dd      ?
+        card25Y2       dd      ?
+        
+        card26X1       dd      ?
+        card26Y1       dd      ?
+        card26X2       dd      ?
+        card26Y2       dd      ?
+
+        card27X1       dd      ?
+        card27Y1       dd      ?
+        card27X2       dd      ?
+        card27Y2       dd      ?
+
+        card28X1       dd      ?
+        card28Y1       dd      ?
+        card28X2       dd      ?
+        card28Y2       dd      ?
+
+        card29X1       dd      ?
+        card29Y1       dd      ?
+        card29X2       dd      ?
+        card29Y2       dd      ?
+
+        card30X1       dd      ?
+        card30Y1       dd      ?
+        card30X2       dd      ?
+        card30Y2       dd      ?
+
+        card31X1       dd      ?
+        card31Y1       dd      ?
+        card31X2       dd      ?
+        card31Y2       dd      ?
+
+        card32X1       dd      ?
+        card32Y1       dd      ?
+        card32X2       dd      ?
+        card32Y2       dd      ?
+
+
+card1BrdrHandler         dd      0
+card2BrdrHandler         dd      0
+card3BrdrHandler         dd      0
+card4BrdrHandler         dd      0
+card5BrdrHandler         dd      0
+card6BrdrHandler         dd      0
+card7BrdrHandler         dd      0
+card8BrdrHandler         dd      0
+cardB9rdrHandler         dd      0
+card10BrdrHandler         dd      0
+card11BrdrHandler         dd      0
+card12BrdrHandler         dd      0
+card13BrdrHandler         dd      0
+card14BrdrHandler         dd      0
+card15BrdrHandler         dd      0
+card16BrdrHandler         dd      0
+card17BrdrHandler         dd      0
+card18BrdrHandler         dd      0
+card19BrdrHandler         dd      0
+card20BrdrHandler         dd      0
+card21BrdrHandler         dd      0
+card22BrdrHandler         dd      0
+card23BrdrHandler         dd      0
+card24BrdrHandler         dd      0
+card25BrdrHandler         dd      0
+card26BrdrHandler         dd      0
+card27BrdrHandler         dd      0
+card28BrdrHandler         dd      0
+card29BrdrHandler         dd      0
+card30BrdrHandler         dd      0
+card31BrdrHandler         dd      0
+card32BrdrHandler         dd      0

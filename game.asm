@@ -1,5 +1,4 @@
 ; todo
-; 1. Check whether it'd be more effective to use gl's loadIdentity instead of my Matrix.SetDefault
 ; 3. Find a way to print some cyrillic too (is this really necessary? thou, can be done with p.5)
 ; 4. Reduce all local fpu temp variables using only one in mem
 ; 5. Recompile glut32.dll with corrected chars display
@@ -174,6 +173,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 case    WM_DESTROY,     .onDestroy
                 case    WM_KEYDOWN,     .onKeyDown1
                 case    WM_MOUSEMOVE,   .onMouseMove1
+                case    WM_LBUTTONDOWN, .onLClick1
 
 
                 invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
@@ -182,8 +182,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 .onPaint1:
                         stdcall Draw.Window1
-                        ; !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                        ; jmp .decCamAngle
+ 
                 jmp     .ReturnZero
                 
                 .onKeyDown1:
@@ -201,42 +200,63 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         sar eax, 16 
                         mov [mouseY], eax
 
+                        stdcall On.Hover, 32, card1X1, card1BrdrHandler
+
                 jmp .ReturnZero
 
                 .incCamAngle:
-                nop
 
-                fld     [camAngle]
-                fadd    [camAngleStep]
-                fldpi
-                fmul    [twodd]
-                fcomp   
-                fstsw   ax 
-                shr     ax,  9 
-                jnc     @f
-                fldpi 
-                fmul    [twodd]
-                fsubp 
-                @@:
-                fstp    [camAngle]
+                        fld     [camAngle]
+                        fadd    [camAngleStep]
+                        fldpi
+                        fmul    [twodd]
+                        fcomp   
+                        fstsw   ax 
+                        shr     ax,  9 
+                        jnc     @f
+                        fldpi 
+                        fmul    [twodd]
+                        fsubp 
+                        @@:
+                        fstp    [camAngle]
                 jmp .ReturnZero
 
                 .decCamAngle:
 
-                fld     [camAngle]
-                fsub    [camAngleStep]
-                fldz 
-                fcomp 
-                fstsw   ax
-                shr     ax, 9
-                jc     @f
-                fcomp 
-                fldpi 
-                fmul    [twodd]
-                @@:
-                fstp    [camAngle]
+                        fld     [camAngle]
+                        fsub    [camAngleStep]
+                        fldz 
+                        fcomp 
+                        fstsw   ax
+                        shr     ax, 9
+                        jc      @f
+                        fcomp 
+                        fldpi 
+                        fmul    [twodd]
+                        @@:
+                        fstp    [camAngle]
                 jmp .ReturnZero
 
+                .onLClick1:
+                fnop
+                        cmp [objectNumSelected], -1
+                        je .ReturnZero
+
+                        mov esi, [objectNumSelected]
+                        add esi, cardMatrix
+                        mov eax, [esi]
+
+                        cmp eax, 0
+                        jne .ReturnZero
+
+                        cmp [numOfOpened], 2
+                        jae .ReturnZero
+
+                        mov dword[esi], 2
+                        inc [numOfOpened]
+
+
+                jmp .ReturnZero
         
         .onDestroy:
         invoke  ExitProcess, 0
@@ -323,7 +343,6 @@ proc WorldToScreen uses ecx, worldX, worldY, worldZ             ; ! CHANGES EAX 
 
         ; I do not multiply matrices manually. Instead, I use glMultMatrixf,
         ; so it's necessary to save initial state of set matrix stack;
-        fnop
         invoke glGetIntegerv, GL_MATRIX_MODE, currMode                            ; saving old mode
         invoke glGetError
         invoke glMatrixMode, GL_PROJECTION                                      ; setting new mode
@@ -405,6 +424,7 @@ proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
         ; |                 y bigger'n 1
         ; *
         ; y increases
+
         mov ebx, [objArr]       
         mov esi, [brdrHandler]
 
@@ -413,13 +433,13 @@ proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
         @@: 
                 mov dword[esi], 0                                               ; clearing border before start
 
-                stdcall WorldToScreen, dword[ebx], dword[ebx+4], dword[ebx+8]   ; for X1, Y1
+                stdcall WorldToScreen, dword[ebx], dword[ebx+4], 0.0            ; for X1, Y1
                 cmp [mouseX], eax                                               ; the choice of all jumps is justified above
                 jl .noBorder
                 cmp [mouseY], edx
                 jg .noBorder 
                                                                                 ; for X2, Y2
-                stdcall WorldToScreen, dword[ebx+12], dword[ebx+16], dword[ebx+20]
+                stdcall WorldToScreen, dword[ebx+8], dword[ebx+12], 1.0
                 cmp [mouseX], eax
                 jg .noBorder
                 cmp [mouseY], edx
@@ -437,10 +457,10 @@ proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
 
                 .noBorder:                                                       ; otherwise continue to the next obj
 
-                mov [objectNumSelected], -1
+                mov [objectNumSelected], 0
 
                 add esi, 4                                                      ; skip one brdrHandler
-                add ebx, 24                                                     ; skip two corners (xyz1, xyz2)
+                add ebx, 16                                                     ; skip two corners (xy1, xy2)
 
         loop @b
 
@@ -468,10 +488,4 @@ proc Object.move uses esi, vArr, vCount, x, y, z
 
         ret     
 endp 
- 
-
-proc Camera.Load, cX, cY, cZ, wX, wY, wZ
-
-
-        ret 
-endp
+  

@@ -1,46 +1,49 @@
-proc Draw.Rect, hasBorder, R, G, B, x1, y1, x2, y2      
+proc Draw.Rect, hasBorder, hasBody, R, G, B, x1, y1, x2, y2      
         ; hasBorder - either 1 or 0 for xy1xy2 rect border 
         ; R, G, B - colors of the xy1xy2 rect
         ; x1, y1, x2, y2 - coords of xy1xy2 rect 
 
         locals 
-                coord dd ? ; just a temp var for fpu 
+                x1m1 dd ?                              ; just a temp var for fpu 
+                x2p1 dd ?
+                y1m1 dd ?
+                y2p1 dd ?
         endl
 
+        cmp  [hasBody], 1
+        jne .checkBorder
         invoke glColor3f, [R], [G], [B]                 ; setting color
         invoke glRectf, [x1], [y1], [x2], [y2]          ; and drawing main rect, z=0
         
+        .checkBorder:
         cmp byte[hasBorder], 1                          ; checking for border
-        jne notSelected                                 ; exit if there's no one
+        jne .notSelected                                 ; exit if there's no one
 
         invoke glColor3f, 1.0, 1.0, 1.0                 ; setting border color
 
-        fld dword[y2]                                   ; calculating border xy's 
-        fadd dword[onedd]
-        fstp [coord]
-        push [coord]
+        fld     dword[x1]
+        fsub    [onedd]
+        fstp    [x1m1]
 
-        fld dword[x2]
-        fadd dword[onedd]
-        fstp [coord]
-        push [coord]
-        
-        fld dword[y1]
-        fsub dword[onedd]
-        fstp [coord]
-        push [coord]
+        fld     dword[y1]
+        fsub    [onedd]
+        fstp    [y1m1]
 
-        fld dword[x1] 
-        fsub dword[onedd]
-        fstp [coord]
-        push [coord]
+        fld     dword[x2]
+        fadd    [onedd]
+        fstp    [x2p1]
 
-        ; actually this sht above must be optimized using loop and
-        ; ebp+N for all coords. For the sake of bytes, I'll do that later 
+        fld     dword[y2]
+        fadd    [onedd]
+        fstp    [y2p1]
 
-        invoke glRectf ; all parameters were pushed above
+        invoke  glRectf, [x1m1], [y1m1], [x1], [y2p1]
+        invoke  glRectf, [x1m1], [y2], [x2p1], [y2p1]
+        invoke  glRectf, [x2], [y1m1], [x2p1], [y2p1]
+        invoke  glRectf, [x1m1], [y1m1], [x2p1], [y1]
 
-        notSelected:                                    ; exiting when there's no border
+         
+        .notSelected:                                    ; exiting when there's no border
 
         ret
 endp
@@ -150,10 +153,10 @@ proc Draw.Window0
         stdcall Draw.Text, -85.0, 37.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.WelcomeText0, 1
         stdcall Draw.Text, -85.0, 23.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.WelcomeText1, 1
 
-        stdcall Draw.Rect, [buttStartBrdr], 0.0, 0.5, 0.5, [buttStartX1], [buttStartY1], [buttStartX2], [buttStartY2]
-        stdcall Draw.Rect, [buttCardsBrdr], 0.0, 0.5, 0.5, [buttCardsX1], [buttCardsY1], [buttCardsX2],  [buttCardsY2]
-        stdcall Draw.Rect, [buttSettsBrdr], 0.0, 0.5, 0.5, [buttSettsX1], [buttSettsY1], [buttSettsX2], [buttSettsY2]
-        stdcall Draw.Rect, [buttExitBrdr],  0.0, 0.5, 0.5, [buttExitX1],  [buttExitY1],  [buttExitX2],  [buttExitY2] 
+        stdcall Draw.Rect, [buttStartBrdr], 1, 0.0, 0.5, 0.5, [buttStartX1], [buttStartY1], [buttStartX2], [buttStartY2]
+        stdcall Draw.Rect, [buttCardsBrdr], 1, 0.0, 0.5, 0.5, [buttCardsX1], [buttCardsY1], [buttCardsX2],  [buttCardsY2]
+        stdcall Draw.Rect, [buttSettsBrdr], 1, 0.0, 0.5, 0.5, [buttSettsX1], [buttSettsY1], [buttSettsX2], [buttSettsY2]
+        stdcall Draw.Rect, [buttExitBrdr],  1, 0.0, 0.5, 0.5, [buttExitX1],  [buttExitY1],  [buttExitX2],  [buttExitY2] 
 
         invoke  SwapBuffers, [hdc]
 
@@ -163,6 +166,12 @@ endp
 
 
 proc Draw.Window1
+        locals
+                x1 dd 0 
+                x2 dd 0
+                y1 dd 0
+                y2 dd 0 
+        endl
         invoke  glClearColor, 0.05, 0.1, 0.2, 1.0
         invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
         invoke  glMatrixMode, GL_MODELVIEW
@@ -176,6 +185,9 @@ proc Draw.Window1
         fld     [camAngle]
         fsin 
         fmul    [camViewRadius]
+        fadd    [cardHeight]
+        fadd    [cardHeight]
+        fadd    [marginY]
         fstp    [cameraPos.y]
 
         fld     [distX]
@@ -188,7 +200,7 @@ proc Draw.Window1
         fstp    [targetPos.x]
 
         fld     [distY]
-        fmul    [threedd]
+        fmul    [twodd]
         fld     [distY]
         fsub    [cardHeight]
         fdiv    [twodd]
@@ -199,90 +211,152 @@ proc Draw.Window1
         stdcall Matrix.LookAt, cameraPos, targetPos, upVector
         invoke glPushMatrix
 
+        mov ebx, card1X1
+        mov esi, 0
+        .DrawRows: 
+        invoke glPushMatrix
+        fld     [y2]
+        fadd    [cardHeight]
+        fstp     [y2]
+                mov edi, 0
+                .DrawCols:
+
+                        fld     [x1]
+                        fst     dword[ebx]
+                        fadd    [cardWidth]
+                        fadd    [marginX]
+                        fstp    [x1]
+
+                        fld     [y1]
+                        fstp    dword[ebx+4]
+
+                        fld     [x2]
+                        fadd    [cardWidth]
+                        fst     dword[ebx+8]
+                        fadd    [marginX]
+                        fstp    [x2]
+
+                        fld     [y2]
+                        fstp    dword[ebx+12]
+
+                        stdcall PutObject, cardVertices, cardColors, [CardVertCount]
+                        invoke glTranslatef, [cardWidth], 0.0, 0.0
+                        invoke glTranslatef, [marginX], 0.0, 0.0
+                       
+                add ebx, 16
+                inc edi
+                cmp edi, 8
+                jne .DrawCols
+
+        fld     [y2]
+        fadd    [marginY]
+        fstp    [y2]
+        fld     [y1]
+        fadd    [cardHeight]
+        fadd    [marginY]
+        fstp    [y1]
+        
+        mov [x1], 0
+        mov [x2], 0
+
+
+        invoke glPopMatrix
+        invoke glTranslatef, 0.0, [cardHeight], 0.0 
+        invoke glTranslatef, 0.0, [marginY], 0.0 
+
  
 
-
-        mov edi, 4
-        .DrawRows: 
-        push edi
-        invoke glPushMatrix
-                mov edi, 8
-                .DrawCols:
-                        stdcall PutObject, cardVertices, cardColors, [CardVertCount]
-                        invoke glTranslatef, [distX], 0.0, 0.0
-                       
-                dec edi
-                cmp edi, 0
-                jne .DrawCols
-        invoke glPopMatrix
-        invoke glTranslatef, 0.0, [distY], 0.0 
-        
-        pop edi
-        dec edi 
-        cmp edi, 0
+        inc esi 
+        cmp esi, 4
         jne .DrawRows 
         invoke glPopMatrix
+
+        mov ebx, 0
+        @@:
+                cmp [card1BrdrHandler+ebx], 1
+                jne .skip 
+                
+                mov eax, ebx 
+                mul [four]
+                mov esi, eax
+
+                stdcall Draw.Rect, [card1BrdrHandler+ebx], 0, 0, 0, 0, [card1X1+esi], [card1X1+esi+4], [card1X1+esi+8], [card1X1+esi+12] 
+
+        .skip:
+        add ebx, 4
+        cmp ebx, 128
+        jne @b
+
+
+
+
  
-        mov  [cardX1],  0.0
-        mov  [cardY1],  0.0
-        mov  [cardX2],  30.0
-        mov  [cardY2],  42.0
+        ; mov  [cardX1],  0.0
+        ; mov  [cardY1],  0.0
+        ; mov  [cardX2],  30.0
+        ; mov  [cardY2],  42.0
 
 
-        mov edi, 4
-        .CheckRows:
-        push edi
-                mov edi, 8
-                .CheckCols:
-                        stdcall On.Hover, 1, cardX1, cardBrdrHandler
+        ; mov esi, 0
+        ; .CheckRows:
+        ;         mov edi, 0
+        ;         .CheckCols:
+        ;                 stdcall On.Hover, 1, cardX1, cardBrdrHandler
 
-                        cmp [cardBrdrHandler], 1
+        ;                 cmp [cardBrdrHandler], 1
 
-                        jne @f
-                        stdcall Draw.Rect, 0, 1.0, 1.0, 1.0, [cardX1], [cardY1], [cardX2], [cardY2]
+        ;                 jne @f
+        ;                 nop
+        ;                         ; stdcall Draw.Rect, 0, 1.0, 1.0, 1.0, [cardX1], [cardY1], [cardX2], [cardY2]
+        ;                         xor eax, eax
+        ;                         or eax, esi 
+        ;                         mul [eight]
+        ;                         add eax, edi 
+        ;                         mov [objectNumSelected], eax
+        ;                         jmp .skip
+        ;                 @@:
+        ;                 mov [objectNumSelected], -1
+        ;                 .skip: 
+        ;                 fld     [cardX1]
+        ;                 fadd    [distX]
+        ;                 fstp    [cardX1]
 
-                        @@:
-                        fld [cardX1]
-                        fadd [distX]
-                        fstp [cardX1]
-
-                        fld [cardX2]
-                        fadd [distX]
-                        fstp [cardX2]
+        ;                 fld     [cardX2]
+        ;                 fadd    [distX]
+        ;                 fstp    [cardX2]
 
                         
-                        dec edi 
-                        cmp edi, 0
-                        jne .CheckCols
+        ;                 inc edi 
+        ;                 cmp edi, 8
+        ;                 jne .CheckCols
 
                         
-                        fld [cardY1]
-                        fadd [distY]
-                        fstp [cardY1]
+        ;         fld     [cardY1]
+        ;         fadd    [distY]
+        ;         fstp    [cardY1]
 
-                        fld [cardY2]
-                        fadd [distY]
-                        fstp [cardY2]
+        ;         fld     [cardY2]
+        ;         fadd    [distY]
+        ;         fstp    [cardY2]
 
-                        fld [cardX1]
-                        fld [distX]
-                        fmul    [eightdd]
-                        fchs
-                        faddp
-                        fstp [cardX1]
+        ;         fld     [cardX1]
+        ;         fld     [distX]
+        ;         fmul    [eightdd]
+        ;         fchs
+        ;         faddp
+        ;         fstp    [cardX1]
 
-                        fld [cardX2]
-                        fld [distX]
-                        fmul    [eightdd]
-                        fchs
-                        faddp
-                        fstp [cardX2]
+        ;         fld     [cardX2]
+        ;         fld     [distX]
+        ;         fmul    [eightdd]
+        ;         fchs
+        ;         faddp
+        ;         fstp    [cardX2]
 
                 
-        pop edi 
-        dec edi
-        cmp edi, 0
-        jne .CheckRows 
+        ; inc esi
+        ; cmp esi, 4
+        ; jne .CheckRows 
         
 
         invoke  SwapBuffers, [hdc]
