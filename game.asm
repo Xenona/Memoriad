@@ -3,8 +3,22 @@
 ; 4. Reduce all local fpu temp variables using only one in mem
 ; 5. Recompile glut32.dll with corrected chars display
 ; 6. Optimize memory usage: push vertices of all objs I use once, pass to opengl stackaddr, then ret N or add esp N
+; 7. On.Hover counts objects from 1, card screen awaits for 0 
+; 9. Loop DrawRect in Draw.Window0
 format  PE GUI 5.0
 entry   WinMain
+
+        macro switch value
+        {
+                xor eax, eax
+                mov eax, value
+        }
+
+        macro case value, label 
+        {
+                cmp eax, value 
+                je  label
+        }
 
         include         ".\INCLUDE\win32ax.inc"         ; himxrmnski 
 
@@ -27,17 +41,7 @@ entry   WinMain
         include         ".\DATA\CommonVariables.inc"
         include         ".\DATA\FpuConstants.inc"
 
-        macro switch value
-        {
-                xor eax, eax
-                mov eax, value
-        }
 
-        macro case value, label 
-        {
-                cmp eax, value 
-                je  label
-        }
 
 data import
 
@@ -142,7 +146,8 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         ; 2 - Cards Button
                         ; 3 - Settings Button
                         ; 4 - Exit Button
-
+                        
+                        inc [objectNumSelected]
                         cmp [objectNumSelected], 4
                         je .onDestroy
 
@@ -206,18 +211,52 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 .incCamAngle:
 
-                        fld     [camAngle]
-                        fadd    [camAngleStep]
-                        fldpi
-                        fmul    [twodd]
-                        fcomp   
-                        fstsw   ax 
-                        shr     ax,  9 
-                        jnc     @f
-                        fldpi 
-                        fmul    [twodd]
+                        mov [IsCamNeg], 0
+
+                        fld     [camAngle]              ; a
+                        fadd    [camAngleStep]          ; a+step
+                        fldpi   
+                        fmul    [twodd]                 ; 2pi
+                        fcomp                           ; a+step < 2pi ? 
+                        fstsw   ax                      ; saving status word
+                        shr     ax,  9                  ; ectracting res of cmp 
+                        jnc     @f                      ; nc => (a+step < 2pi) == true
+                        fldpi                           
+                        fmul    [twodd]                 
                         fsubp 
+                        ; jmp     .exitIncAngle
                         @@:
+                        ; fldpi 
+                        ; fmul    [threedd]
+                        ; fdiv    [twodd]
+                        ; fcomp                           ; a+step < pi 
+                        ; fstsw   ax 
+                        ; shr     ax, 9
+                        ; jc      @f
+                        ; or      [IsCamNeg], 0x00000000 
+                        ; jmp     .step1
+                        ; @@:
+                        ; or      [IsCamNeg], 0xFFFF0000
+                        ; .step1:
+                        ; fldpi 
+                        ; fdiv    [twodd]
+                        ; fcomp 
+                        ; fstsw   ax
+                        ; shr     ax, 9 
+                        ; jc      @f
+                        ; or      [IsCamNeg], 0x0000FFFF 
+                        ; jmp     .step2 
+                        ; @@:
+                        ; or      [IsCamNeg], 0x00000000
+                        ; .step2:
+                        ; fnop
+                        ; cmp     [IsCamNeg], 0xFFFFFFFF
+                        ; je     @f
+                        ; mov     dword[upVector.y], -1.0
+                        ; jmp     .exitIncAngle
+                        ; @@:
+                        ; mov     dword[upVector.y], 1.0
+                        ; .exitIncAngle:
                         fstp    [camAngle]
                 jmp .ReturnZero
 
@@ -238,22 +277,23 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jmp .ReturnZero
 
                 .onLClick1:
-                fnop
+
+ 
                         cmp [objectNumSelected], -1
                         je .ReturnZero
 
                         mov esi, [objectNumSelected]
                         add esi, cardMatrix
-                        mov eax, [esi]
+                        movzx eax, byte[esi]
 
                         cmp eax, 0
                         jne .ReturnZero
 
-                        cmp [numOfOpened], 2
+                        cmp [numOfCurrOpened], 2
                         jae .ReturnZero
 
-                        mov dword[esi], 2
-                        inc [numOfOpened]
+                        mov byte[esi], 2
+                        inc [numOfCurrOpened]
 
 
                 jmp .ReturnZero
@@ -354,8 +394,7 @@ proc WorldToScreen uses ecx, worldX, worldY, worldZ             ; ! CHANGES EAX 
                                                                                 ; (1)
         invoke gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR 
 
-        stdcall Matrix.LookAt, cameraPos, targetPos, upVector
-                                                                                   ; (2) and Pm*Vm simultaneously
+        stdcall Matrix.LookAt, cameraPos, targetPos, upVector                   ; (2) and Pm*Vm simultaneously
      
         stdcall Matrix.setDefault, matrixWtS                                    ; preparing Vm
         mov edi, [worldX]
@@ -451,13 +490,13 @@ proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
                 push dword[numOfObjs]                                           ; saving selected object id (list of IDs in winProc)
                 pop dword[objectNumSelected]                                    ; so when user clicks smth no need to check coords   
                 sub [objectNumSelected], ecx                                    ; again
-                inc [objectNumSelected]                                         ; indices of objects start from 1
+                ; inc [objectNumSelected]                                         ; indices of objects start from 1
 
                 jmp .exit
 
                 .noBorder:                                                       ; otherwise continue to the next obj
 
-                mov [objectNumSelected], 0
+                mov [objectNumSelected], -1
 
                 add esi, 4                                                      ; skip one brdrHandler
                 add ebx, 16                                                     ; skip two corners (xy1, xy2)

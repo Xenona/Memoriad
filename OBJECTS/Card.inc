@@ -1,29 +1,29 @@
     CardVertCount     dd       108
 
-    card0      equ     2.0, 0.0, 0.0
-    card1      equ     2.0, 0.0, 2.0
-    card2      equ     0.0, 2.0, 2.0
-    card3      equ     0.0, 2.0, 0.0
-    card4      equ     30.0, 2.0, 0.0
-    card5      equ     30.0, 2.0, 2.0
-    card6      equ     28.0, 0.0, 2.0
-    card7      equ     28.0, 0.0, 0.0
-    card8      equ     28.0, 42.0, 0.0
-    card9      equ     28.0, 42.0, 2.0
-    card10     equ     30.0, 40.0, 2.0
-    card11     equ     30.0, 40.0, 0.0
-    card12     equ     0.0, 40.0, 0.0
-    card13     equ     0.0, 40.0, 2.0
-    card14     equ     2.0, 42.0, 2.0
-    card15     equ     2.0, 42.0, 0.0
-    card16     equ     2.0, 2.0, 2.0
-    card17     equ     28.0, 2.0, 2.0
-    card18     equ     28.0, 40.0, 2.0
-    card19     equ     2.0, 40.0, 2.0
-    card20     equ     2.0, 2.0, 0.0
-    card21     equ     28.0, 2.0, 0.0
-    card22     equ     28.0, 40.0, 0.0
-    card23     equ     2.0, 40.0, 0.0
+    card0      equ     -13.0, 0.0, 0.0
+    card1      equ     -13.0, 0.0, 2.0
+    card2      equ     -15.0, 2.0, 2.0
+    card3      equ     -15.0, 2.0, 0.0
+    card4      equ     15.0, 2.0, 0.0
+    card5      equ     15.0, 2.0, 2.0
+    card6      equ     13.0, 0.0, 2.0
+    card7      equ     13.0, 0.0, 0.0
+    card8      equ     13.0, 42.0, 0.0
+    card9      equ     13.0, 42.0, 2.0
+    card10     equ     15.0, 40.0, 2.0
+    card11     equ     15.0, 40.0, 0.0
+    card12     equ     -15.0, 40.0, 0.0
+    card13     equ     -15.0, 40.0, 2.0
+    card14     equ     -13.0, 42.0, 2.0
+    card15     equ     -13.0, 42.0, 0.0
+    card16     equ     -13.0, 2.0, 2.0
+    card17     equ     13.0, 2.0, 2.0
+    card18     equ     13.0, 40.0, 2.0
+    card19     equ     -13.0, 40.0, 2.0
+    card20     equ     -13.0, 2.0, 0.0
+    card21     equ     13.0, 2.0, 0.0
+    card22     equ     13.0, 40.0, 0.0
+    card23     equ     -13.0, 40.0, 0.0
 
     cardVertices    dd      card0, card1, card2,\ ; chamfers
                             card0, card2, card3,\
@@ -50,8 +50,8 @@
                             card8, card15, card22,\ 
                             card15, card22, card23,\
                             card2, card5, card13,\ ; big north up & down
-                            card3, card4, card12,\ 
                             card5, card10, card13,\
+                            card3, card4, card12,\ 
                             card4, card11, card12,\ 
                             card0, card1, card7,\ ; side north 
                             card1, card6, card7,\
@@ -68,8 +68,12 @@
     cardColors      dd      18       dup     (1.0, 0.0, 0.0),\
                             18       dup     (1.0, 1.0, 0.0),\
                             18       dup     (0.0, 1.0, 0.0),\
-                            18       dup     (1.0, 0.0, 1.0),\
-                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (1.0, 1.0, 1.0),\
+                            6        dup     (0.0, 0.4, 1.0),\
+                            3        dup     (0.0, 0.1, 0.1),\
+                            3        dup     (0.0, 0.1, 0.1),\
+                            3        dup     (0.0, 0.4, 1.0),\
+                            9        dup    (0.0, 0.0, 1.0),\
                             18       dup     (0.0, 1.0, 1.0)
     
 
@@ -79,22 +83,28 @@
     cardX2          dd      30.0
     cardY2          dd      42.0
 
-    distX           dd      50.0
-    distY           dd      47.0
-    
+     
     cardWidth       dd      30.0
     cardHeight      dd      42.0
     
     marginX         dd      20.0
-    marginY         dd      5.0
+    marginY         dd      20.0
 cardBrdrHandler         dd      0
 
-cardMatrix          dd      0, 0, 0, 0, 0, 0, 0, 0,\
+cardMatrix          db      0, 1, 0, 1, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0
 
-numOfOpened         dd      0 
+
+cardRotAngStep      dd      0.5
+cardRotCurrAng      dd      0.0
+cardRotStopAng      dd      180.1
+cardsSelected       dd      -1, -1
+cardMinusRotCurrAng  dd     180.1
+cardMinusRotStopAng  dd     360.1
+
+numOfCurrOpened       dd      0 
 
         card1X1       dd      ?
         card1Y1       dd      ?

@@ -140,6 +140,10 @@ proc Draw.Window0
         mov     dword[targetPos + vector3.x], 0.0
         mov     dword[targetPos + vector3.y], 0.0
         mov     dword[targetPos + vector3.z], -100.0
+
+        mov     dword[upVector.x], 0.0
+        mov     dword[upVector.y], 1.0
+        mov     dword[upVector.z], 0.0
         stdcall Matrix.LookAt, cameraPos, targetPos, upVector
  
         stdcall PutObject, skyVertices, skyColors, dword[skyPlaneVertCount]
@@ -177,7 +181,7 @@ proc Draw.Window1
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
   
-        fld     [camAngle]
+        fld     [camAngle]                                              ; calculating init pos and target of a camera
         fcos    
         fmul    [camViewRadius]
         fstp    [cameraPos.z]
@@ -190,41 +194,56 @@ proc Draw.Window1
         fadd    [marginY]
         fstp    [cameraPos.y]
 
-        fld     [distX]
-        fmul    [fourdd]
-        fld     [distX]
-        fsub    [cardWidth]
+        fld     [cardWidth]
+        fadd    [marginX]
+        fmul    [fivedd]
+        fld     [marginX]
         fdiv    [twodd]
         fsubp 
+        fld     [cardWidth]
+        fdiv    [twodd]
+        fsubp
         fst     [cameraPos.x]
         fstp    [targetPos.x]
 
-        fld     [distY]
+        fld     [cardHeight]
+        fadd    [marginY]
         fmul    [twodd]
-        fld     [distY]
-        fsub    [cardHeight]
+        fld     [marginY]
         fdiv    [twodd]
         fsubp
-        fstp     [targetPos.y]
+        fstp    [targetPos.y]
 
         mov     [targetPos.z], 0.0
-        stdcall Matrix.LookAt, cameraPos, targetPos, upVector
-        invoke glPushMatrix
+
+        stdcall Matrix.LookAt, cameraPos, targetPos, upVector           ; applying calculated values
+        invoke glPushMatrix                                             
 
         mov ebx, card1X1
+        mov edi, cardMatrix
         mov esi, 0
         .DrawRows: 
         invoke glPushMatrix
         fld     [y2]
         fadd    [cardHeight]
-        fstp     [y2]
-                mov edi, 0
+        fstp    [y2]
+        push esi
+        
+        fld     [cardWidth]
+        fadd    [fivedd]
+        fst     [x1]
+        fstp    [x2]
+
+                mov esi, 0
                 .DrawCols:
+
+
 
                         fld     [x1]
                         fst     dword[ebx]
                         fadd    [cardWidth]
                         fadd    [marginX]
+                        
                         fstp    [x1]
 
                         fld     [y1]
@@ -239,13 +258,95 @@ proc Draw.Window1
                         fld     [y2]
                         fstp    dword[ebx+12]
 
-                        stdcall PutObject, cardVertices, cardColors, [CardVertCount]
                         invoke glTranslatef, [cardWidth], 0.0, 0.0
                         invoke glTranslatef, [marginX], 0.0, 0.0
-                       
+                        invoke glPushMatrix
+
+                        xor     eax, eax
+                        movzx   eax, byte[edi]
+                        case    0,      .CardState0
+                        case    1,      .CardState1
+                        case    2,      .CardState2
+                        case    3,      .CardState3
+                        case    4,      .CardState4
+
+                        .CardState0:
+
+                        jmp .EndInnerLoop
+
+                        .CardState1:
+                                invoke glRotatef, 180.01, 0.0, 42.0, 0.0
+
+
+
+                        jmp .EndInnerLoop
+                        .CardState2:
+                                fld     [cardRotCurrAng]                ; alpha
+                                fadd    [cardRotAngStep]                ; a+step
+                                fst     [cardRotCurrAng]                ; a+step => a
+                                fld     [cardRotStopAng]                ; stopAngle 
+                                fcompp                                  ; a+step < stopAngle? 
+                                fstsw   ax                              
+                                shr     ax, 9                           ; if c=1 it's true, otherwise it's false
+                                jc      @f 
+
+                                        invoke glRotatef, [cardRotCurrAng], 0.0, 42.0, 0.0
+
+                                jmp .exitAngleCheck
+                                @@:
+                                        mov     [cardRotCurrAng], 0
+                                        mov     byte[edi], 3
+                                
+                                .exitAngleCheck: 
+
+
+
+
+
+                        jmp .EndInnerLoop
+
+                        .CardState3:
+                                invoke glRotatef, 180.0, 0.0, 42.0, 0.0
+                        jmp .EndInnerLoop
+
+                        .CardState4:
+                                fld     [cardMinusRotCurrAng]                ; alpha
+                                fadd    [cardRotAngStep]                ; a+step
+                                fst     [cardMinusRotCurrAng]                ; a+step => a
+                                fld     [cardMinusRotStopAng]                ; stopAngle 
+                                fcompp                                  ; a+step < stopAngle? 
+                                fstsw   ax                              
+                                shr     ax, 9                           ; if c=1 it's true, otherwise it's false
+                                jc      @f 
+
+                                        invoke glRotatef, [cardMinusRotCurrAng], 0.0, 42.0, 0.0
+
+                                jmp .exitAngleCheck4
+                                @@:
+                                        mov     [cardMinusRotCurrAng], 180.1 
+                                        mov     byte[edi], 0
+                                        dec     [numOfCurrOpened]
+                                
+                                .exitAngleCheck4: 
+
+
+
+
+
+
+                        jmp .EndInnerLoop
+
+                    
+                        .EndInnerLoop:
+
+                        stdcall PutObject, cardVertices, cardColors, [CardVertCount]
+                        invoke glPopMatrix
+
+
                 add ebx, 16
-                inc edi
-                cmp edi, 8
+                add edi, 1
+                inc esi
+                cmp esi, 8
                 jne .DrawCols
 
         fld     [y2]
@@ -256,8 +357,6 @@ proc Draw.Window1
         fadd    [marginY]
         fstp    [y1]
         
-        mov [x1], 0
-        mov [x2], 0
 
 
         invoke glPopMatrix
@@ -265,6 +364,7 @@ proc Draw.Window1
         invoke glTranslatef, 0.0, [marginY], 0.0 
 
  
+        pop esi
 
         inc esi 
         cmp esi, 4
@@ -282,83 +382,14 @@ proc Draw.Window1
 
                 stdcall Draw.Rect, [card1BrdrHandler+ebx], 0, 0, 0, 0, [card1X1+esi], [card1X1+esi+4], [card1X1+esi+8], [card1X1+esi+12] 
 
+                jmp .exitDrawingBoard 
         .skip:
         add ebx, 4
         cmp ebx, 128
         jne @b
 
-
-
-
  
-        ; mov  [cardX1],  0.0
-        ; mov  [cardY1],  0.0
-        ; mov  [cardX2],  30.0
-        ; mov  [cardY2],  42.0
-
-
-        ; mov esi, 0
-        ; .CheckRows:
-        ;         mov edi, 0
-        ;         .CheckCols:
-        ;                 stdcall On.Hover, 1, cardX1, cardBrdrHandler
-
-        ;                 cmp [cardBrdrHandler], 1
-
-        ;                 jne @f
-        ;                 nop
-        ;                         ; stdcall Draw.Rect, 0, 1.0, 1.0, 1.0, [cardX1], [cardY1], [cardX2], [cardY2]
-        ;                         xor eax, eax
-        ;                         or eax, esi 
-        ;                         mul [eight]
-        ;                         add eax, edi 
-        ;                         mov [objectNumSelected], eax
-        ;                         jmp .skip
-        ;                 @@:
-        ;                 mov [objectNumSelected], -1
-        ;                 .skip: 
-        ;                 fld     [cardX1]
-        ;                 fadd    [distX]
-        ;                 fstp    [cardX1]
-
-        ;                 fld     [cardX2]
-        ;                 fadd    [distX]
-        ;                 fstp    [cardX2]
-
-                        
-        ;                 inc edi 
-        ;                 cmp edi, 8
-        ;                 jne .CheckCols
-
-                        
-        ;         fld     [cardY1]
-        ;         fadd    [distY]
-        ;         fstp    [cardY1]
-
-        ;         fld     [cardY2]
-        ;         fadd    [distY]
-        ;         fstp    [cardY2]
-
-        ;         fld     [cardX1]
-        ;         fld     [distX]
-        ;         fmul    [eightdd]
-        ;         fchs
-        ;         faddp
-        ;         fstp    [cardX1]
-
-        ;         fld     [cardX2]
-        ;         fld     [distX]
-        ;         fmul    [eightdd]
-        ;         fchs
-        ;         faddp
-        ;         fstp    [cardX2]
-
-                
-        ; inc esi
-        ; cmp esi, 4
-        ; jne .CheckRows 
-        
-
+        .exitDrawingBoard:
         invoke  SwapBuffers, [hdc]
 
         ret

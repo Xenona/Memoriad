@@ -41,9 +41,10 @@ trMatr                  matrix                         ; matrix for all transfor
 cameraPos           	vector3         ?, ?, ? 
 targetPos  	            vector3         ?, ?, ? 
 upVector 	            vector3         0.0, 1.0, 0.0                      
-camAngle                dd              0.46
+camAngle                dd              0.01
 camAngleStep            dd              0.01745320
 camViewRadius           dd              250.0
+IsCamNeg                dd              0.0
 ;______________________________________________________________________________    
 
 
