@@ -224,39 +224,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         fldpi                           
                         fmul    [twodd]                 
                         fsubp 
-                        ; jmp     .exitIncAngle
                         @@:
-                        ; fldpi 
-                        ; fmul    [threedd]
-                        ; fdiv    [twodd]
-                        ; fcomp                           ; a+step < pi 
-                        ; fstsw   ax 
-                        ; shr     ax, 9
-                        ; jc      @f
-                        ; or      [IsCamNeg], 0x00000000 
-                        ; jmp     .step1
-                        ; @@:
-                        ; or      [IsCamNeg], 0xFFFF0000
-                        ; .step1:
-                        ; fldpi 
-                        ; fdiv    [twodd]
-                        ; fcomp 
-                        ; fstsw   ax
-                        ; shr     ax, 9 
-                        ; jc      @f
-                        ; or      [IsCamNeg], 0x0000FFFF 
-                        ; jmp     .step2 
-                        ; @@:
-                        ; or      [IsCamNeg], 0x00000000
-                        ; .step2:
-                        ; fnop
-                        ; cmp     [IsCamNeg], 0xFFFFFFFF
-                        ; je     @f
-                        ; mov     dword[upVector.y], -1.0
-                        ; jmp     .exitIncAngle
-                        ; @@:
-                        ; mov     dword[upVector.y], 1.0
-                        ; .exitIncAngle:
                         fstp    [camAngle]
                 jmp .ReturnZero
 
@@ -278,7 +246,9 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 .onLClick1:
 
- 
+                        cmp [canClick], 0
+                        je .ReturnZero
+                        
                         cmp [objectNumSelected], -1
                         je .ReturnZero
 
@@ -293,6 +263,14 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         jae .ReturnZero
 
                         mov byte[esi], 2
+
+                        mov eax, 4
+                        mul [numOfCurrOpened]
+                        add eax, cardsSelected
+                        mov esi, eax 
+                        mov eax, [objectNumSelected]
+                        mov dword[esi], eax 
+
                         inc [numOfCurrOpened]
 
 

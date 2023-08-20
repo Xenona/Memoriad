@@ -281,6 +281,9 @@ proc Draw.Window1
 
                         jmp .EndInnerLoop
                         .CardState2:
+
+                                mov [canClick], 0
+
                                 fld     [cardRotCurrAng]                ; alpha
                                 fadd    [cardRotAngStep]                ; a+step
                                 fst     [cardRotCurrAng]                ; a+step => a
@@ -296,6 +299,8 @@ proc Draw.Window1
                                 @@:
                                         mov     [cardRotCurrAng], 0
                                         mov     byte[edi], 3
+
+                                        mov [canClick], 1
                                 
                                 .exitAngleCheck: 
 
@@ -310,6 +315,9 @@ proc Draw.Window1
                         jmp .EndInnerLoop
 
                         .CardState4:
+                                
+                                mov     [canClick], 0
+
                                 fld     [cardMinusRotCurrAng]                ; alpha
                                 fadd    [cardRotAngStep]                ; a+step
                                 fst     [cardMinusRotCurrAng]                ; a+step => a
@@ -326,13 +334,9 @@ proc Draw.Window1
                                         mov     [cardMinusRotCurrAng], 180.1 
                                         mov     byte[edi], 0
                                         dec     [numOfCurrOpened]
+                                        mov     [canClick], 1
                                 
                                 .exitAngleCheck4: 
-
-
-
-
-
 
                         jmp .EndInnerLoop
 

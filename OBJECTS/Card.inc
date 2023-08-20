@@ -91,7 +91,7 @@
     marginY         dd      20.0
 cardBrdrHandler         dd      0
 
-cardMatrix          db      0, 1, 0, 1, 0, 0, 0, 0,\
+cardMatrix          db      0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0
