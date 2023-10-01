@@ -91,13 +91,18 @@
     marginY         dd      20.0
 cardBrdrHandler         dd      0
 
-cardMatrix          db      0, 0, 0, 0, 0, 0, 0, 0,\
+cardStateMatrix         db  0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0
 
+cardPicMatrix           db  0, 0, 1, 1, 2, 2, 3, 3,\
+                            4, 4, 5, 5, 6, 6, 7, 7,\
+                            8, 8, 9, 9, 10, 10, 11, 11,\
+                            12, 12, 13, 13, 14, 14, 15, 15
 
-cardRotAngStep      dd      0.5
+
+cardRotAngStep      dd      2.0
 cardRotCurrAng      dd      0.0
 cardRotStopAng      dd      180.1
 cardsSelected       dd      -1, -1
@@ -105,6 +110,9 @@ cardMinusRotCurrAng  dd     180.1
 cardMinusRotStopAng  dd     360.1
 
 numOfCurrOpened       dd      0 
+numOfTriedPairs       dd      0
+
+numOfGuessedPairs       dd      0           ; up to 16
 
         card1X1       dd      ?
         card1Y1       dd      ?

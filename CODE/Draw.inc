@@ -181,6 +181,14 @@ proc Draw.Window1
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
   
+        cmp     [numOfGuessedPairs], 16
+        je      .GameFinished
+
+
+
+
+
+
         fld     [camAngle]                                              ; calculating init pos and target of a camera
         fcos    
         fmul    [camViewRadius]
@@ -220,7 +228,7 @@ proc Draw.Window1
         invoke glPushMatrix                                             
 
         mov ebx, card1X1
-        mov edi, cardMatrix
+        mov edi, cardStateMatrix
         mov esi, 0
         .DrawRows: 
         invoke glPushMatrix
@@ -318,13 +326,13 @@ proc Draw.Window1
                                 
                                 mov     [canClick], 0
 
-                                fld     [cardMinusRotCurrAng]                ; alpha
-                                fadd    [cardRotAngStep]                ; a+step
-                                fst     [cardMinusRotCurrAng]                ; a+step => a
-                                fld     [cardMinusRotStopAng]                ; stopAngle 
-                                fcompp                                  ; a+step < stopAngle? 
+                                fld     [cardMinusRotCurrAng]                   ; alpha
+                                fadd    [cardRotAngStep]                        ; a+step
+                                fst     [cardMinusRotCurrAng]                   ; a+step => a
+                                fld     [cardMinusRotStopAng]                   ; stopAngle 
+                                fcompp                                          ; a+step < stopAngle? 
                                 fstsw   ax                              
-                                shr     ax, 9                           ; if c=1 it's true, otherwise it's false
+                                shr     ax, 9                                   ; if c=1 it's true, otherwise it's false
                                 jc      @f 
 
                                         invoke glRotatef, [cardMinusRotCurrAng], 0.0, 42.0, 0.0
@@ -395,6 +403,13 @@ proc Draw.Window1
  
         .exitDrawingBoard:
         invoke  SwapBuffers, [hdc]
+        jmp @f
+        .GameFinished:
+
+                mov [windowID], 4
+
+
+        @@:
 
         ret
 endp

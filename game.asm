@@ -5,6 +5,12 @@
 ; 6. Optimize memory usage: push vertices of all objs I use once, pass to opengl stackaddr, then ret N or add esp N
 ; 7. On.Hover counts objects from 1, card screen awaits for 0 
 ; 9. Loop DrawRect in Draw.Window0
+; 10. Create consts for 1-4 card states to get rid of all magic numbers
+; 11. Refactor and revise all funcs in terms to reduce their size 
+; 12. Get rid of array of card vertices when checking hover just by recalculating card position 
+; 13. Return cursor to its normal state
+; 14. Use heap to store all my 680b of cards data
+; 15. Implement horisontal rotation 
 format  PE GUI 5.0
 entry   WinMain
 
@@ -26,13 +32,13 @@ entry   WinMain
         include         ".\INCLUDE\api\user32.inc"
         include         ".\INCLUDE\api\gdi32.inc"       
         include         ".\INCLUDE\api\opengl.inc"
-        include         ".\INCLUDE\DLL\glut.inc"        ; kdafllnlss
+        include         ".\INCLUDE\DLL\glut.inc"        
 
         include         ".\OBJECTS\Card.inc"
         include         ".\OBJECTS\SeaPlane.inc"
         include         ".\OBJECTS\SkyPlane.inc"
         include         ".\OBJECTS\SunPlane.inc"
-        include         ".\OBJECTS\MainMenuButtons.inc"
+        include         ".\OBJECTS\MainMenuButtons.inc" 
 
         include         ".\CODE\Vector3.inc"
         include         ".\CODE\Matrix.inc"
@@ -113,7 +119,10 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
  
         switch  dword[windowID] 
         case    0,      .window0                        ; Main menu
-        case    1,      .window1
+        case    1,      .window1                        ; Game screen
+        ; case    2,                                    ; View all cards
+        ; case  3,                                      ; Settings 
+        case    4,      .window4                        ; Game over screen
 
 
         .window0: 
@@ -125,7 +134,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 case    WM_DESTROY,     .onDestroy
                 case    WM_KEYDOWN,     .onKeyDown0
                 case    WM_MOUSEMOVE,   .onMouseMove0
-                case    WM_LBUTTONDOWN, .onClick0
+                case    WM_LBUTTONDOWN, .onLClick0
 
                 invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
 
@@ -140,7 +149,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         case VK_ESCAPE, .onDestroy
                 jmp     .ReturnZero
 
-                .onClick0:
+                .onLClick0:
                         ; Object IDs on Window0:
                         ; 1 - Start Button 
                         ; 2 - Cards Button
@@ -246,21 +255,20 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 .onLClick1:
 
-                        cmp [canClick], 0
-                        je .ReturnZero
-                        
-                        cmp [objectNumSelected], -1
+                        ; cmp [canClick], 0
+                        ; je .ReturnZero
+
+                        cmp [objectNumSelected], -1                     ; returning zero if no card is selected
                         je .ReturnZero
 
-                        mov esi, [objectNumSelected]
-                        add esi, cardMatrix
+                        mov esi, [objectNumSelected]                    ; getting number
+                        add esi, cardStateMatrix                        ; adding to matrix addr to get addr of card state
                         movzx eax, byte[esi]
 
-                        cmp eax, 0
+                        cmp eax, 0                                      ; if card was touched already, this does not allow to touch it again
                         jne .ReturnZero
-
-                        cmp [numOfCurrOpened], 2
-                        jae .ReturnZero
+                        
+                       
 
                         mov byte[esi], 2
 
@@ -272,8 +280,80 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov dword[esi], eax 
 
                         inc [numOfCurrOpened]
+                        
+                        cmp [numOfCurrOpened], 2
+                        jae .TwoSelected
+
+                        jmp .ReturnZero
+
+                        .TwoSelected: 
+
+                        mov esi, [cardsSelected]
+                        mov edi, [cardsSelected+4]
+
+                        add esi, cardPicMatrix
+                        add edi, cardPicMatrix
+
+                        movzx esi, byte[esi]
+                        movzx edi, byte[edi]
+
+                        cmp esi, edi
+                        jne @f
+                        
+                        mov esi, [cardsSelected]
+                        mov edi, [cardsSelected+4]
+                        
+                        add esi, cardStateMatrix
+                        add edi, cardStateMatrix
+
+                        mov byte[esi], 1
+                        mov byte[edi], 1
+                        mov [numOfCurrOpened], 0
+                        mov dword[cardsSelected], -1
+                        mov dword[cardsSelected+4], -1
+
+                        jmp .exit44 
+
+                        @@:
+                        mov esi, [cardsSelected]
+                        mov edi, [cardsSelected+4]
+                        
+                        add esi, cardStateMatrix
+                        add edi, cardStateMatrix
+
+                        mov byte[esi], 4
+                        mov byte[edi], 4
+
+                        mov [numOfCurrOpened], 0
+                        mov dword[cardsSelected], -1
+                        mov dword[cardsSelected+4], -1
+                        .exit44:
 
 
+                        inc [numOfTriedPairs]
+
+                jmp .ReturnZero
+
+        .window4:
+                xor     ebx, ebx
+
+                switch  [uMsg]
+                case    WM_PAINT,       .onPaint4
+                case    WM_DESTROY,     .onDestroy
+                case    WM_KEYDOWN,     .onKeyDown4
+                case    WM_MOUSEMOVE,   .onMouseMove4
+                case    WM_LBUTTONDOWN, .onLClick4
+
+                .onPaint4:
+                jmp .ReturnZero
+
+                .onKeyDown4:
+                jmp .ReturnZero
+
+                .onMouseMove4:
+                jmp .ReturnZero
+
+                .onLClick4:
                 jmp .ReturnZero
         
         .onDestroy:
