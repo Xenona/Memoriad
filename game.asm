@@ -11,6 +11,7 @@
 ; 13. Return cursor to its normal state
 ; 14. Use heap to store all my 680b of cards data
 ; 15. Implement horisontal rotation 
+; 16. Move target calcs outside of the main loop. Probably I need some init()
 format  PE GUI 5.0
 entry   WinMain
 
@@ -220,8 +221,6 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 .incCamAngle:
 
-                        mov [IsCamNeg], 0
-
                         fld     [camAngle]              ; a
                         fadd    [camAngleStep]          ; a+step
                         fldpi   
@@ -235,6 +234,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         fsubp 
                         @@:
                         fstp    [camAngle]
+
                 jmp .ReturnZero
 
                 .decCamAngle:
@@ -281,8 +281,9 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         inc [numOfCurrOpened]
                         
+
                         cmp [numOfCurrOpened], 2
-                        jae .TwoSelected
+                        jge .TwoSelected
 
                         jmp .ReturnZero
 
@@ -308,10 +309,8 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         mov byte[esi], 1
                         mov byte[edi], 1
-                        mov [numOfCurrOpened], 0
-                        mov dword[cardsSelected], -1
-                        mov dword[cardsSelected+4], -1
 
+                        inc [numOfGuessedPairs]
                         jmp .exit44 
 
                         @@:
@@ -324,12 +323,11 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov byte[esi], 4
                         mov byte[edi], 4
 
+                        .exit44:
+
                         mov [numOfCurrOpened], 0
                         mov dword[cardsSelected], -1
                         mov dword[cardsSelected+4], -1
-                        .exit44:
-
-
                         inc [numOfTriedPairs]
 
                 jmp .ReturnZero

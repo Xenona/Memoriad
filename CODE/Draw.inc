@@ -183,24 +183,19 @@ proc Draw.Window1
   
         cmp     [numOfGuessedPairs], 16
         je      .GameFinished
-
-
-
-
-
-
-        fld     [camAngle]                                              ; calculating init pos and target of a camera
+                                                        ; calculating init pos and target of a camera
+        fld     [camAngle]                                              
         fcos    
         fmul    [camViewRadius]
-        fstp    [cameraPos.z]
+        fstp    [cameraPos.z]                           ; cos(camAngle)*R -> cameraPos.z
 
-        fld     [camAngle]
+        fld     [camAngle]                              
         fsin 
         fmul    [camViewRadius]
         fadd    [cardHeight]
         fadd    [cardHeight]
         fadd    [marginY]
-        fstp    [cameraPos.y]
+        fstp    [cameraPos.y]                           ; sin(camAngle)*R + 2*cardHeight + marginY -> cameraPos.y
 
         fld     [cardWidth]
         fadd    [marginX]
@@ -211,8 +206,8 @@ proc Draw.Window1
         fld     [cardWidth]
         fdiv    [twodd]
         fsubp
-        fst     [cameraPos.x]
-        fstp    [targetPos.x]
+        fst     [cameraPos.x]                           ; (cardWidth+marginX)*5 - (marginX-cardWidth)/2 -> cameraPos.x
+        fstp    [targetPos.x]                           ;                                               -> targetPos.x
 
         fld     [cardHeight]
         fadd    [marginY]
@@ -220,9 +215,31 @@ proc Draw.Window1
         fld     [marginY]
         fdiv    [twodd]
         fsubp
-        fstp    [targetPos.y]
+        fstp    [targetPos.y]                           ; (cardHeight+marginY)*2 - marginY/2 -> targetPos.y
 
         mov     [targetPos.z], 0.0
+
+        fnop
+
+        fld     [cameraPos.x]
+        fsub    [targetPos.x]
+        fdiv    [camViewRadius]
+        fstp    [upVector.x]
+
+        fld     [cameraPos.y]
+        fsub    [targetPos.y]
+        fdiv    [camViewRadius]
+        fstp    [upVector.y]
+
+        fld     [cameraPos.z]
+        fsub    [targetPos.z]
+        fdiv    [camViewRadius]
+        fstp    [upVector.z]
+
+        ; DEBUG
+        ; fld     [camAngle]
+        ; fadd    [camAngleStep]
+        ; fstp    [camAngle]
 
         stdcall Matrix.LookAt, cameraPos, targetPos, upVector           ; applying calculated values
         invoke glPushMatrix                                             
@@ -341,7 +358,7 @@ proc Draw.Window1
                                 @@:
                                         mov     [cardMinusRotCurrAng], 180.1 
                                         mov     byte[edi], 0
-                                        dec     [numOfCurrOpened]
+                                        ;alert xena
                                         mov     [canClick], 1
                                 
                                 .exitAngleCheck4: 
