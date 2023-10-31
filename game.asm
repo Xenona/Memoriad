@@ -27,9 +27,9 @@ entry   WinMain
                 je  label
         }
 
-        include         ".\INCLUDE\win32ax.inc"         ; himxrmnski 
+        include         ".\INCLUDE\win32ax.inc"         
 
-        include         ".\INCLUDE\api\kernel32.inc"    ;)
+        include         ".\INCLUDE\api\kernel32.inc"   
         include         ".\INCLUDE\api\user32.inc"
         include         ".\INCLUDE\api\gdi32.inc"       
         include         ".\INCLUDE\api\opengl.inc"
@@ -103,6 +103,7 @@ proc WinMain
         invoke  gluPerspective, double FOV, double [aspect], double Z_NEAR, double Z_FAR
 
         invoke  glEnable, GL_DEPTH_TEST
+        invoke  glEnable, GL_TEXTURE_2D        
         invoke  glShadeModel, GL_SMOOTH
         invoke  glHint, GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST
 
