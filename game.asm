@@ -48,6 +48,14 @@ entry   WinMain
         include         ".\DATA\CommonVariables.inc"
         include         ".\DATA\FpuConstants.inc"
 
+        include         ".\INCLUDE\glext.inc"
+        include         ".\INCLUDE\memory.inc"
+        include         ".\INCLUDE\texture.inc"
+        include         ".\INCLUDE\texture.asm"
+        include         ".\INCLUDE\internal\files\file.asm"
+        include         ".\INCLUDE\internal\memory\glext.asm"
+        include         ".\INCLUDE\internal\memory\mem_funcs.asm"
+        include         ".\INCLUDE\internal\string\string_funcs.asm"
 
 
 data import
@@ -70,6 +78,9 @@ proc WinMain
         endl
 
         xor     ebx, ebx
+
+        stdcall memInit
+
 
         invoke  RegisterClass, wndClass
         invoke  CreateWindowEx, ebx, className, className, WINDOW_STYLE,\
@@ -106,6 +117,13 @@ proc WinMain
         invoke  glEnable, GL_TEXTURE_2D        
         invoke  glShadeModel, GL_SMOOTH
         invoke  glHint, GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST
+
+       	invoke wglGetCurrentContext
+        stdcall Glext.LoadFunctions
+        lea     edi, [arrTextures]
+        stdcall Texture.Constructor, edi, testPic,\
+                            GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
+
 
         lea     esi, [msg]
 
@@ -365,12 +383,37 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
         ret
 endp
 
-proc PutObject, verts:DWORD, colors:DWORD, vCount:DWORD
+proc PutObject, verts:DWORD, colors:DWORD, vCount:DWORD, isTexture:DWORD, texCoords:DWORD
         ; verts - array of all verts grouped as triangles 
         ; colors - array of colors each for each vertex
         ; vCount - length of verts array
+        nop;
 
+        cmp [isTexture], 0
+        jz .isColor
+        
 
+        .isTexture:
+
+        invoke  glEnableClientState, GL_VERTEX_ARRAY
+        invoke glEnableClientState, GL_TEXTURE_COORD_ARRAY_EXT
+
+        stdcall Texture.Bind, GL_TEXTURE_2D, dword [arrTextures], GL_TEXTURE0
+
+        invoke  glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+        invoke  glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+        invoke  glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
+        invoke  glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+        invoke  glVertexPointer, 3, GL_FLOAT, 0, [verts]
+        invoke  glTexCoordPointer, 2, GL_FLOAT, 0, [texCoords]
+        invoke  glDrawArrays, GL_TRIANGLES, 0,  [vCount]
+
+        invoke glDisableClientState, GL_TEXTURE_COORD_ARRAY_EXT
+        invoke  glDisableClientState, GL_VERTEX_ARRAY
+        
+        jmp @f
+
+        .isColor:
         invoke  glEnableClientState, GL_VERTEX_ARRAY
         invoke  glEnableClientState, GL_COLOR_ARRAY
 
@@ -383,6 +426,7 @@ proc PutObject, verts:DWORD, colors:DWORD, vCount:DWORD
         invoke  glDisableClientState, GL_COLOR_ARRAY
 
 
+        @@:
         ret
 endp;
 

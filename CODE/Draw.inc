@@ -146,9 +146,9 @@ proc Draw.Window0
         mov     dword[upVector.z], 0.0
         stdcall Matrix.LookAt, cameraPos, targetPos, upVector
  
-        stdcall PutObject, skyVertices, skyColors, dword[skyPlaneVertCount]
-        stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount]
-        stdcall PutObject, sunVertices, sunColors, dword[sunPlaneVertCount]
+        stdcall PutObject, skyVertices, skyColors, dword[skyPlaneVertCount], 0, 0
+        stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount], 0, 0
+        stdcall PutObject, sunVertices, sunColors, dword[sunPlaneVertCount], 0, 0
  
         stdcall Draw.Text, 35.0, 29.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.StartButton, 0
         stdcall Draw.Text, 27.0, 7.5, 0.0, 1.0, 1.0, 1.0, 0.07, Window0.CardsButton, 0
@@ -219,22 +219,21 @@ proc Draw.Window1
 
         mov     [targetPos.z], 0.0
 
-        fnop
 
-        fld     [cameraPos.x]
-        fsub    [targetPos.x]
-        fdiv    [camViewRadius]
-        fstp    [upVector.x]
+        ; fld     [cameraPos.x]
+        ; fsub    [targetPos.x]
+        ; fdiv    [camViewRadius]
+        ; fstp    [upVector.x]
 
-        fld     [cameraPos.y]
-        fsub    [targetPos.y]
-        fdiv    [camViewRadius]
-        fstp    [upVector.y]
+        ; fld     [cameraPos.y]
+        ; fsub    [targetPos.y]
+        ; fdiv    [camViewRadius]
+        ; fstp    [upVector.y]
 
-        fld     [cameraPos.z]
-        fsub    [targetPos.z]
-        fdiv    [camViewRadius]
-        fstp    [upVector.z]
+        ; fld     [cameraPos.z]
+        ; fsub    [targetPos.z]
+        ; fdiv    [camViewRadius]
+        ; fstp    [upVector.z]
 
         ; DEBUG
         ; fld     [camAngle]
@@ -359,6 +358,7 @@ proc Draw.Window1
                                         mov     [cardMinusRotCurrAng], 180.1 
                                         mov     byte[edi], 0
                                         ;alert xena
+                                        
                                         mov     [canClick], 1
                                 
                                 .exitAngleCheck4: 
@@ -368,7 +368,7 @@ proc Draw.Window1
                     
                         .EndInnerLoop:
 
-                        stdcall PutObject, cardVertices, cardColors, [CardVertCount]
+                        stdcall PutObject, cardVertices, cardColors, [CardVertCount], 1, texture11
                         invoke glPopMatrix
 
 

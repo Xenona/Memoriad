@@ -1,4 +1,9 @@
 
+testPic db '.\ASSETS\test1.bmp', 0
+arrTextures dw 20 dup (?)
+
+
+
 
 ;__FOR MAIN WINDOW MAINTENANCE_________________________________________________    
 COLOR_DEPTH             =       24
