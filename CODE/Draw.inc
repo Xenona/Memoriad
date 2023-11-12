@@ -179,6 +179,7 @@ proc Draw.Window1
                 pointerCardAng dd 0
                 numberOf3      dd 0                   ; UP TO 2 
                 numberOf234    dd 0                   ; UP TO 2
+                currTime       dd 0
         endl
         invoke  glClearColor, 0.05, 0.1, 0.2, 1.0
         invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
@@ -486,7 +487,7 @@ proc Draw.Window1
         ;         if (timeOfStart = -1) {
         ;                 timeOfStart = getTime();
         ;         } else {
-        ;                 int currTime;
+        ;                 int currTime = getTime();
         ;                 int diff = currTime - timeOfStart;
         ;                 if (diff >= timeToWait) {
         ;                         cardStateMatrix[cardsSelected[0]] = 4;
@@ -514,10 +515,23 @@ proc Draw.Window1
         jmp .skipskip
         .cardsDontMatch:        
         ;;
-        mov byte[ebx + cardStateMatrix], 4
-        mov ebx, [cardsSelected + 4]
-        mov byte[ebx + cardStateMatrix], 4
-        mov [timeOfStart], -1
+                cmp [timeOfStart], -1
+                jne .checkTimeLeft
+                        invoke GetTickCount
+                        mov [timeOfStart], eax
+                jmp .skipskip
+                .checkTimeLeft:
+                invoke GetTickCount
+                sub eax, [timeOfStart]
+                cmp eax, [timeToWait]
+                jb .skipskip
+
+
+
+                mov byte[ebx + cardStateMatrix], 4
+                mov ebx, [cardsSelected + 4]
+                mov byte[ebx + cardStateMatrix], 4
+                mov [timeOfStart], -1
         ;;
         .skipskip:
 
