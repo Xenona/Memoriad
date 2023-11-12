@@ -119,14 +119,24 @@ cardStateMatrix         db  0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0
 
+cardAngleMatrix         dd  0, 0, 0, 0, 0, 0, 0, 0,\
+                            0, 0, 0, 0, 0, 0, 0, 0,\
+                            0, 0, 0, 0, 0, 0, 0, 0,\
+                            0, 0, 0, 0, 0, 0, 0, 0
+
+
 cardPicMatrix           db  0, 0, 1, 1, 2, 2, 3, 3,\
                             4, 4, 5, 5, 6, 6, 7, 7,\
                             8, 8, 9, 9, 10, 10, 11, 11,\
                             12, 12, 13, 13, 14, 14, 15, 15
 
+timeToWait          dd      1000 ; ?????/
 
 cardRotAngStep      dd      2.0
-cardRotCurrAng      dd      0.0
+cardRotAng1         dd      0.0
+cardRotAng2         dd      0.0
+cardMinusRotAng1    dd      180.1
+cardMinusRotAng2    dd      180.1
 cardRotStopAng      dd      180.1
 cardsSelected       dd      -1, -1
 cardMinusRotCurrAng  dd     180.1

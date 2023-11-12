@@ -175,6 +175,10 @@ proc Draw.Window1
                 x2 dd 0
                 y1 dd 0
                 y2 dd 0 
+                cardRotCurrAng dd 0
+                pointerCardAng dd 0
+                numberOf3      dd 0                   ; UP TO 2 
+                numberOf234    dd 0                   ; UP TO 2
         endl
         invoke  glClearColor, 0.05, 0.1, 0.2, 1.0
         invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
@@ -305,29 +309,40 @@ proc Draw.Window1
 
                         jmp .EndInnerLoop
                         .CardState2:
+                                inc [numberOf234]
+                               
+                                ; int index = getCurrCard();                            (1)
+                                ; cardAngleMatrix[index] += step;                       (2)
+                                ; if (cardAngleMatrix[index] < cardRotStopAng) {
+                                ;         rotate();
+                                ; } else {
+                                ;         cardStateMatrix[index] = 3;
+                                ; }
+                                mov eax, edi
+                                sub eax, cardStateMatrix                            ; (1) index === eax
 
-                                mov [canClick], 0
-
-                                fld     [cardRotCurrAng]                ; alpha
-                                fadd    [cardRotAngStep]                ; a+step
-                                fst     [cardRotCurrAng]                ; a+step => a
-                                fld     [cardRotStopAng]                ; stopAngle 
+                                shl eax, 2
+                                add eax, cardAngleMatrix          
+                                fld dword[eax]
+                                fadd [cardRotAngStep]
+                                fst dword[eax]                                      ; (2)
+                                fld     [cardRotStopAng] 
+ 
+                                push eax
                                 fcompp                                  ; a+step < stopAngle? 
                                 fstsw   ax                              
                                 shr     ax, 9                           ; if c=1 it's true, otherwise it's false
+                                pop eax
                                 jc      @f 
 
-                                        invoke glRotatef, [cardRotCurrAng], 0.0, 42.0, 0.0
+                                        invoke glRotatef, dword[eax], 0.0, 42.0, 0.0
 
                                 jmp .exitAngleCheck
                                 @@:
-                                        mov     [cardRotCurrAng], 0
                                         mov     byte[edi], 3
 
-                                        mov [canClick], 1
                                 
                                 .exitAngleCheck: 
-
 
 
 
@@ -335,40 +350,96 @@ proc Draw.Window1
                         jmp .EndInnerLoop
 
                         .CardState3:
+                                inc [numberOf3]
+                                inc [numberOf234]
                                 invoke glRotatef, 180.0, 0.0, 42.0, 0.0
                         jmp .EndInnerLoop
 
                         .CardState4:
-                                
-                                mov     [canClick], 0
+                                inc [numberOf234]
 
-                                fld     [cardMinusRotCurrAng]                   ; alpha
-                                fadd    [cardRotAngStep]                        ; a+step
-                                fst     [cardMinusRotCurrAng]                   ; a+step => a
-                                fld     [cardMinusRotStopAng]                   ; stopAngle 
+                                ; int index = getCurrCard();
+                                ; cardAngleMatrix[index] += step;
+                                ; if (cardAngleMatrix[index] < cardMinusRotStopAng) {
+                                ;         rotate();
+                                ; } else {
+                                ;         cardAngleMatrix[index] = 0;
+                                ;         cardStateMatrix[index] = 0;
+                                ;         dec [numOfCurrOpened];
+                                ;         if (index == cardsSelected[0]) {
+                                ;                 cardsSelected[0] = -1;
+                                ;         } else
+                                ;         if (index == cardsSelected[1]) {
+                                ;                 cardsSelected[1] = -1;
+                                ;         }
+                                ; }
+
+                                mov eax, edi
+                                sub eax, cardStateMatrix                            ; (1) index === eax
+
+                                shl eax, 2
+                                add eax, cardAngleMatrix          
+                                fld dword[eax]
+                                fadd [cardRotAngStep]
+                                fst dword[eax]                                      ; (2)
+                                fld     [cardMinusRotStopAng] 
+                                push eax
                                 fcompp                                          ; a+step < stopAngle? 
                                 fstsw   ax                              
                                 shr     ax, 9                                   ; if c=1 it's true, otherwise it's false
+                                pop eax
                                 jc      @f 
 
-                                        invoke glRotatef, [cardMinusRotCurrAng], 0.0, 42.0, 0.0
+                                        invoke glRotatef, dword[eax], 0.0, 42.0, 0.0
+                                        
 
                                 jmp .exitAngleCheck4
                                 @@:
-                                        mov     [cardMinusRotCurrAng], 180.1 
+                                        mov     dword[eax], 0
                                         mov     byte[edi], 0
+                                        dec     [numOfCurrOpened]
+
+
+                                        sub eax, cardAngleMatrix
+                                        shr eax, 2      
+                                        .firstCardClosed:
+                                        cmp eax, [cardsSelected]
+                                        jne .secondCardClosed
+                                                mov [cardsSelected], -1
+                                        jmp @f;
+                                        .secondCardClosed:
+
+                                                mov [cardsSelected+4], -1
+
+                                        @@:
+
+
+
                                         ;alert xena
+
+                                        ; if (cardsSelected[0] == -1) {
+                                        ;         if (cardsSelected[1] == -1) {
+                                        ;                 canClick = 1;
+                                        ;         }
+                                        ; }
+
+                                nop
+
+                                        ; cmp [cardsSelected], -1
+                                        ; jne .exitAngleCheck4
+                                        ; cmp [cardsSelected + 4], -1
+                                        ; jne .exitAngleCheck4
+                                        ; mov [canClick], 1
+
                                         
-                                        mov     [canClick], 1
                                 
                                 .exitAngleCheck4: 
-
                         jmp .EndInnerLoop
 
                     
                         .EndInnerLoop:
 
-                        stdcall PutObject, cardVertices, cardColors, [CardVertCount], 1, texture11
+                        stdcall PutObject, cardVertices, cardColors, [CardVertCount], 0, texture11
                         invoke glPopMatrix
 
 
@@ -400,6 +471,72 @@ proc Draw.Window1
         jne .DrawRows 
         invoke glPopMatrix
 
+        cmp [numberOf3], 2
+        jb @f 
+
+        
+        ; if (cardsMatch) {
+        ;         cardStateMatrix[cardsSelected[0]] = 1;
+        ;         cardStateMatrix[cardsSelected[1]] = 1;
+        ;         numOfCurrOpened = 0;
+        ;         cardsSelected[0] = -1;
+        ;         cardsSelected[1] = -1;
+        ;         canClick = 1;
+        ; } else {
+        ;         if (timeOfStart = -1) {
+        ;                 timeOfStart = getTime();
+        ;         } else {
+        ;                 int currTime;
+        ;                 int diff = currTime - timeOfStart;
+        ;                 if (diff >= timeToWait) {
+        ;                         cardStateMatrix[cardsSelected[0]] = 4;
+        ;                         cardStateMatrix[cardsSelected[1]] = 4;
+        ;                         timeOfStart = -1;
+        ;                 }
+        ;         }
+        ; }
+
+        mov ebx, [cardsSelected]
+        .cardsMatching:
+        cmp dword[cardsMatch], 1
+        jne .cardsDontMatch
+
+        mov byte[ebx + cardStateMatrix], 1
+        mov ebx, [cardsSelected + 4]
+        mov byte[ebx + cardStateMatrix], 1
+        mov [numOfCurrOpened], 0
+        mov [cardsSelected], -1;
+        mov [cardsSelected+4], -1;
+        mov [canClick], 1
+
+
+
+        jmp .skipskip
+        .cardsDontMatch:        
+        ;;
+        mov byte[ebx + cardStateMatrix], 4
+        mov ebx, [cardsSelected + 4]
+        mov byte[ebx + cardStateMatrix], 4
+        mov [timeOfStart], -1
+        ;;
+        .skipskip:
+
+
+
+
+        jmp .handleBorders
+
+        @@: 
+
+        cmp [numberOf234], 2
+        jb @f 
+
+        mov [canClick], 0 
+        jmp .handleBorders
+        @@:
+        mov [canClick], 1
+
+        .handleBorders:
         mov ebx, 0
         @@:
                 cmp [card1BrdrHandler+ebx], 1

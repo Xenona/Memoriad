@@ -273,23 +273,22 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jmp .ReturnZero
 
                 .onLClick1:
-
-                        ; cmp [canClick], 0
-                        ; je .ReturnZero
+                        cmp [canClick], 0
+                        je .ReturnZero
 
                         cmp [objectNumSelected], -1                     ; returning zero if no card is selected
                         je .ReturnZero
 
                         mov esi, [objectNumSelected]                    ; getting number
                         add esi, cardStateMatrix                        ; adding to matrix addr to get addr of card state
-                        movzx eax, byte[esi]
+                        movzx eax, byte[esi]            ; getting card state
 
                         cmp eax, 0                                      ; if card was touched already, this does not allow to touch it again
                         jne .ReturnZero
-                        
                        
 
                         mov byte[esi], 2
+                        
 
                         mov eax, 4
                         mul [numOfCurrOpened]
@@ -319,34 +318,20 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         cmp esi, edi
                         jne @f
-                        
-                        mov esi, [cardsSelected]
-                        mov edi, [cardsSelected+4]
-                        
-                        add esi, cardStateMatrix
-                        add edi, cardStateMatrix
 
-                        mov byte[esi], 1
-                        mov byte[edi], 1
-
+                        mov [cardsMatch], 1             ; !!!!!!!!!!!!!!!
+                        
+                     
                         inc [numOfGuessedPairs]
                         jmp .exit44 
 
                         @@:
-                        mov esi, [cardsSelected]
-                        mov edi, [cardsSelected+4]
+
+                        mov [cardsMatch], 0             ; !!!!!!!!!!!!!!!
+
                         
-                        add esi, cardStateMatrix
-                        add edi, cardStateMatrix
-
-                        mov byte[esi], 4
-                        mov byte[edi], 4
-
                         .exit44:
-
-                        mov [numOfCurrOpened], 0
-                        mov dword[cardsSelected], -1
-                        mov dword[cardsSelected+4], -1
+                
                         inc [numOfTriedPairs]
 
                 jmp .ReturnZero
@@ -387,7 +372,6 @@ proc PutObject, verts:DWORD, colors:DWORD, vCount:DWORD, isTexture:DWORD, texCoo
         ; verts - array of all verts grouped as triangles 
         ; colors - array of colors each for each vertex
         ; vCount - length of verts array
-        nop;
 
         cmp [isTexture], 0
         jz .isColor
