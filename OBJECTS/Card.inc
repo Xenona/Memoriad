@@ -25,87 +25,104 @@
     card22     equ     13.0, 40.0, 0.0
     card23     equ     -13.0, 40.0, 0.0
 
-    cardVertices    dd      card0, card1, card2,\ ; chamfers
-                            card0, card2, card3,\
-                            card4, card5, card6,\
-                            card4, card6, card7,\
-                            card8, card9, card10,\
-                            card8, card10,card11,\
-                            card12, card13, card14,\ 
-                            card12, card14, card15,\     
-                            card1, card2, card16,\ ; above chamfers
-                            card5, card6, card17,\
-                            card9, card10, card18,\
-                            card13,card14,card19,\
-                            card0, card3, card20,\ ; below chamfers
-                            card4, card7, card21,\
-                            card8, card11,card22,\ 
-                            card12, card15, card23,\ 
-                            card1, card6, card16,\ ; prolonged north up & down
-                            card6, card16, card17,\
-                            card0, card7, card20,\
-                            card4, card20, card21,\ 
-                            card9, card14, card18,\ ; prolonged south up & down
-                            card14, card18, card19,\
-                            card8, card15, card22,\ 
-                            card15, card22, card23,\
-                            card2, card5, card13,\ ; big north up & down
-                            card5, card10, card13,\
-                            card3, card4, card12,\ 
-                            card4, card11, card12,\ 
-                            card0, card1, card7,\ ; side north 
-                            card1, card6, card7,\
-                            card4, card5, card11,\ ; side east
-                            card5, card10, card11,\ 
-                            card8, card9, card15,\ ; side south
-                            card9, card14, card15,\  
-                            card2, card3, card13,\ ; side west
-                            card3, card12, card13
 
+
+
+    cardTex1    equ     0.825, 0.0
+    cardTex2    equ     0.875, 0.05
+    cardTex5    equ     0.125, 0.05
+    cardTex6    equ     0.175, 0.0
+    cardTex9    equ     0.175, 1.0
+    cardTex10   equ     0.125, 0.95
+    cardTex13   equ     0.875, 0.95
+    cardTex14   equ     0.825, 1.0
+    cardTex16   equ     0.825, 0.05
+    cardTex17   equ     0.175, 0.05
+    cardTex18   equ     0.175, 0.95
+    cardTex19   equ     0.825, 0.95   
+
+
+
+cardVertices    dd      card0, card1, card2,\ ; chamfers
+                        card0, card2, card3,\
+                        card4, card5, card6,\
+                        card4, card6, card7,\
+                        card8, card9, card10,\
+                        card8, card10,card11,\
+                        card12, card13, card14,\ 
+                        card12, card14, card15,\  
+                        card0, card1, card7,\ ; side north 
+                        card1, card6, card7,\
+                        card4, card5, card11,\ ; side east
+                        card5, card10, card11,\ 
+                        card8, card9, card15,\ ; side south
+                        card9, card14, card15,\  
+                        card2, card3, card13,\ ; side west
+                        card3, card12, card13
+                        
+cardFace        dd      card2, card5, card13,\ ; big north up 
+                        card5, card10, card13,\    
+                        card1, card2, card16,\ ; above chamfers
+                        card5, card6, card17,\
+                        card9, card10, card18,\
+                        card13,card14,card19,\
+                        card1, card6, card16,\ ; prolonged north up 
+                        card6, card16, card17,\
+                        card9, card14, card18,\ ; prolonged south up 
+                        card14, card18, card19
+
+cardBack        dd      card3, card4, card12,\  ; big north down
+                        card4, card11, card12,\
+                        card0, card3, card20,\ ; below chamfers
+                        card4, card7, card21,\
+                        card8, card11,card22,\ 
+                        card12, card15, card23,\
+                        card0, card7, card20,\  ; prolonged north down
+                        card7, card20, card21,\
+                        card8, card15, card22,\ ; prolonged south down
+                        card15, card22, card23 
+
+
+   
+; back, but applied to face (baaaad naming) ????
+cardTextures    dd      cardTex2, cardTex5, cardTex13,\ ; big north up
+                        cardTex5, cardTex10, cardTex13,\
+                        cardTex1, cardTex2, cardTex16,\ ; above chamfers
+                        cardTex5, cardTex6, cardTex17,\
+                        cardTex9, cardTex10, cardTex18,\
+                        cardTex13,cardTex14,cardTex19,\
+                        cardTex1, cardTex6, cardTex16,\ ; prolonged north up 
+                        cardTex6, cardTex16, cardTex17,\
+                        cardTex9, cardTex14, cardTex18,\ ; prolonged south up 
+                        cardTex14, cardTex18, cardTex19
+
+
+
+  
+    cardColors      dd      18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0),\
+                            18       dup     (0.0, 0.0, 1.0)
     
 
-
-    cardColors      dd      18       dup     (1.0, 0.0, 0.0),\
-                            18       dup     (1.0, 1.0, 0.0),\
-                            18       dup     (0.0, 1.0, 0.0),\
-                            18       dup     (1.0, 1.0, 1.0),\
-                            6        dup     (0.0, 0.4, 1.0),\
-                            3        dup     (0.0, 0.1, 0.1),\
-                            3        dup     (0.0, 0.1, 0.1),\
-                            3        dup     (0.0, 0.4, 1.0),\
-                            9        dup     (0.0, 0.0, 1.0),\
-                            18       dup     (0.0, 1.0, 1.0)
-    
-
-    texture11          dd      0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0,\
-                               0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0
+    texture11          dd    0
                                
     cardWidth       dd      30.0
     cardHeight      dd      42.0
@@ -130,16 +147,11 @@ cardPicMatrix           db  0, 0, 1, 1, 2, 2, 3, 3,\
                             8, 8, 9, 9, 10, 10, 11, 11,\
                             12, 12, 13, 13, 14, 14, 15, 15
 
-timeToWait          dd      1000 ; ?????/
+timeToWait          dd      700
 
-cardRotAngStep      dd      2.0
-cardRotAng1         dd      0.0
-cardRotAng2         dd      0.0
-cardMinusRotAng1    dd      180.1
-cardMinusRotAng2    dd      180.1
+cardRotAngStep      dd      3.0
 cardRotStopAng      dd      180.1
 cardsSelected       dd      -1, -1
-cardMinusRotCurrAng  dd     180.1
 cardMinusRotStopAng  dd     360.1
 
 numOfCurrOpened       dd      0 
@@ -340,3 +352,18 @@ card29BrdrHandler         dd      0
 card30BrdrHandler         dd      0
 card31BrdrHandler         dd      0
 card32BrdrHandler         dd      0
+
+
+oone    equ     1
+zero   equ     0
+
+vvvv0   equ  -100.0, -100.0, 0 
+vvvv1   equ   -100.0, 100.0, 0
+vvvv2   equ     100.0, 100.0, 0
+vvvv3   equ     100.0, -100.0 ,0
+cubeVertices    dd      vvvv0, vvvv1, vvvv3,\  
+                        vvvv1, vvvv2, vvvv3
+ 
+
+cubeTexVerts    dd      0, 0, 0, 1.0, 1.0, 0,\
+                        0, 1.0, 1.0, 1.0, 1.0, 0

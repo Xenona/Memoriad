@@ -1,5 +1,7 @@
 
 testPic db '.\ASSETS\test1.bmp', 0
+testPic2 db '.\ASSETS\test2.bmp', 0
+nop
 arrTextures dw 20 dup (?)
 
 
@@ -25,6 +27,10 @@ hdc                     dd      ?
 aspect                  dq      ?                       ; width/height 
 windowID                dd      1                       ; shows, which game screen should be drawn
 objectNumSelected       dd      -1
+hinst                   dd      ?
+hCurs1                  dd      ?
+hCurs2                  dd      ?
+
 ;______________________________________________________________________________    
 
 
@@ -52,14 +58,11 @@ camViewRadius           dd              250.0
 ;______________________________________________________________________________    
 
 
-
 ;__CONTROLLING USER ACTIONS____________________________________________________    
 mouseX                  dd      0 
 mouseY                  dd      0
 canClick                dd      1
 ;______________________________________________________________________________    
-
-
 
 
 ;__SOME STRINGS TO PRINT_______________________________________________________  
@@ -76,4 +79,7 @@ Window0.WelcomeText1    db      "MEMORIAD", 0
 ; __CARDS AND STUFF____________________________________________________________
 cardsMatch              dd      0 
 timeOfStart             dd      -1
+NUM_OF_VERTS_FOR_CARD_BORDERS       =       16 * 3
+NUM_OF_VERTS_FOR_CARD_FACE          =       10 * 3    
+NUM_OF_VERTS_FOR_CARD_BACK          =       10 * 3    
 ;______________________________________________________________________________

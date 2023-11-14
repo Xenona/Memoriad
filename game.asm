@@ -89,11 +89,12 @@ proc WinMain
 
         invoke  GetClientRect, eax, clientRect
 
-
-        ; !!!!!!!!!!!!!!! return cursor to its normal state !!!!!!!!!!!!
-        ; invoke  ShowCursor, ebx
-
-
+        invoke LoadCursor, ebx, IDC_ARROW
+        mov [hCurs1], eax 
+        invoke LoadCursor, ebx, IDC_HAND
+        mov [hCurs2], eax 
+        invoke SetCursor, [hCurs1]
+ 
         invoke  GetDC, [hMainWindow]
         mov     [hdc], eax
 
@@ -122,6 +123,10 @@ proc WinMain
         stdcall Glext.LoadFunctions
         lea     edi, [arrTextures]
         stdcall Texture.Constructor, edi, testPic,\
+                            GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
+
+        add esi, 4
+        stdcall Texture.Constructor, edi, testPic2,\
                             GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
 
 
@@ -345,12 +350,17 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 case    WM_KEYDOWN,     .onKeyDown4
                 case    WM_MOUSEMOVE,   .onMouseMove4
                 case    WM_LBUTTONDOWN, .onLClick4
-
+                invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
+                jmp     .Return
+                
                 .onPaint4:
+                        stdcall Draw.Window4 
                 jmp .ReturnZero
 
                 .onKeyDown4:
-                jmp .ReturnZero
+                        switch [wParam]
+                        case VK_ESCAPE, .onDestroy
+                jmp     .ReturnZero
 
                 .onMouseMove4:
                 jmp .ReturnZero
@@ -368,7 +378,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
         ret
 endp
 
-proc PutObject, verts:DWORD, colors:DWORD, vCount:DWORD, isTexture:DWORD, texCoords:DWORD
+proc PutObject, verts:DWORD, colors:DWORD, vCount:DWORD, isTexture:DWORD, texCoords:DWORD, texVertices:DWORD
         ; verts - array of all verts grouped as triangles 
         ; colors - array of colors each for each vertex
         ; vCount - length of verts array
@@ -376,38 +386,38 @@ proc PutObject, verts:DWORD, colors:DWORD, vCount:DWORD, isTexture:DWORD, texCoo
         cmp [isTexture], 0
         jz .isColor
         
+        
 
         .isTexture:
 
-        invoke  glEnableClientState, GL_VERTEX_ARRAY
+        invoke glEnableClientState, GL_VERTEX_ARRAY
         invoke glEnableClientState, GL_TEXTURE_COORD_ARRAY_EXT
 
         stdcall Texture.Bind, GL_TEXTURE_2D, dword [arrTextures], GL_TEXTURE0
 
-        invoke  glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
-        invoke  glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
-        invoke  glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
-        invoke  glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
-        invoke  glVertexPointer, 3, GL_FLOAT, 0, [verts]
-        invoke  glTexCoordPointer, 2, GL_FLOAT, 0, [texCoords]
-        invoke  glDrawArrays, GL_TRIANGLES, 0,  [vCount]
+        invoke glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+        invoke glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+        invoke glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST
+        invoke glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR
+        invoke glVertexPointer, 3, GL_FLOAT, 0, [verts]
+        invoke glTexCoordPointer, 2, GL_FLOAT, 0, dword[texVertices]
+        invoke glDrawArrays, GL_TRIANGLES, 0,  [vCount]
 
         invoke glDisableClientState, GL_TEXTURE_COORD_ARRAY_EXT
-        invoke  glDisableClientState, GL_VERTEX_ARRAY
+        invoke glDisableClientState, GL_VERTEX_ARRAY
         
         jmp @f
 
         .isColor:
-        invoke  glEnableClientState, GL_VERTEX_ARRAY
-        invoke  glEnableClientState, GL_COLOR_ARRAY
+        invoke glEnableClientState, GL_VERTEX_ARRAY
+        invoke glEnableClientState, GL_COLOR_ARRAY
 
-        invoke  glVertexPointer, 3, GL_FLOAT, 0, [verts]
-        invoke  glColorPointer, 3, GL_FLOAT, 0, [colors]
-        invoke  glDrawArrays, GL_TRIANGLES, 0,  [vCount]
-
-
-        invoke  glDisableClientState, GL_VERTEX_ARRAY
-        invoke  glDisableClientState, GL_COLOR_ARRAY
+        invoke glVertexPointer, 3, GL_FLOAT, 0, [verts]
+        invoke glColorPointer, 3, GL_FLOAT, 0, [colors]
+        invoke glDrawArrays, GL_TRIANGLES, 0,  [vCount]
+        
+        invoke glDisableClientState, GL_VERTEX_ARRAY
+        invoke glDisableClientState, GL_COLOR_ARRAY
 
 
         @@:
@@ -523,7 +533,7 @@ proc WorldToScreen uses ecx, worldX, worldY, worldZ             ; ! CHANGES EAX 
 
         ret 
 endp 
-
+; On.Hover
 proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
         ; ecx - for main loop (stores num of Objects)
         ; ebx - access to coords of a corner 

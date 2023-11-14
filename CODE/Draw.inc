@@ -146,9 +146,9 @@ proc Draw.Window0
         mov     dword[upVector.z], 0.0
         stdcall Matrix.LookAt, cameraPos, targetPos, upVector
  
-        stdcall PutObject, skyVertices, skyColors, dword[skyPlaneVertCount], 0, 0
-        stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount], 0, 0
-        stdcall PutObject, sunVertices, sunColors, dword[sunPlaneVertCount], 0, 0
+        stdcall PutObject, skyVertices, skyColors, dword[skyPlaneVertCount], 0, 0, 0
+        stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount], 0, 0, 0
+        stdcall PutObject, sunVertices, sunColors, dword[sunPlaneVertCount], 0, 0, 0
  
         stdcall Draw.Text, 35.0, 29.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.StartButton, 0
         stdcall Draw.Text, 27.0, 7.5, 0.0, 1.0, 1.0, 1.0, 0.07, Window0.CardsButton, 0
@@ -424,7 +424,6 @@ proc Draw.Window1
                                         ;         }
                                         ; }
 
-                                nop
 
                                         ; cmp [cardsSelected], -1
                                         ; jne .exitAngleCheck4
@@ -440,7 +439,9 @@ proc Draw.Window1
                     
                         .EndInnerLoop:
 
-                        stdcall PutObject, cardVertices, cardColors, [CardVertCount], 0, texture11
+                        stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, texture11, cardTextures
+                        stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, texture11, cardTextures
+                        stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, texture11, 0
                         invoke glPopMatrix
 
 
@@ -562,7 +563,8 @@ proc Draw.Window1
 
                 stdcall Draw.Rect, [card1BrdrHandler+ebx], 0, 0, 0, 0, [card1X1+esi], [card1X1+esi+4], [card1X1+esi+8], [card1X1+esi+12] 
 
-                jmp .exitDrawingBoard 
+
+                jmp .exitDrawingBoard
         .skip:
         add ebx, 4
         cmp ebx, 128
@@ -578,6 +580,40 @@ proc Draw.Window1
 
 
         @@:
+
+        ret
+endp
+
+proc Draw.Window4
+        invoke  glClearColor, 0.05, 0.1, 0.2, 1.0
+        invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
+        invoke  glMatrixMode, GL_MODELVIEW
+        ; invoke  glLoadIdentity
+        invoke  glLoadIdentity
+
+
+        mov     dword[cameraPos + vector3.x], 0.0
+        mov     dword[cameraPos + vector3.y], 0.0
+        mov     dword[cameraPos + vector3.z], -90.0
+
+        mov     dword[targetPos + vector3.x], 0.0
+        mov     dword[targetPos + vector3.y], 0.0
+        mov     dword[targetPos + vector3.z], 100.0
+
+        mov     dword[upVector.x], 0.0
+        mov     dword[upVector.y], 1.0
+        mov     dword[upVector.z], 0.0
+        stdcall Matrix.LookAt, cameraPos, targetPos, upVector
+
+        stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, texture11, cardTextures
+        stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, texture11, cardTextures
+        stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, texture11, 0
+        invoke glRotatef, 180.0, 0.0, 42.0, 0.0 
+        invoke glTranslatef, -50.0, 0.0, 00.0
+        invoke glRotatef, 90.0, 100.0, 42.0, 0.0 
+
+
+        invoke  SwapBuffers, [hdc]
 
         ret
 endp
