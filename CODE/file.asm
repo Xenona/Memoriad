@@ -41,10 +41,12 @@ proc File.LoadBmp uses edi,\
         mov     [hFile], eax
 
         invoke  GetFileSize, [hFile], ebx
+
         inc     eax
         mov     [length], eax
         stdcall malloc, [length]
         mov     [pBuffer], eax
+
 
         lea     edi, [read]
         invoke  ReadFile, [hFile], [pBuffer], [length], edi, ebx

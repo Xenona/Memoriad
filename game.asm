@@ -54,7 +54,7 @@ entry   WinMain
         include         ".\INCLUDE\memory.inc"
         include         ".\INCLUDE\texture.inc"
         include         ".\CODE\Texture.asm"
-        include         ".\INCLUDE\internal\files\file.asm"
+        include         ".\CODE\file.asm"
         include         ".\INCLUDE\internal\memory\glext.asm"
         include         ".\CODE\mem_funcs.asm"
         include         ".\INCLUDE\internal\string\string_funcs.asm"
@@ -129,7 +129,7 @@ proc WinMain
         mov edi, arrTextures
         mov esi, testPic2
 
-        mov ecx, 12
+        mov ecx, 32
         @@:
 
         push ecx
@@ -140,14 +140,6 @@ proc WinMain
         add edi, 4
         add esi, 49
         loop @b
-
-
-        ; stdcall Texture.Constructor, arrTextures, testPic2,\
-        ;                 GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
-
- 
- 
-
 
         lea     esi, [msg]
 

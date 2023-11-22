@@ -11,17 +11,8 @@ endp
 ; Return result in eax
 proc malloc\
     sizeInBytes
-
-    locals 
-        p dd ?
-    endl
-
-    nop
-
+  
     invoke HeapAlloc, [hHeap], 8, [sizeInBytes]
-    mov [p], eax
-    invoke GetLastError
-    mov eax, [p]
     ret
 endp
 

@@ -23,7 +23,6 @@ proc Texture.Constructor uses edi esi eax ebx ecx edx,\
                     [format], [pixelType], edi
     invoke  HeapFree, [hHeap], 0, eax
     fnop
-    invoke  GetLastError
     invoke  glGenerateMipmap, [texType]
     
     invoke  glBindTexture, [texType], 0
