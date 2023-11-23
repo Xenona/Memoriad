@@ -122,7 +122,7 @@ cardTextures    dd      cardTex2, cardTex5, cardTex13,\ ; big north up
                             18       dup     (0.0, 0.0, 1.0)
     
 
-    texture11          dd    0
+texture11          dd    0
                                
     cardWidth       dd      30.0
     cardHeight      dd      42.0

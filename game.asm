@@ -12,6 +12,8 @@
 ; 14. Use heap to store all my 680b of cards data
 ; 15. Implement horisontal rotation 
 ; 16. Move target calcs outside of the main loop. Probably I need some init()
+; 17. Rename cursor handles;
+
 format  PE GUI 5.0
 entry   WinMain
 
@@ -51,10 +53,10 @@ entry   WinMain
         include         ".\INCLUDE\glext.inc"
         include         ".\INCLUDE\memory.inc"
         include         ".\INCLUDE\texture.inc"
-        include         ".\INCLUDE\texture.asm"
+        include         ".\CODE\Texture.asm"
         include         ".\INCLUDE\internal\files\file.asm"
         include         ".\INCLUDE\internal\memory\glext.asm"
-        include         ".\INCLUDE\internal\memory\mem_funcs.asm"
+        include         ".\CODE\mem_funcs.asm"
         include         ".\INCLUDE\internal\string\string_funcs.asm"
 
 
@@ -121,13 +123,30 @@ proc WinMain
 
        	invoke wglGetCurrentContext
         stdcall Glext.LoadFunctions
-        lea     edi, [arrTextures]
-        stdcall Texture.Constructor, edi, testPic,\
-                            GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
 
-        add esi, 4
-        stdcall Texture.Constructor, edi, testPic2,\
+       
+        xor eax, eax
+        mov edi, arrTextures
+        mov esi, testPic2
+
+        mov ecx, 12
+        @@:
+
+        push ecx
+        stdcall Texture.Constructor, edi, esi,\
                             GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
+        pop ecx
+
+        add edi, 4
+        add esi, 49
+        loop @b
+
+
+        ; stdcall Texture.Constructor, arrTextures, testPic2,\
+        ;                 GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
+
+ 
+ 
 
 
         lea     esi, [msg]
@@ -378,7 +397,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
         ret
 endp
 
-proc PutObject, verts:DWORD, colors:DWORD, vCount:DWORD, isTexture:DWORD, texCoords:DWORD, texVertices:DWORD
+proc PutObject, verts:DWORD, colors:DWORD, vCount:DWORD, isTexture:DWORD, texture:DWORD, texVertices:DWORD
         ; verts - array of all verts grouped as triangles 
         ; colors - array of colors each for each vertex
         ; vCount - length of verts array
@@ -393,7 +412,7 @@ proc PutObject, verts:DWORD, colors:DWORD, vCount:DWORD, isTexture:DWORD, texCoo
         invoke glEnableClientState, GL_VERTEX_ARRAY
         invoke glEnableClientState, GL_TEXTURE_COORD_ARRAY_EXT
 
-        stdcall Texture.Bind, GL_TEXTURE_2D, dword [arrTextures], GL_TEXTURE0
+        stdcall Texture.Bind, GL_TEXTURE_2D, dword [texture], GL_TEXTURE0
 
         invoke glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
         invoke glTexParameteri, GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE

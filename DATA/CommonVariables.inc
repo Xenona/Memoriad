@@ -1,8 +1,37 @@
 
-testPic db '.\ASSETS\test1.bmp', 0
-testPic2 db '.\ASSETS\test2.bmp', 0
-nop
-arrTextures dw 20 dup (?)
+testPic2 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test2.bmp', 0
+testPic3 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test3.bmp', 0
+testPic4 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test4.bmp', 0
+testPic5 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test5.bmp', 0
+testPic6 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test6.bmp', 0
+testPic7 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test7.bmp', 0
+testPic8 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test8.bmp', 0
+testPic9 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test9.bmp', 0
+testPic10 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testa.bmp', 0
+testPic11 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testb.bmp', 0
+testPic12 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testc.bmp', 0
+testPic13 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testd.bmp', 0
+testPic14 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\teste.bmp', 0
+testPic15 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testk.bmp', 0
+testPic16 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testf.bmp', 0
+testPic17 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testg.bmp', 0
+testPic18 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testh.bmp', 0
+testPic19 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testi.bmp', 0
+testPic20 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testj.bmp', 0
+testPic21 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic22 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic23 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic24 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic25 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic26 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic27 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic28 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic29 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic30 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic31 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic32 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+testPic33 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+arrTextures dd 32 dup (?)
 
 
 

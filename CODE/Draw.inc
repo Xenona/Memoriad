@@ -439,11 +439,14 @@ proc Draw.Window1
                     
                         .EndInnerLoop:
 
-                        stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, texture11, cardTextures
-                        stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, texture11, cardTextures
-                        stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, texture11, 0
+                        push eax 
+                        mov eax, arrTextures
+                        stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, dword[eax], cardTextures
+                        stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, dword[arrTextures], cardTextures
+                        pop eax
+                        stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, 0, 0
                         invoke glPopMatrix
-
+                        
 
                 add ebx, 16
                 add edi, 1
