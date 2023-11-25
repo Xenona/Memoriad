@@ -140,7 +140,6 @@ proc WinMain
         add edi, 4
         add esi, 49
         loop @b
-
         lea     esi, [msg]
 
         .cycle:
@@ -323,6 +322,8 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         .TwoSelected: 
 
+                        ; HERE GOES THE CARD CHECK
+
                         mov esi, [cardsSelected]
                         mov edi, [cardsSelected+4]
 
@@ -335,7 +336,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         cmp esi, edi
                         jne @f
 
-                        mov [cardsMatch], 1             ; !!!!!!!!!!!!!!!
+                        mov [cardsMatch], 1             
                         
                      
                         inc [numOfGuessedPairs]
@@ -343,7 +344,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         @@:
 
-                        mov [cardsMatch], 0             ; !!!!!!!!!!!!!!!
+                        mov [cardsMatch], 0             
 
                         
                         .exit44:

@@ -441,8 +441,8 @@ proc Draw.Window1
 
                         push eax 
                         mov eax, arrTextures
-                        stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, dword[eax], cardTextures
-                        stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, dword[arrTextures], cardTextures
+                        stdcall PutObject, cardFace, 0, NUM_OF_VERTS_FOR_CARD_FACE, 1, dword[eax], cardTextures
+                        stdcall PutObject, cardBack, 0, NUM_OF_VERTS_FOR_CARD_BACK, 1, dword[arrTextures], cardTextures
                         pop eax
                         stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, 0, 0
                         invoke glPopMatrix
