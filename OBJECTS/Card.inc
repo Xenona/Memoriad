@@ -1,32 +1,29 @@
     CardVertCount     dd       108
 
-    card0      equ     -13.0, 0.0, 0.0
-    card1      equ     -13.0, 0.0, 1.5
-    card2      equ     -15.0, 2.0, 1.5
-    card3      equ     -15.0, 2.0, 0.0
-    card4      equ     15.0, 2.0, 0.0
-    card5      equ     15.0, 2.0, 1.5
-    card6      equ     13.0, 0.0, 1.5
-    card7      equ     13.0, 0.0, 0.0
-    card8      equ     13.0, 42.0, 0.0
-    card9      equ     13.0, 42.0, 1.5
-    card10     equ     15.0, 40.0, 1.5
-    card11     equ     15.0, 40.0, 0.0
-    card12     equ     -15.0, 40.0, 0.0
-    card13     equ     -15.0, 40.0, 1.5
-    card14     equ     -13.0, 42.0, 1.5
-    card15     equ     -13.0, 42.0, 0.0
-    card16     equ     -13.0, 2.0, 1.5
-    card17     equ     13.0, 2.0, 1.5
-    card18     equ     13.0, 40.0, 1.5
-    card19     equ     -13.0, 40.0, 1.5
-    card20     equ     -13.0, 2.0, 0.0
-    card21     equ     13.0, 2.0, 0.0
-    card22     equ     13.0, 40.0, 0.0
-    card23     equ     -13.0, 40.0, 0.0
-
-
-
+    card0      equ     -1.3, 0.0, 0.0
+    card1      equ     -1.3, 0.0, 0.15
+    card2      equ     -1.5, 0.2, 0.15
+    card3      equ     -1.5, 0.2, 0.0
+    card4      equ     1.5, 0.2, 0.0
+    card5      equ     1.5, 0.2, 0.15
+    card6      equ     1.3, 0.0, 0.15
+    card7      equ     1.3, 0.0, 0.0
+    card8      equ     1.3, 4.2, 0.0
+    card9      equ     1.3, 4.2, 0.15
+    card10     equ     1.5, 4.0, 0.15
+    card11     equ     1.5, 4.0, 0.0
+    card12     equ     -1.5, 4.0, 0.0
+    card13     equ     -1.5, 4.0, 0.15
+    card14     equ     -1.3, 4.2, 0.15
+    card15     equ     -1.3, 4.2, 0.0
+    card16     equ     -1.3, 0.2, 0.15
+    card17     equ     1.3, 0.2, 0.15
+    card18     equ     1.3, 4.0, 0.15
+    card19     equ     -1.3, 4.0, 0.15
+    card20     equ     -1.3, 0.2, 0.0
+    card21     equ     1.3, 0.2, 0.0
+    card22     equ     1.3, 4.0, 0.0
+    card23     equ     -1.3, 4.0, 0.0
 
     cardTex1    equ     0.825, 0.0
     cardTex2    equ     0.875, 0.05
@@ -106,11 +103,11 @@ cardTextures    dd      cardTex2, cardTex5, cardTex13,\ ; big north up
 
 texture11          dd    0
                                
-    cardWidth       dd      30.0
-    cardHeight      dd      42.0
+    cardWidth       dd      3.0
+    cardHeight      dd      4.4
     
-    marginX         dd      20.0
-    marginY         dd      20.0
+    marginX         dd      2.0
+    marginY         dd      2.0
 cardBrdrHandler         dd      0
 
 cardStateMatrix         db  0, 0, 0, 0, 0, 0, 0, 0,\
@@ -123,7 +120,6 @@ cardAngleMatrix         dd  0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0,\
                             0, 0, 0, 0, 0, 0, 0, 0
 
-; TODO : CHANGE TO DB
 
 cardPicMatrix           dd  0, 0, 1, 1, 2, 2, 3, 3,\
                             4, 4, 5, 5, 6, 6, 7, 7,\

@@ -1,4 +1,4 @@
-proc Draw.Rect, hasBorder, hasBody, R, G, B, x1, y1, x2, y2      
+proc Draw.Rect, hasBorder, hasBody, R, G, B, x1, y1, x2, y2, thickness      
         ; hasBorder - either 1 or 0 for xy1xy2 rect border 
         ; R, G, B - colors of the xy1xy2 rect
         ; x1, y1, x2, y2 - coords of xy1xy2 rect 
@@ -22,19 +22,19 @@ proc Draw.Rect, hasBorder, hasBody, R, G, B, x1, y1, x2, y2
         invoke glColor3f, 1.0, 1.0, 1.0                 ; setting border color
 
         fld     dword[x1]
-        fsub    [onedd]
+        fsub    [thickness]
         fstp    [x1m1]
 
         fld     dword[y1]
-        fsub    [onedd]
+        fsub    [thickness]
         fstp    [y1m1]
 
         fld     dword[x2]
-        fadd    [onedd]
+        fadd    [thickness]
         fstp    [x2p1]
 
         fld     dword[y2]
-        fadd    [onedd]
+        fadd    [thickness]
         fstp    [y2p1]
 
         invoke  glRectf, [x1m1], [y1m1], [x1], [y2p1]
@@ -157,10 +157,10 @@ proc Draw.Window0
         stdcall Draw.Text, -85.0, 37.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.WelcomeText0, 1
         stdcall Draw.Text, -85.0, 23.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.WelcomeText1, 1
 
-        stdcall Draw.Rect, [buttStartBrdr], 1, 0.0, 0.5, 0.5, [buttStartX1], [buttStartY1], [buttStartX2], [buttStartY2]
-        stdcall Draw.Rect, [buttCardsBrdr], 1, 0.0, 0.5, 0.5, [buttCardsX1], [buttCardsY1], [buttCardsX2],  [buttCardsY2]
-        stdcall Draw.Rect, [buttSettsBrdr], 1, 0.0, 0.5, 0.5, [buttSettsX1], [buttSettsY1], [buttSettsX2], [buttSettsY2]
-        stdcall Draw.Rect, [buttExitBrdr],  1, 0.0, 0.5, 0.5, [buttExitX1],  [buttExitY1],  [buttExitX2],  [buttExitY2] 
+        stdcall Draw.Rect, [buttStartBrdr], 1, 0.0, 0.5, 0.5, [buttStartX1], [buttStartY1], [buttStartX2], [buttStartY2], [onedd]
+        stdcall Draw.Rect, [buttCardsBrdr], 1, 0.0, 0.5, 0.5, [buttCardsX1], [buttCardsY1], [buttCardsX2],  [buttCardsY2], [onedd]
+        stdcall Draw.Rect, [buttSettsBrdr], 1, 0.0, 0.5, 0.5, [buttSettsX1], [buttSettsY1], [buttSettsX2], [buttSettsY2], [onedd]
+        stdcall Draw.Rect, [buttExitBrdr],  1, 0.0, 0.5, 0.5, [buttExitX1],  [buttExitY1],  [buttExitX2],  [buttExitY2], [onedd]
 
         invoke  SwapBuffers, [hdc]
 
@@ -259,7 +259,9 @@ proc Draw.Window1
         push esi
         
         fld     [cardWidth]
-        fadd    [fivedd]
+        fld  [onedd]
+        fdiv [twodd]
+        faddp
         fst     [x1]
         fstp    [x2]
 
@@ -584,7 +586,7 @@ proc Draw.Window1
                 mul [four]
                 mov esi, eax
 
-                stdcall Draw.Rect, [card1BrdrHandler+ebx], 0, 0, 0, 0, [card1X1+esi], [card1X1+esi+4], [card1X1+esi+8], [card1X1+esi+12] 
+                stdcall Draw.Rect, [card1BrdrHandler+ebx], 0, 0, 0, 0, [card1X1+esi], [card1X1+esi+4], [card1X1+esi+8], [card1X1+esi+12], [onedd] 
 
 
                 jmp .exitDrawingBoard

@@ -45,7 +45,7 @@ targetPos  	            vector3         ?, ?, ?
 upVector 	            vector3         0.0, 1.0, 0.0                      
 camAngle                dd              0.01
 camAngleStep            dd              0.01745320
-camViewRadius           dd              250.0
+camViewRadius           dd              25.0
 ;______________________________________________________________________________    
 
 
