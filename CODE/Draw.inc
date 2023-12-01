@@ -255,12 +255,16 @@ proc Draw.Window1
         invoke glPushMatrix
         fld     [y2]
         fadd    [cardHeight]
+        fld     [onedd]
+        fdiv    [fourdd]
+        fdiv    [fourdd]
+        fsubp
         fstp    [y2]
         push esi
         
         fld     [cardWidth]
-        fld  [onedd]
-        fdiv [twodd]
+        fld     [onedd]
+        fdiv    [twodd]
         faddp
         fst     [x1]
         fstp    [x2]
@@ -450,7 +454,7 @@ proc Draw.Window1
                         sub edi, cardStateMatrix
                         shl edi, 2
                         
-
+                        mov eax, dword[edi+arrTextures]
 
 
                         ; push eax 

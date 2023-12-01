@@ -1,4 +1,4 @@
-proc shuffleArray uses esi edi edx ecx ebx, PArray, length
+proc shuffleArray uses esi edi edx ecx ebx, PArray, PArray2, length
 
     ; for (int i = length-1; i > 0; i--) {
     ;     int j = getRand(0, i);
@@ -7,21 +7,31 @@ proc shuffleArray uses esi edi edx ecx ebx, PArray, length
     ;     array[j] = temp;
     ; }
 
+    
 
     mov esi, [length]
     dec esi
+    shl esi, 2
     mov edi, [PArray]
+    fnop
+    fnop
+    fnop
+    fnop
+    fnop
     @@:
     
-        stdcall getNumberInRange, 0, esi
+        mov edx, esi 
+        shr edx, 2
+        stdcall getNumberInRange, 0, edx
+        shl eax, 2
         mov ebx, eax
-        movzx eax, byte[edi + ebx]
-        xchg al, byte[edi + esi]
-        mov byte[edi + ebx], al        
+        mov eax, dword[edi + ebx]
+        xchg eax, dword[edi + esi]
+        mov dword[edi + ebx], eax        
         
-    mov edx, [edi]
+    ; mov edx, [edi]
 
-    dec esi
+    sub esi, 4
     jg @b
 
     ret

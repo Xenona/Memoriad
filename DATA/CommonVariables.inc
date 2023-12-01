@@ -98,19 +98,19 @@ NUM_OF_VERTS_FOR_CARD_BACK          =       10 * 3
     testPic18 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testh.bmp', 0
     testPic19 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testi.bmp', 0
     testPic20 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testj.bmp', 0
-    testPic21 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic22 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic23 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic24 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic25 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic26 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic27 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic28 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic29 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic30 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic31 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic32 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
-    testPic33 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test1.bmp', 0
+    testPic21 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testk.bmp', 0
+    testPic22 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testl.bmp', 0
+    testPic23 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testm.bmp', 0
+    testPic24 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testn.bmp', 0
+    testPic25 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testo.bmp', 0
+    testPic26 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testp.bmp', 0
+    testPic27 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testq.bmp', 0
+    testPic28 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testr.bmp', 0
+    testPic29 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\tests.bmp', 0
+    testPic30 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testt.bmp', 0
+    testPic31 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testu.bmp', 0
+    testPic32 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testv.bmp', 0
+    testPic33 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testw.bmp', 0
 
 arrTextures dd 32 dup (?)
 cardBackTextureFile db ".\ASSETS\INGAME\CARDBACK.bmp", 0

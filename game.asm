@@ -134,16 +134,23 @@ proc WinMain
         mov edi, arrTextures
         mov esi, testPic2
 
+        ; mov ecx, 16
         mov ecx, 32
         @@:
 
         push ecx
         stdcall Texture.Constructor, edi, esi,\
                             GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
+
+        ;; debug
+        add edi, 4
+        stdcall Texture.Constructor, edi, esi,\
+                        GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
         pop ecx
 
         add edi, 4
         add esi, 49
+        dec ecx 
         loop @b
 
 
@@ -158,7 +165,6 @@ proc WinMain
 endp
 
 proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
- 
  
         switch  dword[windowID] 
         case    0,      .window0                        ; Main menu
@@ -206,7 +212,10 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov eax, dword[objectNumSelected]
                         mov dword[windowID], eax
 
-                        stdcall shuffleArray, cardPicMatrix, 32
+                        nop
+                        ; сделала двойную тасовку, но массив текстур
+                        ; не тасуется, надо чекнуть
+                        stdcall shuffleArray, cardPicMatrix, arrTextures, 32
 
 
 
