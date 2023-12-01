@@ -46,6 +46,7 @@ entry   WinMain
         include         ".\CODE\Vector3.inc"
         include         ".\CODE\Matrix.inc"
         include         ".\CODE\Draw.inc"
+        include         ".\CODE\Random.asm"
         
         include         ".\DATA\CommonVariables.inc"
         include         ".\DATA\FpuConstants.inc"
@@ -124,8 +125,12 @@ proc WinMain
        	invoke wglGetCurrentContext
         stdcall Glext.LoadFunctions
 
+
+        ; ; Loading card back
+        stdcall Texture.Constructor, cardBackTexHandle, cardBackTextureFile,\
+                            GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
        
-        xor eax, eax
+        ; Loading 32 possible textures 
         mov edi, arrTextures
         mov esi, testPic2
 
@@ -140,6 +145,9 @@ proc WinMain
         add edi, 4
         add esi, 49
         loop @b
+
+
+        ; processing other messages
         lea     esi, [msg]
 
         .cycle:
@@ -176,7 +184,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jmp     .Return
 
                 .onPaint0:
-                stdcall Draw.Window0
+                        stdcall Draw.Window0
                 jmp     .ReturnZero
                 
                 .onKeyDown0:
@@ -197,6 +205,8 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         mov eax, dword[objectNumSelected]
                         mov dword[windowID], eax
+
+                        stdcall shuffleArray, cardPicMatrix, 32
 
 
 
@@ -327,11 +337,14 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov esi, [cardsSelected]
                         mov edi, [cardsSelected+4]
 
+                        shl esi, 2
+                        shl edi, 2
+
                         add esi, cardPicMatrix
                         add edi, cardPicMatrix
 
-                        movzx esi, byte[esi]
-                        movzx edi, byte[edi]
+                        mov esi, dword[esi]
+                        mov edi, dword[edi]
 
                         cmp esi, edi
                         jne @f

@@ -439,12 +439,31 @@ proc Draw.Window1
                     
                         .EndInnerLoop:
 
-                        push eax 
-                        mov eax, arrTextures
-                        stdcall PutObject, cardFace, 0, NUM_OF_VERTS_FOR_CARD_FACE, 1, dword[eax], cardTextures
-                        stdcall PutObject, cardBack, 0, NUM_OF_VERTS_FOR_CARD_BACK, 1, dword[arrTextures], cardTextures
-                        pop eax
+                        ; сохоаняю еди чтобы по нему взять индкс из
+                        ; таблицы интексов а поом оттуда лескриптор текстуоы
+                        ; баг 
+                        
+                        fnop
+                        push edi
+                        sub edi, cardStateMatrix
+                        shl edi, 2
+                        
+
+
+
+                        ; push eax 
+                        ; stdcall PutObject, cardFace, 0, NUM_OF_VERTS_FOR_CARD_FACE, 1, dword[cardBackTexHandle], edi
+                        ; stdcall PutObject, cardBack, 0, NUM_OF_VERTS_FOR_CARD_BACK, 1, dword[arrTextures], cardTextures
+                        ; pop eax
+                        ; stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, 0, 0
+                        
+                        
+                        stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, dword[cardBackTexHandle], cardTextures
+                        stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, dword[edi+arrTextures], cardTextures
                         stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, 0, 0
+                        pop edi
+                        
+                        
                         invoke glPopMatrix
                         
 
@@ -539,6 +558,7 @@ proc Draw.Window1
         ;;
         .skipskip:
 
+        invoke  SwapBuffers, [hdc]
 
 
 
@@ -588,6 +608,9 @@ proc Draw.Window1
 endp
 
 proc Draw.Window4
+
+        mov eax, dword[numOfTriedPairs]
+
         invoke  glClearColor, 0.05, 0.1, 0.2, 1.0
         invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
         invoke  glMatrixMode, GL_MODELVIEW
