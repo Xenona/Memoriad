@@ -445,11 +445,6 @@ proc Draw.Window1
                     
                         .EndInnerLoop:
 
-                        ; сохоаняю еди чтобы по нему взять индкс из
-                        ; таблицы интексов а поом оттуда лескриптор текстуоы
-                        ; баг 
-                        
-                        fnop
                         push edi
                         sub edi, cardStateMatrix
                         shl edi, 2
@@ -463,7 +458,7 @@ proc Draw.Window1
                         ; pop eax
                         ; stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, 0, 0
                         
-                        
+                        invoke glColor3f, 1.0, 1.0, 1.0 
                         stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, dword[cardBackTexHandle], cardTextures
                         stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, dword[edi+arrTextures], cardTextures
                         stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, 0, 0
@@ -615,34 +610,33 @@ endp
 
 proc Draw.Window4
 
-        mov eax, dword[numOfTriedPairs]
 
         invoke  glClearColor, 0.05, 0.1, 0.2, 1.0
         invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
         invoke  glMatrixMode, GL_MODELVIEW
-        ; invoke  glLoadIdentity
         invoke  glLoadIdentity
 
 
         mov     dword[cameraPos + vector3.x], 0.0
         mov     dword[cameraPos + vector3.y], 0.0
-        mov     dword[cameraPos + vector3.z], -90.0
+        mov     dword[cameraPos + vector3.z], 90.0
 
         mov     dword[targetPos + vector3.x], 0.0
         mov     dword[targetPos + vector3.y], 0.0
-        mov     dword[targetPos + vector3.z], 100.0
+        mov     dword[targetPos + vector3.z], 0.0
 
         mov     dword[upVector.x], 0.0
         mov     dword[upVector.y], 1.0
         mov     dword[upVector.z], 0.0
         stdcall Matrix.LookAt, cameraPos, targetPos, upVector
 
-        stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, texture11, cardTextures
-        stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, texture11, cardTextures
-        stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, texture11, 0
-        invoke glRotatef, 180.0, 0.0, 42.0, 0.0 
-        invoke glTranslatef, -50.0, 0.0, 00.0
-        invoke glRotatef, 90.0, 100.0, 42.0, 0.0 
+        stdcall Draw.Text, -78.0, 30.0, 0, 1.0, 1.0, 1.0, 0.07, Window2.Congrats, 1
+        stdcall Draw.Text, -18.0, 15.0, 0, 1.0, 1.0, 1.0, 0.07, Window2.ItTook, 1
+
+        stdcall String.IntToStr, dword[numOfTriedPairs], Window2.Number, 0
+        stdcall Draw.Text, -18.0, 0.0, 0, 1.0, 1.0, 1.0, 0.07, Window2.Number, 1
+
+        mov eax, dword[numOfTriedPairs]
 
 
         invoke  SwapBuffers, [hdc]

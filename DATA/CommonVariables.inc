@@ -11,16 +11,24 @@ pfd                     PIXELFORMATDESCRIPTOR   sizeof.PIXELFORMATDESCRIPTOR, 1,
                                                 PFD_FLAGS, PFD_TYPE_RGBA, COLOR_DEPTH,\
                                                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,\
                                                 COLOR_DEPTH, 0, 0, PFD_MAIN_PLANE, 0, PFD_MAIN_PLANE
-
 className               db      "MEMORIAD (C) XENONA GAMES 2023", 0
 clientRect              RECT
 hdc                     dd      ?
 aspect                  dq      ?                       ; width/height 
 windowID                dd      0                       ; shows, which game screen should be drawn
+hex2                    db      0x22
+hex4                    db      0x22
+
+hex5                    db      0x22
+
+hex6                    db      0x22
+
 objectNumSelected       dd      -1
+hex3                    db      0x22
 hinst                   dd      ?
 hCurs1                  dd      ?
 hCurs2                  dd      ?
+
 
 ;______________________________________________________________________________    
 
@@ -63,6 +71,15 @@ Window0.SettsButton     db      "SETTINGS", 0
 Window0.ExitButton      db      "EXIT", 0
 Window0.WelcomeText0    db      "WELCOME TO", 0
 Window0.WelcomeText1    db      "MEMORIAD", 0
+Window2.Congrats        db      "CONGRATS FOR YOU, O WINNER!!!", 0
+Window2.ItTook          db      "IT TOOK", 0
+Window2.Number          db      "                  ", 0
+Window2.MovesToWin      db      "MOVES FOR YOU TO WIN", 0
+Window2.Custom0         db      "SOMEDAY YOU WILL BECOME A LEGEND", 0
+Window2.Custom1         db      "NICE TRY, YOU MADE IT WELL!", 0
+Window2.Custom2         db      "YOU COULD DO IT BETTER", 0
+Window2.Custom3         db      "HOLY MOLY, IT TOOK SO LONG, MAN...", 0
+Window2.ExitHint        db      "press any key to exit.", 0
 
 ;______________________________________________________________________________  
 

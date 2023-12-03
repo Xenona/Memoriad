@@ -13,6 +13,8 @@
 ; 15. Implement horisontal rotation 
 ; 16. Move target calcs outside of the main loop. Probably I need some init()
 ; 17. Rename cursor handles;
+; 19. Fix double imaging (3rd state, use arrows);
+; 20. Fix relative paths; 
 
 format  PE GUI 5.0
 entry   WinMain
@@ -47,6 +49,7 @@ entry   WinMain
         include         ".\CODE\Matrix.inc"
         include         ".\CODE\Draw.inc"
         include         ".\CODE\Random.asm"
+        include         ".\CODE\String.asm"
         
         include         ".\DATA\CommonVariables.inc"
         include         ".\DATA\FpuConstants.inc"
@@ -131,6 +134,16 @@ proc WinMain
                             GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
        
         ; Loading 32 possible textures 
+        
+        ; WARNING FOR FUTURE ME 
+        ; when you are done with window 2,
+        ; return the loop to its state
+        ; at commit 69c1911
+        
+        ; don't forget to consider writing
+        ; a function that will move esi to 
+        ; the next string instead of adding 
+        ; 49 do esi
         mov edi, arrTextures
         mov esi, testPic2
 
@@ -211,13 +224,9 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         mov eax, dword[objectNumSelected]
                         mov dword[windowID], eax
+                        mov dword[objectNumSelected], -1
 
-                        nop
-                        ; сделала двойную тасовку, но массив текстур
-                        ; не тасуется, надо чекнуть
                         stdcall shuffleArray, cardPicMatrix, arrTextures, 32
-
-
 
                 jmp     .ReturnZero
 
@@ -307,9 +316,10 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jmp .ReturnZero
 
                 .onLClick1:
+
                         cmp [canClick], 0
                         je .ReturnZero
-
+                        
                         cmp [objectNumSelected], -1                     ; returning zero if no card is selected
                         je .ReturnZero
 
