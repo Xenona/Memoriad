@@ -559,8 +559,6 @@ proc Draw.Window1
         ;;
         .skipskip:
 
-        invoke  SwapBuffers, [hdc]
-
 
 
         jmp .handleBorders

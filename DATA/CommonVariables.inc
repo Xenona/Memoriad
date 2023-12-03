@@ -16,15 +16,7 @@ clientRect              RECT
 hdc                     dd      ?
 aspect                  dq      ?                       ; width/height 
 windowID                dd      0                       ; shows, which game screen should be drawn
-hex2                    db      0x22
-hex4                    db      0x22
-
-hex5                    db      0x22
-
-hex6                    db      0x22
-
 objectNumSelected       dd      -1
-hex3                    db      0x22
 hinst                   dd      ?
 hCurs1                  dd      ?
 hCurs2                  dd      ?

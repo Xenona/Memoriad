@@ -13,7 +13,6 @@
 ; 15. Implement horisontal rotation 
 ; 16. Move target calcs outside of the main loop. Probably I need some init()
 ; 17. Rename cursor handles;
-; 19. Fix double imaging (3rd state, use arrows);
 ; 20. Fix relative paths; 
 
 format  PE GUI 5.0
