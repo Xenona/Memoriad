@@ -42,3 +42,31 @@ proc String.IntToStr uses edx ebx edi esi ecx, num, buf, startBufPos
 
   ret
 endp
+
+proc String.NextString
+
+  ; this function accepts pointer 
+  ; via esi register and moves the 
+  ; pointer till the next string 
+  ; starts: 
+
+  ; before the call: 
+  ; S T R I N G 0 N E X T S T R I N G 0 
+  ; * 
+
+  ; after the call:
+  ; S T R I N G 0 N E X T S T R I N G 0
+  ;               * 
+
+  ; be sure you have 0s at the ends of 
+  ; all strings (and strings are 1 byte???) 
+
+  @@: 
+  inc esi
+  cmp byte[esi], 0
+  jne @b
+  inc esi
+
+
+  ret 
+endp

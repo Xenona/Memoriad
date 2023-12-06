@@ -335,17 +335,4 @@ card30BrdrHandler         dd      0
 card31BrdrHandler         dd      0
 card32BrdrHandler         dd      0
 
-
-oone    equ     1
-zero   equ     0
-
-vvvv0   equ  -100.0, -100.0, 0 
-vvvv1   equ   -100.0, 100.0, 0
-vvvv2   equ     100.0, 100.0, 0
-vvvv3   equ     100.0, -100.0 ,0
-cubeVertices    dd      vvvv0, vvvv1, vvvv3,\  
-                        vvvv1, vvvv2, vvvv3
  
-
-cubeTexVerts    dd      0, 0, 0, 1.0, 1.0, 0,\
-                        0, 1.0, 1.0, 1.0, 1.0, 0

@@ -163,7 +163,7 @@ proc WinMain
         pop ecx
 
         add edi, 4
-        add esi, 49
+        stdcall String.NextString
         dec ecx 
         loop @b
 

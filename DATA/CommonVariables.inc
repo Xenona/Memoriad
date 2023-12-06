@@ -15,7 +15,7 @@ className               db      "MEMORIAD (C) XENONA GAMES 2023", 0
 clientRect              RECT
 hdc                     dd      ?
 aspect                  dq      ?                       ; width/height 
-windowID                dd      0                       ; shows, which game screen should be drawn
+windowID                dd      1                       ; shows, which game screen should be drawn
 objectNumSelected       dd      -1
 hinst                   dd      ?
 hCurs1                  dd      ?
@@ -44,7 +44,7 @@ cameraPos           	vector3         ?, ?, ?
 targetPos  	            vector3         ?, ?, ? 
 upVector 	            vector3         0.0, 1.0, 0.0                      
 camAngle                dd              0.01
-camAngleStep            dd              0.01745320
+camAngleStep            dd              3.14;0.01745320
 camViewRadius           dd              25.0
 ;______________________________________________________________________________    
 
@@ -88,38 +88,38 @@ NUM_OF_VERTS_FOR_CARD_BACK          =       10 * 3
 ;__TEXTURES: FILENAMES AND ARRAYS______________________________________________ 
 
 
-    testPic2 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test2.bmp', 0
-    testPic3 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test3.bmp', 0
-    testPic4 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test4.bmp', 0
-    testPic5 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test5.bmp', 0
-    testPic6 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test6.bmp', 0
-    testPic7 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test7.bmp', 0
-    testPic8 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test8.bmp', 0
-    testPic9 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\test9.bmp', 0
-    testPic10 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testa.bmp', 0
-    testPic11 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testb.bmp', 0
-    testPic12 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testc.bmp', 0
-    testPic13 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testd.bmp', 0
-    testPic14 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\teste.bmp', 0
-    testPic15 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testk.bmp', 0
-    testPic16 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testf.bmp', 0
-    testPic17 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testg.bmp', 0
-    testPic18 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testh.bmp', 0
-    testPic19 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testi.bmp', 0
-    testPic20 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testj.bmp', 0
-    testPic21 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testk.bmp', 0
-    testPic22 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testl.bmp', 0
-    testPic23 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testm.bmp', 0
-    testPic24 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testn.bmp', 0
-    testPic25 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testo.bmp', 0
-    testPic26 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testp.bmp', 0
-    testPic27 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testq.bmp', 0
-    testPic28 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testr.bmp', 0
-    testPic29 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\tests.bmp', 0
-    testPic30 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testt.bmp', 0
-    testPic31 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testu.bmp', 0
-    testPic32 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testv.bmp', 0
-    testPic33 db 'C:\Users\golub\Desktop\Memoriad\ASSETS\testw.bmp', 0
+    testPic2 db 'ASSETS\CARDS\test2.bmp', 0
+    testPic3 db 'ASSETS\CARDS\test3.bmp', 0
+    testPic4 db 'ASSETS\CARDS\test4.bmp', 0
+    testPic5 db 'ASSETS\CARDS\test5.bmp', 0
+    testPic6 db 'ASSETS\CARDS\test6.bmp', 0
+    testPic7 db 'ASSETS\CARDS\test7.bmp', 0
+    testPic8 db 'ASSETS\CARDS\test8.bmp', 0
+    testPic9 db 'ASSETS\CARDS\test9.bmp', 0
+    testPic10 db 'ASSETS\CARDS\testa.bmp', 0
+    testPic11 db 'ASSETS\CARDS\testb.bmp', 0
+    testPic12 db 'ASSETS\CARDS\testc.bmp', 0
+    testPic13 db 'ASSETS\CARDS\testd.bmp', 0
+    testPic14 db 'ASSETS\CARDS\teste.bmp', 0
+    testPic15 db 'ASSETS\CARDS\testk.bmp', 0
+    testPic16 db 'ASSETS\CARDS\testf.bmp', 0
+    testPic17 db 'ASSETS\CARDS\testg.bmp', 0
+    testPic18 db 'ASSETS\CARDS\testh.bmp', 0
+    testPic19 db 'ASSETS\CARDS\testi.bmp', 0
+    testPic20 db 'ASSETS\CARDS\testj.bmp', 0
+    testPic21 db 'ASSETS\CARDS\testk.bmp', 0
+    testPic22 db 'ASSETS\CARDS\testl.bmp', 0
+    testPic23 db 'ASSETS\CARDS\testm.bmp', 0
+    testPic24 db 'ASSETS\CARDS\testn.bmp', 0
+    testPic25 db 'ASSETS\CARDS\testo.bmp', 0
+    testPic26 db 'ASSETS\CARDS\testp.bmp', 0
+    testPic27 db 'ASSETS\CARDS\testq.bmp', 0
+    testPic28 db 'ASSETS\CARDS\testr.bmp', 0
+    testPic29 db 'ASSETS\CARDS\tests.bmp', 0
+    testPic30 db 'ASSETS\CARDS\testt.bmp', 0
+    testPic31 db 'ASSETS\CARDS\testu.bmp', 0
+    testPic32 db 'ASSETS\CARDS\testv.bmp', 0
+    testPic33 db 'ASSETS\CARDS\testw.bmp', 0
 
 arrTextures dd 32 dup (?)
 cardBackTextureFile db ".\ASSETS\INGAME\CARDBACK.bmp", 0

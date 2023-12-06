@@ -38,6 +38,12 @@ proc File.LoadBmp uses edi,\
         endl
 
         invoke  CreateFile, [fileName], GENERIC_READ, ebx, ebx, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, ebx
+        
+        ; DEBUGGGGGG
+        nop
+        push eax
+        invoke GetLastError
+        pop eax
         mov     [hFile], eax
 
         invoke  GetFileSize, [hFile], ebx
