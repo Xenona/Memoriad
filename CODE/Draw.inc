@@ -583,7 +583,7 @@ proc Draw.Window1
                 mul [four]
                 mov esi, eax
 
-                stdcall Draw.Rect, [card1BrdrHandler+ebx], 0, 0, 0, 0, [card1X1+esi], [card1X1+esi+4], [card1X1+esi+8], [card1X1+esi+12], [onedd] 
+                stdcall Draw.Rect, [card1BrdrHandler+ebx], 0, 0.0, 0.5, 0.5, [card1X1+esi], [card1X1+esi+4], [card1X1+esi+8], [card1X1+esi+12], [onedd] 
 
 
                 jmp .exitDrawingBoard
@@ -606,6 +606,9 @@ proc Draw.Window1
         ret
 endp
 
+proc Draw.Window2 
+        ret
+endp
 proc Draw.Window4
 
 
@@ -614,6 +617,7 @@ proc Draw.Window4
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
 
+        invoke glColor3f, 1.0, 1.0, 1.0 
 
         mov     dword[cameraPos + vector3.x], 0.0
         mov     dword[cameraPos + vector3.y], 0.0
@@ -629,13 +633,43 @@ proc Draw.Window4
         stdcall Matrix.LookAt, cameraPos, targetPos, upVector
 
         stdcall Draw.Text, -78.0, 30.0, 0, 1.0, 1.0, 1.0, 0.07, Window2.Congrats, 1
-        stdcall Draw.Text, -18.0, 15.0, 0, 1.0, 1.0, 1.0, 0.07, Window2.ItTook, 1
+        stdcall Draw.Text, -18.0, 20.0, 0, 1.0, 1.0, 1.0, 0.07, Window2.ItTook, 1
 
+        mov ecx, 18
+        mov edi, Window2.Number
+        mov eax, ' '
+        rep stosb
         stdcall String.IntToStr, dword[numOfTriedPairs], Window2.Number, 0
-        stdcall Draw.Text, -18.0, 0.0, 0, 1.0, 1.0, 1.0, 0.07, Window2.Number, 1
+        stdcall Draw.Text, 0.0, 10.0, 0, 1.0, 1.0, 1.0, 0.07, Window2.Number, 1
+        stdcall Draw.Text, -56.0, 0.0, 0, 1.0, 1.0, 1.0, 0.07, Window2.MovesToWin, 1
 
+
+        cmp dword[numOfTriedPairs], 16
+        jle best
+        cmp dword[numOfTriedPairs], 50
+        jle nice
+        cmp dword[numOfTriedPairs], 80
+        jle well 
+        mov edi, Window2.Custom3
+        jmp @f
+        
+        best:
+        mov edi, Window2.Custom0
+        jmp @f
+
+        well: 
+        mov edi, Window2.Custom1
+        jmp @f 
+
+        nice:
+        mov edi, Window2.Custom2
+        jmp @f
+
+        @@:
+        stdcall Draw.Text, -84.0, -20.0, 0, 1.0, 1.0, 1.0, 0.06, edi, 1
         mov eax, dword[numOfTriedPairs]
 
+        stdcall Draw.Text, -90.0, -50.0, 0, 1.0, 1.0, 1.0, 0.05, Window2.ExitHint, 1
 
         invoke  SwapBuffers, [hdc]
 

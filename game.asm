@@ -14,6 +14,8 @@
 ; 16. Move target calcs outside of the main loop. Probably I need some init()
 ; 17. Rename cursor handles;
 ; 20. Fix relative paths; 
+; 21. Fix yellow yellow yellow after return to window 0;
+; 22. Fix multiple hovers in main menu (probably I need break in On.Hover, dunno)
 
 format  PE GUI 5.0
 entry   WinMain
@@ -181,7 +183,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
         switch  dword[windowID] 
         case    0,      .window0                        ; Main menu
         case    1,      .window1                        ; Game screen
-        ; case    2,                                    ; View all cards
+        case    2,      .window2                        ; View all cards
         ; case  3,                                      ; Settings 
         case    4,      .window4                        ; Game over screen
 
@@ -225,7 +227,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov dword[windowID], eax
                         mov dword[objectNumSelected], -1
 
-                        stdcall shuffleArray, cardPicMatrix, arrTextures, 32
+                        ; stdcall shuffleArray, cardPicMatrix, arrTextures, 32
 
                 jmp     .ReturnZero
 
@@ -384,6 +386,57 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 jmp .ReturnZero
 
+        .window2: 
+
+                switch  [uMsg]
+                case    WM_PAINT,       .onPaint2
+                case    WM_DESTROY,     .onDestroy
+                case    WM_KEYDOWN,     .onKeyDown2
+                case    WM_MOUSEMOVE,   .onMouseMove2
+                case    WM_LBUTTONDOWN, .onLClick2
+
+
+
+                jmp .ReturnZero
+
+
+                invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
+
+                jmp     .Return
+
+                .onPaint2:
+                        stdcall Draw.Window2
+ 
+                jmp     .ReturnZero
+                
+                .onKeyDown2:
+                        switch [wParam]
+                        case VK_ESCAPE, .onDestroy
+ 
+                jmp     .ReturnZero
+                
+                .onMouseMove2: 
+
+                        mov eax, [lParam]
+                        movsx ebx, ax
+                        mov dword[mouseX], ebx
+                        sar eax, 16 
+                        mov [mouseY], eax
+
+                        stdcall On.Hover, 32, card1X1, card1BrdrHandler
+
+                jmp .ReturnZero
+
+               
+
+                .onLClick2:
+
+                       
+
+                jmp .ReturnZero
+
+                
+
         .window4:
                 xor     ebx, ebx
 
@@ -403,6 +456,8 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 .onKeyDown4:
                         switch [wParam]
                         case VK_ESCAPE, .onDestroy
+
+                        mov [windowID], 0
                 jmp     .ReturnZero
 
                 .onMouseMove4:

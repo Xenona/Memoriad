@@ -68,10 +68,10 @@ Window2.ItTook          db      "IT TOOK", 0
 Window2.Number          db      "                  ", 0
 Window2.MovesToWin      db      "MOVES FOR YOU TO WIN", 0
 Window2.Custom0         db      "SOMEDAY YOU WILL BECOME A LEGEND", 0
-Window2.Custom1         db      "NICE TRY, YOU MADE IT WELL!", 0
-Window2.Custom2         db      "YOU COULD DO IT BETTER", 0
+Window2.Custom1         db      "THAT'S NICE TRY, YOU MADE IT WELL!", 0
+Window2.Custom2         db      " YOU DEFINITELY COULD DO IT BETTER", 0
 Window2.Custom3         db      "HOLY MOLY, IT TOOK SO LONG, MAN...", 0
-Window2.ExitHint        db      "press any key to exit.", 0
+Window2.ExitHint        db      "press any key to exit to main menu.", 0
 
 ;______________________________________________________________________________  
 
