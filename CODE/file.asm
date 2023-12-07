@@ -40,7 +40,6 @@ proc File.LoadBmp uses edi,\
         invoke  CreateFile, [fileName], GENERIC_READ, ebx, ebx, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, ebx
         
         ; DEBUGGGGGG
-        nop
         push eax
         invoke GetLastError
         pop eax
@@ -61,5 +60,108 @@ proc File.LoadBmp uses edi,\
 
         mov     eax, [pBuffer]
 
+        ret
+endp
+
+                currFile        WIN32_FIND_DATA ? 
+
+                exePath         dd MAX_PATH dup (?) 
+
+proc File.GetFilesInDirectory, dirPath
+        
+        ;         std::vector<DWORD> GetFilesInDirectory(const TCHAR* directoryPath) {
+        ;     std::vector<DWORD> files;
+
+        ;     WIN32_FIND_DATA findFileData;
+        ;     HANDLE hFind = FindFirstFile(directoryPath, &findFileData);
+
+
+        ;     do {
+        ;         if (!(findFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+
+        ;             files.push_back( findFileData.cFileName);
+        ;         }
+        ;     } while (FindNextFile(hFind, &findFileData) != 0);
+
+        ;     FindClose(hFind);
+        ;     return files;
+        ; }
+
+        ; *char[260] filenames = malloc(for 32 * 260);
+        ; 
+
+
+        locals
+                filenamesArray  dd ? 
+                hFind           dd ?  
+                numberOfFiles   dd 0
+                capacity        dd 16
+                currentArrayPointer dd ?
+        endl
+
+        nop 
+
+        stdcall mallocCustom, 16*260
+        mov [filenamesArray], eax
+        mov [currentArrayPointer], eax
+        
+        invoke FindFirstFile, cardsPath, currFile
+        mov [hFind], eax 
+
+        ; invoke GetModuleFileName, NULL, exePath, MAX_PATH
+
+        @@:
+
+                mov eax, dword[currFile + WIN32_FIND_DATA.dwFileAttributes]
+                and eax, FILE_ATTRIBUTE_DIRECTORY
+
+                cmp eax, 0
+                jnz .skip 
+
+                        inc [numberOfFiles]
+
+                        ;files.push_back( findFileData.cFileName);
+                        mov eax, [capacity]
+                        cmp eax, [numberOfFiles]
+                        jg .justPut
+                       
+                        .ReallocAndPut:
+
+                        mov eax, [capacity]
+                        shl eax, 1
+                        mov [capacity], eax
+                        mov eax, MAX_PATH
+                        mul [capacity]
+                        stdcall reallocCustom, [filenamesArray], eax
+                        mov [filenamesArray], eax
+                        mov eax, MAX_PATH
+                        mul [numberOfFiles]
+                        sub eax, MAX_PATH
+                        mov ebx, [filenamesArray]
+                        add ebx, eax
+                        mov [currentArrayPointer], ebx
+
+                        .justPut:
+                        mov ecx, MAX_PATH
+                        mov edi, [currentArrayPointer] 
+                        mov esi, currFile
+                        add esi, WIN32_FIND_DATA.cFileName
+                        rep movsb   
+
+                        mov [currentArrayPointer], edi 
+
+
+                .skip:
+
+
+        invoke FindNextFile, [hFind], currFile
+        cmp eax, 0
+        jnz @b
+
+        invoke FindClose, [hFind]
+
+
+
+        
         ret
 endp

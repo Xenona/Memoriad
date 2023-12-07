@@ -70,3 +70,25 @@ proc String.NextString
 
   ret 
 endp
+
+proc String.Len
+
+  ; supposes that string pointer
+  ; lies in esi
+
+  ; returnes the length in eax
+
+  push esi 
+  xor eax, eax
+  @@: 
+  cmp byte[esi], 0
+  je .counted
+  inc esi
+  inc eax
+  jnz @b
+
+  pop esi  
+
+  .counted
+  ret 
+endp

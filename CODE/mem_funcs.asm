@@ -3,6 +3,9 @@ proc memInit
 
     invoke  GetProcessHeap
     mov     [hHeap], eax
+    invoke  HeapCreate, 0, 0, 0
+    mov     [hCustomHeap], eax
+
 
     ret
 endp
@@ -16,6 +19,23 @@ proc malloc\
     ret
 endp
 
+proc mallocCustom, sizeInBytes
+
+    invoke HeapAlloc, [hCustomHeap], 8, [sizeInBytes]
+    ret 
+endp 
+
+proc reallocCustom, sizeInBytes
+ 
+    invoke  HeapReAlloc, [hCustomHeap], 8, [ptr], [sizeInBytes]
+    ret 
+endp
+
+proc freeCustom, ptrMem
+
+    invoke HeapFree, [hCustomHeap], 8, [ptrMem]
+    ret 
+endp
 ; Release memory that was allocated
 proc free\
     ptrMem

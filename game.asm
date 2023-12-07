@@ -13,10 +13,9 @@
 ; 15. Implement horisontal rotation 
 ; 16. Move target calcs outside of the main loop. Probably I need some init()
 ; 17. Rename cursor handles;
-; 20. Fix relative paths; 
 ; 21. Fix yellow yellow yellow after return to window 0;
 ; 22. Fix multiple hovers in main menu (probably I need break in On.Hover, dunno)
-
+; 23. Check file path string for having 3f ('?'). If present, sub edi, MAX_PATH   
 format  PE GUI 5.0
 entry   WinMain
 
@@ -51,6 +50,9 @@ entry   WinMain
         include         ".\CODE\Draw.inc"
         include         ".\CODE\Random.asm"
         include         ".\CODE\String.asm"
+        include         ".\CODE\mem_funcs.asm"
+        include         ".\CODE\Texture.asm"
+        include         ".\CODE\file.asm"
         
         include         ".\DATA\CommonVariables.inc"
         include         ".\DATA\FpuConstants.inc"
@@ -58,10 +60,7 @@ entry   WinMain
         include         ".\INCLUDE\glext.inc"
         include         ".\INCLUDE\memory.inc"
         include         ".\INCLUDE\texture.inc"
-        include         ".\CODE\Texture.asm"
-        include         ".\CODE\file.asm"
         include         ".\INCLUDE\internal\memory\glext.asm"
-        include         ".\CODE\mem_funcs.asm"
         include         ".\INCLUDE\internal\string\string_funcs.asm"
 
 
@@ -130,6 +129,7 @@ proc WinMain
         stdcall Glext.LoadFunctions
 
 
+
         ; ; Loading card back
         stdcall Texture.Constructor, cardBackTexHandle, cardBackTextureFile,\
                             GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
@@ -141,10 +141,6 @@ proc WinMain
         ; return the loop to its state
         ; at commit 69c1911
         
-        ; don't forget to consider writing
-        ; a function that will move esi to 
-        ; the next string instead of adding 
-        ; 49 do esi
         mov edi, arrTextures
         mov esi, testPic2
 
@@ -166,6 +162,8 @@ proc WinMain
         stdcall String.NextString
         dec ecx 
         loop @b
+
+        stdcall File.GetFilesInDirectory, cardsPath
 
 
         ; processing other messages
