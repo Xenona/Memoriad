@@ -124,6 +124,6 @@ NUM_OF_VERTS_FOR_CARD_BACK          =       10 * 3
 arrTextures dd 32 dup (?)
 cardBackTextureFile db ".\ASSETS\INGAME\CARDBACK.bmp", 0
 cardBackTexHandle dw ?
-
 cardsPath db "C:\Users\golub\Desktop\Memoriad\ASSETS\CARDS\*.bmp", 0
+cardsFolderPath db "ASSETS\CARDS\", 0
 ;______________________________________________________________________________ 

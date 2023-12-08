@@ -25,7 +25,7 @@ proc mallocCustom, sizeInBytes
     ret 
 endp 
 
-proc reallocCustom, sizeInBytes
+proc reallocCustom, ptr, sizeInBytes
  
     invoke  HeapReAlloc, [hCustomHeap], 8, [ptr], [sizeInBytes]
     ret 

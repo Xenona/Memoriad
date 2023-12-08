@@ -99,16 +99,33 @@ proc File.GetFilesInDirectory, dirPath
                 currentArrayPointer dd ?
         endl
 
-        nop 
 
         stdcall mallocCustom, 16*260
         mov [filenamesArray], eax
         mov [currentArrayPointer], eax
         
+        nop 
+
         invoke FindFirstFile, cardsPath, currFile
         mov [hFind], eax 
 
-        ; invoke GetModuleFileName, NULL, exePath, MAX_PATH
+        invoke GetModuleFileName, NULL, exePath, MAX_PATH
+        mov esi, exePath
+        stdcall String.NextString
+        stdcall String.FindLastAppearanceOf, 92 ; \ char
+        mov edi, cardsFolderPath
+        push esi 
+        push edi 
+        mov esi, cardsFolderPath
+        stdcall String.Len
+        pop edi
+        pop esi 
+        xchg edi, esi
+        mov ecx, eax 
+        rep movsb 
+        xchg edi, esi
+        mov byte[esi], 0
+
 
         @@:
 
@@ -142,8 +159,18 @@ proc File.GetFilesInDirectory, dirPath
                         mov [currentArrayPointer], ebx
 
                         .justPut:
-                        mov ecx, MAX_PATH
+
                         mov edi, [currentArrayPointer] 
+
+                        mov esi, exePath
+                        stdcall String.Len
+                        mov ecx, eax
+                        mov ebx, eax
+                        rep movsb
+
+                        mov ecx, MAX_PATH
+                        sub ecx, ebx
+
                         mov esi, currFile
                         add esi, WIN32_FIND_DATA.cFileName
                         rep movsb   

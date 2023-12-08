@@ -16,6 +16,7 @@
 ; 21. Fix yellow yellow yellow after return to window 0;
 ; 22. Fix multiple hovers in main menu (probably I need break in On.Hover, dunno)
 ; 23. Check file path string for having 3f ('?'). If present, sub edi, MAX_PATH   
+; 24. Rewrite CardsPath to a relative path
 format  PE GUI 5.0
 entry   WinMain
 
@@ -83,7 +84,7 @@ proc WinMain
                 msg             MSG
         endl
 
-        xor     ebx, ebx
+        xor ebx, ebx
 
         stdcall memInit
 
@@ -128,6 +129,8 @@ proc WinMain
        	invoke wglGetCurrentContext
         stdcall Glext.LoadFunctions
 
+        stdcall File.GetFilesInDirectory, cardsPath
+        fnop 
 
 
         ; ; Loading card back
@@ -163,7 +166,6 @@ proc WinMain
         dec ecx 
         loop @b
 
-        stdcall File.GetFilesInDirectory, cardsPath
 
 
         ; processing other messages

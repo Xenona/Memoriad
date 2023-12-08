@@ -87,8 +87,26 @@ proc String.Len
   inc eax
   jnz @b
 
-  pop esi  
 
-  .counted
+  .counted:
+  pop esi  
+  ret 
+endp
+
+proc String.FindLastAppearanceOf uses edi, char 
+
+  ; assuming that string lies in esi
+  ; returns pointer to next char
+  ; after the one that was looked for 
+  ; in esi
+
+  mov edi, esi
+  mov al, byte[char]
+  std 
+  repnz scasb
+  cld 
+  mov esi, edi
+  add esi, 2
+
   ret 
 endp
