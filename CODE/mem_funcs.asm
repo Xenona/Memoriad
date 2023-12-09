@@ -3,8 +3,8 @@ proc memInit
 
     invoke  GetProcessHeap
     mov     [hHeap], eax
-    invoke  HeapCreate, 0, 0, 0
-    mov     [hCustomHeap], eax
+    ; invoke  HeapCreate, 0, 0, 0
+    ; mov     [hCustomHeap], eax
 
 
     ret

@@ -110,3 +110,18 @@ proc String.FindLastAppearanceOf uses edi, char
 
   ret 
 endp
+
+
+proc String.SkipZeros
+
+  ; assumes sting pointer in esi 
+  ; moves till next non-zero char 
+
+  @@: 
+
+  inc esi
+  cmp byte[esi], 0
+  je @b
+  dec esi
+  ret 
+endp 

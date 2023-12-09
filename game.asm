@@ -129,9 +129,7 @@ proc WinMain
        	invoke wglGetCurrentContext
         stdcall Glext.LoadFunctions
 
-        stdcall File.GetFilesInDirectory, cardsPath
         fnop 
-
 
         ; ; Loading card back
         stdcall Texture.Constructor, cardBackTexHandle, cardBackTextureFile,\
@@ -139,34 +137,25 @@ proc WinMain
        
         ; Loading 32 possible textures 
         
-        ; WARNING FOR FUTURE ME 
-        ; when you are done with window 2,
-        ; return the loop to its state
-        ; at commit 69c1911
-        
-        mov edi, arrTextures
-        mov esi, testPic2
+        pusha 
+        stdcall File.GetFilesInDirectory, cardsPath
+        popa
 
-        ; mov ecx, 16
+        mov edi, arrTextures
+        mov esi, dword[filenamesArrayHandle]
         mov ecx, 32
         @@:
 
         push ecx
         stdcall Texture.Constructor, edi, esi,\
-                            GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
+                            GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE   
 
-        ;; debug
-        add edi, 4
-        stdcall Texture.Constructor, edi, esi,\
-                        GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
+
         pop ecx
 
         add edi, 4
-        stdcall String.NextString
-        dec ecx 
+        add esi, MAX_PATH
         loop @b
-
-
 
         ; processing other messages
         lea     esi, [msg]

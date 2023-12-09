@@ -100,12 +100,10 @@ proc File.GetFilesInDirectory, dirPath
         endl
 
 
-        stdcall mallocCustom, 16*260
+        stdcall malloc, 16*260
         mov [filenamesArray], eax
         mov [currentArrayPointer], eax
         
-        nop 
-
         invoke FindFirstFile, cardsPath, currFile
         mov [hFind], eax 
 
@@ -137,7 +135,7 @@ proc File.GetFilesInDirectory, dirPath
 
                         inc [numberOfFiles]
 
-                        ;files.push_back( findFileData.cFileName);
+        ;                 ;files.push_back( findFileData.cFileName);
                         mov eax, [capacity]
                         cmp eax, [numberOfFiles]
                         jg .justPut
@@ -149,7 +147,7 @@ proc File.GetFilesInDirectory, dirPath
                         mov [capacity], eax
                         mov eax, MAX_PATH
                         mul [capacity]
-                        stdcall reallocCustom, [filenamesArray], eax
+                        stdcall realloc, [filenamesArray], eax
                         mov [filenamesArray], eax
                         mov eax, MAX_PATH
                         mul [numberOfFiles]
@@ -186,8 +184,8 @@ proc File.GetFilesInDirectory, dirPath
         jnz @b
 
         invoke FindClose, [hFind]
-
-
+        mov eax, [filenamesArray]
+        mov [filenamesArrayHandle], eax
 
         
         ret
