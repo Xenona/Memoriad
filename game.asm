@@ -408,8 +408,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 jmp .ReturnZero
 
-
-                invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
+                        invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
 
                 jmp     .Return
 

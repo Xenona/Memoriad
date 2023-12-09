@@ -92,5 +92,5 @@ cardBackTextureFile db ".\ASSETS\INGAME\CARDBACK.bmp", 0
 cardsPath db "C:\Users\golub\Desktop\Memoriad\ASSETS\CARDS\*.bmp", 0
 cardsFolderPath db "ASSETS\CARDS\", 0
 filenamesArrayHandle dd 0
-cardBackTexHandle dw 0
+cardBackTexHandle dd 0
 ;______________________________________________________________________________ 

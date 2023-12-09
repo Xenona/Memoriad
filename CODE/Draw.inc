@@ -584,6 +584,8 @@ proc Draw.Window1
                 mul [four]
                 mov esi, eax
 
+                stdcall Texture.Unbind, GL_TEXTURE_2D, 0
+
                 stdcall Draw.Rect, [card1BrdrHandler+ebx], 0, 0.0, 0.5, 0.5, [card1X1+esi], [card1X1+esi+4], [card1X1+esi+8], [card1X1+esi+12], [onedd] 
 
 
