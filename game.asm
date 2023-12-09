@@ -135,8 +135,13 @@ proc WinMain
         stdcall Texture.Constructor, cardBackTexHandle, cardBackTextureFile,\
                             GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE
        
-        ; Loading 32 possible textures 
-        
+        ; Loading 32 possible textures DEBUG DEBUG DEBUG 
+
+        ; mov ecx, 8
+        ; .testloop:
+        ; push ecx
+        ; pusha 
+
         pusha 
         stdcall File.GetFilesInDirectory, cardsPath
         popa
@@ -156,6 +161,23 @@ proc WinMain
         add edi, 4
         add esi, MAX_PATH
         loop @b
+
+        nop 
+        mov esi, arrTextures
+        mov ecx, 32
+        @@: 
+        push ecx
+        stdcall Texture.Delete, esi
+        pop ecx
+        mov dword[esi], 0
+        add esi, 4
+
+        loop @b
+
+        ; popa
+        ; pop ecx
+        ; loop .testloop
+        ; DEBUG DEBUG DEBUG
 
         ; processing other messages
         lea     esi, [msg]
