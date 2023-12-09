@@ -131,6 +131,7 @@ proc Draw.Window0
 
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
+        stdcall Texture.Unbind, GL_TEXTURE_2D, 0
 
 
         mov     dword[cameraPos + vector3.x], 0.0
@@ -607,6 +608,24 @@ proc Draw.Window1
 endp
 
 proc Draw.Window2 
+
+        locals 
+                x1 dd 0
+                x2 dd 0
+                y1 dd 0 
+                y2 dd 0
+        endl
+
+        invoke  glClearColor, 0.05, 0.1, 0.2, 1.0
+        invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
+        invoke  glMatrixMode, GL_MODELVIEW
+        invoke  glLoadIdentity
+        invoke glColor3f, 1.0, 1.0, 1.0 
+
+
+
+        invoke  SwapBuffers, [hdc]
+
         ret
 endp
 proc Draw.Window4
@@ -618,6 +637,7 @@ proc Draw.Window4
         invoke  glLoadIdentity
 
         invoke glColor3f, 1.0, 1.0, 1.0 
+        stdcall Texture.Unbind, GL_TEXTURE_2D, 0
 
         mov     dword[cameraPos + vector3.x], 0.0
         mov     dword[cameraPos + vector3.y], 0.0

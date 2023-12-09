@@ -2,18 +2,13 @@
 ; 3. Find a way to print some cyrillic too (is this really necessary? thou, can be done with p.5)
 ; 4. Reduce all local fpu temp variables using only one in mem
 ; 5. Recompile glut32.dll with corrected chars display
-; 6. Optimize memory usage: push vertices of all objs I use once, pass to opengl stackaddr, then ret N or add esp N
-; 7. On.Hover counts objects from 1, card screen awaits for 0 
-; 9. Loop DrawRect in Draw.Window0
 ; 10. Create consts for 1-4 card states to get rid of all magic numbers
 ; 11. Refactor and revise all funcs in terms to reduce their size 
 ; 12. Get rid of array of card vertices when checking hover just by recalculating card position 
-; 13. Return cursor to its normal state
 ; 14. Use heap to store all my 680b of cards data
 ; 15. Implement horisontal rotation 
 ; 16. Move target calcs outside of the main loop. Probably I need some init()
 ; 17. Rename cursor handles;
-; 21. Fix yellow yellow yellow after return to window 0;
 ; 22. Fix multiple hovers in main menu (probably I need break in On.Hover, dunno)
 ; 23. Check file path string for having 3f ('?'). If present, sub edi, MAX_PATH   
 ; 24. Rewrite CardsPath to a relative path
@@ -162,17 +157,16 @@ proc WinMain
         add esi, MAX_PATH
         loop @b
 
-        nop 
-        mov esi, arrTextures
-        mov ecx, 32
-        @@: 
-        push ecx
-        stdcall Texture.Delete, esi
-        pop ecx
-        mov dword[esi], 0
-        add esi, 4
-
-        loop @b
+        ; nop 
+        ; mov esi, arrTextures
+        ; mov ecx, 32
+        ; @@: 
+        ; push ecx
+        ; stdcall Texture.Delete, esi
+        ; pop ecx
+        ; mov dword[esi], 0
+        ; add esi, 4
+        ; loop @b
 
         ; popa
         ; pop ecx
@@ -276,10 +270,14 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 
                 .onKeyDown1:
                         switch [wParam]
-                        case VK_ESCAPE, .onDestroy
+                        case VK_ESCAPE, .ReturnToMenu
                         case VK_DOWN, .decCamAngle
                         case VK_UP, .incCamAngle
                 jmp     .ReturnZero
+
+                .ReturnToMenu: 
+                        mov [windowID], 0
+                jmp .ReturnZero 
                 
                 .onMouseMove1: 
 
