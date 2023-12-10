@@ -101,9 +101,8 @@ arrTextures dd 32 dup (0)
 
 ;__ WINDOW 2 (CARDS SELECTION)_________________________________________________
 
-topScrollLevel dd 100
-bottomScrollLevel dd -100
-currentScrollLevel dd 100 
+topScrollLevel dd 76.0
+currentScrollLevel dd 0 
 brush dd 0
 currTexArray dd 32 dup (0)
 

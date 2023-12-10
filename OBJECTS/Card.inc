@@ -301,6 +301,9 @@ numOfGuessedPairs       dd      0           ; up to 16
         card32X2       dd      ?
         card32Y2       dd      ?
 
+        Palette1x1     dd      ?
+
+
 
 card1BrdrHandler         dd      0
 card2BrdrHandler         dd      0

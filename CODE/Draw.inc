@@ -626,26 +626,28 @@ proc Draw.Window2
   
         ; todo: return curr high scroll threshold to init  
 
-        mov     dword[cameraPos + vector3.x], 30.0
-        fld     dword[cardHeight]
-        fsub    dword[onedd]
+        mov     dword[cameraPos + vector3.x], 20.0              ; camera.x <- 20
+        fld     dword[cardHeight]                               
+        fsub    dword[onedd]                                    
         fmul    dword[fourdd]
         fmul    dword[fourdd]
         fld     dword[marginY]
         fmul    dword[fourdd]
         fmul    dword[fourdd]
-        fsub    dword[onedd]
+        fsub    dword[threedd]
         faddp
-        fst     dword[cameraPos + vector3.y]
-        fstp    dword[targetPos + vector3.y]
-        mov     dword[cameraPos + vector3.z], 30.0
+        fsub    dword[currentScrollLevel]
+                        nop
+        fst     dword[cameraPos + vector3.y]                    ; camera.y <- (cardHeight-1)*16+(marginY*16-2)-currLevel
+        fstp    dword[targetPos + vector3.y]                    ; target.y <- (cardHeight-1)*16+(marginY*16-2)-currLevel
+        mov     dword[cameraPos + vector3.z], 20.0              ; camera.z <- 20
 
-        mov     dword[targetPos + vector3.x], 30.0
-        mov     dword[targetPos + vector3.z], 0.0
+        mov     dword[targetPos + vector3.x], 20.0              ; target.x <- 20
+        mov     dword[targetPos + vector3.z], 0.0               ; target.z <- 0
 
-        mov     dword[upVector.x], 0.0
-        mov     dword[upVector.y], 1.0
-        mov     dword[upVector.z], 0.0
+        mov     dword[upVector.x], 0.0                          ; up.x <- 0 
+        mov     dword[upVector.y], 1.0                          ; up.y <- 1
+        mov     dword[upVector.z], 0.0                          ; up.z <- 0
         stdcall Matrix.LookAt, cameraPos, targetPos, upVector
  
 
@@ -725,7 +727,10 @@ proc Draw.Window2
         dec esi
         cmp esi, 0
         jne .DrawLeftRows       
-        invoke glPopMatrix                                       
+        invoke glPopMatrix      
+
+
+
 
         mov [canClick], 0 
         jmp .handleBorders

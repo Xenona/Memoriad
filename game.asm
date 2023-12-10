@@ -419,7 +419,37 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         switch [wParam]
                         case VK_ESCAPE, .ReturnToMenu
+                        case VK_DOWN, .scrollDown
+                        case VK_UP, .scrollUp
  
+
+                jmp     .ReturnZero
+
+                .scrollDown: 
+                        fld     dword[currentScrollLevel]
+                        fld     dword[topScrollLevel]
+                        fcompp                          ; currentScrollLevel < topScrollLevel ? 
+                        fstsw   ax                      ; saving status word
+                        shr     ax,  9                  ; ectracting res of cmp 
+                        jc      .ReturnZero             ; nc => (?) == true
+
+                        fld     dword[currentScrollLevel]
+                        fadd    dword[onedd]
+                        fstp    dword[currentScrollLevel]
+
+                jmp     .ReturnZero
+
+                .scrollUp: 
+                        fld     dword[currentScrollLevel]
+                        fldz
+                        fcompp 
+                        fstsw   ax
+                        shr     ax, 9
+                        jnc      .ReturnZero
+
+                        fld     dword[currentScrollLevel]
+                        fsub    dword[onedd]
+                        fstp    dword[currentScrollLevel]
 
                 jmp     .ReturnZero
 
