@@ -172,16 +172,17 @@ endp
 
 proc Draw.Window1
         locals
-                x1 dd 0 
-                x2 dd 0
-                y1 dd 0
-                y2 dd 0 
-                cardRotCurrAng dd 0
-                pointerCardAng dd 0
-                numberOf3      dd 0                   ; UP TO 2 
-                numberOf234    dd 0                   ; UP TO 2
-                currTime       dd 0
+                x1                      dd       0 
+                x2                      dd       0
+                y1                      dd       0
+                y2                      dd       0 
+                cardRotCurrAng          dd       0
+                pointerCardAng          dd       0
+                numberOf3               dd       0                   ; UP TO 2 
+                numberOf234             dd       0                   ; UP TO 2
+                currTime                dd       0
         endl
+
         invoke  glClearColor, 0.05, 0.1, 0.2, 1.0
         invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
         invoke  glMatrixMode, GL_MODELVIEW
@@ -256,10 +257,10 @@ proc Draw.Window1
         invoke glPushMatrix
         fld     [y2]
         fadd    [cardHeight]
-        fld     [onedd]
-        fdiv    [fourdd]
-        fdiv    [fourdd]
-        fsubp
+        ; fld     [onedd]
+        ; fdiv    [fourdd]
+        ; fdiv    [fourdd]
+        ; fsubp
         fstp    [y2]
         push esi
         
@@ -611,24 +612,162 @@ endp
 
 proc Draw.Window2 
 
-        locals 
-                x1 dd 0
-                x2 dd 0
-                y1 dd 0 
-                y2 dd 0
+        locals
+                x1                      dd       0 
+                x2                      dd       0
+                y1                      dd       0
+                y2                      dd       0 
         endl
 
         invoke  glClearColor, 0.05, 0.1, 0.2, 1.0
         invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
-        invoke glColor3f, 1.0, 1.0, 1.0 
+  
+        ; todo: return curr high scroll threshold to init  
+
+        mov     dword[cameraPos + vector3.x], 30.0
+        fld     dword[cardHeight]
+        fsub    dword[onedd]
+        fmul    dword[fourdd]
+        fmul    dword[fourdd]
+        fld     dword[marginY]
+        fmul    dword[fourdd]
+        fmul    dword[fourdd]
+        fsub    dword[onedd]
+        faddp
+        fst     dword[cameraPos + vector3.y]
+        fstp    dword[targetPos + vector3.y]
+        mov     dword[cameraPos + vector3.z], 30.0
+
+        mov     dword[targetPos + vector3.x], 30.0
+        mov     dword[targetPos + vector3.z], 0.0
+
+        mov     dword[upVector.x], 0.0
+        mov     dword[upVector.y], 1.0
+        mov     dword[upVector.z], 0.0
+        stdcall Matrix.LookAt, cameraPos, targetPos, upVector
+ 
+
+        fnop 
+
+        invoke glPushMatrix
+        mov ebx, card1X1
+
+        mov esi, 16 ; i
+        .DrawLeftRows: 
+        invoke glPushMatrix
+
+                fld     [y2]
+                fadd    [cardHeight]
+                fstp    [y2]
+        
+                fld     [cardWidth]
+                fld     [onedd]
+                fdiv    [twodd]
+                faddp               
+                fst     [x1]
+                fstp    [x2]
+
+                mov edi, 2 ; j
+                .DrawLeftCols: 
+
+                fld     [x1]
+                fst     dword[ebx]
+                fadd    [cardWidth]
+                fadd    [marginX]
+                fstp    [x1]
+
+                fld     [y1]
+                fstp    dword[ebx+4]
+                
+                fld     [x2]
+                fadd    [cardWidth]
+                fst     dword[ebx+8]
+                fadd    [marginX]
+                fstp    [x2]
+
+                fld     [y2]
+                fstp    dword[ebx+12]
+
+                invoke glTranslatef, [cardWidth], 0.0, 0.0
+                invoke glTranslatef, [marginX], 0.0, 0.0
+                invoke glPushMatrix
+
+                mov eax, edi 
+                mul esi 
+
+                invoke glColor3f, 1.0, 1.0, 1.0 
+                stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, dword[edi+arrTextures], cardTextures
+                stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, dword[cardBackTexHandle] , cardTextures
+                stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, 0, 0
+                invoke glPopMatrix
 
 
+                add ebx, 16
+                dec edi 
+                cmp edi, 0
+                jne .DrawLeftCols
+
+        
+        fld     [y2]
+        fadd    [marginY]
+        fstp    [y2]
+        fld     [y1]
+        fadd    [cardHeight]
+        fadd    [marginY]
+        fstp    [y1]
+
+        invoke glPopMatrix
+        invoke glTranslatef, 0.0, [cardHeight], 0.0 
+        invoke glTranslatef, 0.0, [marginY], 0.0 
+
+        dec esi
+        cmp esi, 0
+        jne .DrawLeftRows       
+        invoke glPopMatrix                                       
+
+        mov [canClick], 0 
+        jmp .handleBorders
+        @@:
+        mov [canClick], 1
+
+        .handleBorders:
+        mov ebx, 0
+        @@:
+                cmp [card1BrdrHandler+ebx], 1
+                jne .skip 
+                
+                mov eax, ebx 
+                mul [four]
+                mov esi, eax
+
+                stdcall Texture.Unbind, GL_TEXTURE_2D, 0
+
+                stdcall Draw.Rect, [card1BrdrHandler+ebx], 0, 0.0, 0.5, 0.5, [card1X1+esi], [card1X1+esi+4], [card1X1+esi+8], [card1X1+esi+12], [onedd] 
+
+
+                jmp .exitDrawingBoard
+        .skip:
+        add ebx, 4
+        cmp ebx, 128
+        jne @b
+
+        mov eax, objectNumSelected
+        mov eax, card1X1
+ 
+        .exitDrawingBoard:
 
         invoke  SwapBuffers, [hdc]
+        jmp @f
+        .GameFinished:
 
-        ret
+                mov [windowID], 4
+
+
+        @@:
+
+        ret 
 endp
 proc Draw.Window4
 

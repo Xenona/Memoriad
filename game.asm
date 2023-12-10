@@ -12,6 +12,8 @@
 ; 22. Fix multiple hovers in main menu (probably I need break in On.Hover, dunno)
 ; 23. Check file path string for having 3f ('?'). If present, sub edi, MAX_PATH   
 ; 24. Rewrite CardsPath to a relative path
+; 25. Add a ShowMessage (smth like 'game will start with default settings') if user didn't visit the window 2 (i.e. if the settings file (?) is empty)
+
 format  PE GUI 5.0
 entry   WinMain
 
@@ -123,8 +125,6 @@ proc WinMain
 
        	invoke wglGetCurrentContext
         stdcall Glext.LoadFunctions
-
-        fnop 
 
         ; ; Loading card back
         stdcall Texture.Constructor, cardBackTexHandle, cardBackTextureFile,\
@@ -396,6 +396,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jmp .ReturnZero
 
         .window2: 
+                xor     ebx, ebx
 
                 switch  [uMsg]
                 case    WM_PAINT,       .onPaint2
@@ -404,11 +405,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 case    WM_MOUSEMOVE,   .onMouseMove2
                 case    WM_LBUTTONDOWN, .onLClick2
 
-
-
-                jmp .ReturnZero
-
-                        invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
+                invoke  DefWindowProc, [hWnd], [uMsg], [wParam], [lParam]
 
                 jmp     .Return
 
@@ -418,11 +415,14 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jmp     .ReturnZero
                 
                 .onKeyDown2:
+
+
                         switch [wParam]
-                        case VK_ESCAPE, .onDestroy
+                        case VK_ESCAPE, .ReturnToMenu
  
+
                 jmp     .ReturnZero
-                
+
                 .onMouseMove2: 
 
                         mov eax, [lParam]
