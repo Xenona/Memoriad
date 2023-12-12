@@ -105,6 +105,8 @@ topScrollLevel dd 76.0
 currentScrollLevel dd 0 
 brush dd 0
 currTexArray dd 32 dup (0)
+paletteYOffset dd -8.5
+paletteXOffset dd 15.0
 
 ;______________________________________________________________________________ 
 

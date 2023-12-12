@@ -396,5 +396,16 @@ card29BrdrHandler         dd      0
 card30BrdrHandler         dd      0
 card31BrdrHandler         dd      0
 card32BrdrHandler         dd      0
-
+palette1BrdrHandler         dd      0
+palette2BrdrHandler         dd      0
+palette3BrdrHandler         dd      0
+palette4BrdrHandler         dd      0
+palette5BrdrHandler         dd      0
+palette6BrdrHandler         dd      0
+palette7BrdrHandler         dd      0
+palette8BrdrHandler         dd      0
+palette9BrdrHandler         dd      0
+palette10BrdrHandler         dd      0
+palette11BrdrHandler         dd      0
+palette12BrdrHandler         dd      0
  

@@ -461,7 +461,9 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         sar eax, 16 
                         mov [mouseY], eax
 
+                        nop
                         stdcall On.Hover, 32, card1X1, card1BrdrHandler
+                        stdcall On.Hover, 12, Palette1x1, palette1BrdrHandler
 
                 jmp .ReturnZero
 

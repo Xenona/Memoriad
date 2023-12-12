@@ -625,6 +625,7 @@ proc Draw.Window2
         invoke  glLoadIdentity
   
         ; todo: return curr high scroll threshold to init  
+        ; when windowID <- 2
 
         mov     dword[cameraPos + vector3.x], 20.0              ; camera.x <- 20
         fld     dword[cardHeight]                               
@@ -639,7 +640,7 @@ proc Draw.Window2
         fsub    dword[currentScrollLevel]
         fst     dword[cameraPos + vector3.y]                    ; camera.y <- (cardHeight-1)*16+(marginY*16-2)-currLevel
         fstp    dword[targetPos + vector3.y]                    ; target.y <- (cardHeight-1)*16+(marginY*16-2)-currLevel
-        mov     dword[cameraPos + vector3.z], 50.0              ; camera.z <- 20
+        mov     dword[cameraPos + vector3.z], 20.0              ; camera.z <- 20
 
         mov     dword[targetPos + vector3.x], 20.0              ; target.x <- 20
         mov     dword[targetPos + vector3.z], 0.0               ; target.z <- 0
@@ -648,16 +649,15 @@ proc Draw.Window2
         mov     dword[upVector.y], 1.0                          ; up.y <- 1
         mov     dword[upVector.z], 0.0                          ; up.z <- 0
         stdcall Matrix.LookAt, cameraPos, targetPos, upVector
- 
-
-
-
+  
         invoke glPushMatrix
         mov ebx, card1X1
 
         mov esi, 0 ; i
         .DrawLeftRows: 
         invoke glPushMatrix
+
+                fnop
 
                 fld     [y2]
                 fadd    [cardHeight]
@@ -703,7 +703,6 @@ proc Draw.Window2
                 shl eax, 1
                 add eax, edi
                 shl eax, 2
-                nop
                 add eax, arrTextures
                 mov eax, dword[eax]
 
@@ -736,93 +735,111 @@ proc Draw.Window2
         jne .DrawLeftRows       
         invoke glPopMatrix      
 
-        ; fld     dword[cameraPos + vector3.y]
-        ; fst     dword[y1]
-        ; fstp    dword[y2]
-        ; fld     dword[cameraPos + vector3.x]
-        ; fst     dword[x1]
-        ; fstp    dword[x2]
+        invoke glPushMatrix
+        invoke glTranslatef, 0, dword[paletteYOffset], 0
 
-        mov [x1], 0
-        mov [x2], 0
-        mov [y1], 0
-        mov [y2], 0
+        fld     dword[cameraPos + vector3.y]
+        fadd    dword[paletteYOffset]
+        fld     dword[onedd]
+        fdiv    dword[fivedd]
+        fdiv    dword[twodd]
+        fsubp   
+        fst     dword[y1]
 
-        ; invoke glPushMatrix
-        ; mov ebx, Palette1x1
 
-        ; mov esi, 3 ; i
-        ; .DrawRightRows: 
-        ; invoke glPushMatrix
+        fstp    dword[y2]
 
-        ;         fld     [y2]
-        ;         fadd    [cardHeight]
-        ;         fstp    [y2]
+
+
+        mov ebx, Palette1x1
+
+        mov esi, 0 ; i
+        .DrawRightRows: 
+        invoke glPushMatrix
+
+                fld     [y2]
+                fadd    [cardHeight]
+                fstp    [y2]
         
-        ;         fld     [cardWidth]
-        ;         fld     [onedd]
-        ;         fdiv    [twodd]
-        ;         faddp               
-        ;         fst     [x1]
-        ;         fstp    [x2]
+        
+                fld     dword[paletteXOffset]
+                fmul    dword[twodd]
+                fsub    dword[eightdd]
+                fsub    dword[fourdd]
+                fld     dword[onedd]
+                fdiv    dword[threedd]
+                fmul    dword[twodd]
+                fdiv    dword[threedd]
+                fmul    dword[twodd]
+                faddp
+                fst     dword[x1]
+                fstp    dword[x2]
+ 
 
-        ;         mov edi, 2 ; j
-        ;         .DrawRightCols: 
+                invoke glTranslatef, dword[paletteXOffset], dword[cameraPos + vector3.y], 0
 
-        ;         fld     [x1]
-        ;         fst     dword[ebx]
-        ;         fadd    [cardWidth]
-        ;         fadd    [marginX]
-        ;         fstp    [x1]
+                mov edi, 0 ; j
+                .DrawRightCols: 
 
-        ;         fld     [y1]
-        ;         fstp    dword[ebx+4]
+                fld     [x1]
+                fst     dword[ebx]
+                fadd    [cardWidth]
+                fadd    [marginX]
+                fstp    [x1]
+
+                fld     [y1]
+                fstp    dword[ebx+4]
                 
-        ;         fld     [x2]
-        ;         fadd    [cardWidth]
-        ;         fst     dword[ebx+8]
-        ;         fadd    [marginX]
-        ;         fstp    [x2]
+                fld     [x2]
+                fadd    [cardWidth]
+                fst     dword[ebx+8]
+                fadd    [marginX]
+                fstp    [x2]
 
-        ;         fld     [y2]
-        ;         fstp    dword[ebx+12]
+                fld     [y2]
+                fstp    dword[ebx+12]
 
-        ;         invoke glTranslatef, [cardWidth], 0.0, 0.0
-        ;         invoke glTranslatef, [marginX], 0.0, 0.0
-        ;         invoke glPushMatrix
-
-        ;         mov eax, edi 
-        ;         mul esi 
+                invoke glTranslatef, [cardWidth], 0.0, 0.0
+                invoke glTranslatef, [marginX], 0.0, 0.0
+                invoke glPushMatrix
 
                 invoke glColor3f, 1.0, 1.0, 1.0 
-                stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, dword[edi+arrTextures], cardTextures
+
+                mov eax, esi 
+                shl eax, 1
+                add eax, edi
+                shl eax, 2
+                add eax, currTexArray
+                mov eax, dword[eax]
+                
+                stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, eax, cardTextures
                 stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, dword[cardBackTexHandle] , cardTextures
                 stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, 0, 0
                 invoke glPopMatrix
 
 
-        ;         add ebx, 16
-        ;         dec edi 
-        ;         cmp edi, 0
-        ;         jne .DrawRightCols
+                add ebx, 16
+                inc edi 
+                cmp edi, 4
+                jne .DrawRightCols
 
         
-        ; fld     [y2]
-        ; fadd    [marginY]
-        ; fstp    [y2]
-        ; fld     [y1]
-        ; fadd    [cardHeight]
-        ; fadd    [marginY]
-        ; fstp    [y1]
+        fld     [y2]
+        fadd    [marginY]
+        fstp    [y2]
+        fld     [y1]
+        fadd    [cardHeight]
+        fadd    [marginY]
+        fstp    [y1]
 
-        ; invoke glPopMatrix
-        ; invoke glTranslatef, 0.0, [cardHeight], 0.0 
-        ; invoke glTranslatef, 0.0, [marginY], 0.0 
+        invoke glPopMatrix
+        invoke glTranslatef, 0.0, [cardHeight], 0.0 
+        invoke glTranslatef, 0.0, [marginY], 0.0 
 
-        ; dec esi
-        ; cmp esi, 0
-        ; jne .DrawRightRows       
-        ; invoke glPopMatrix      
+        inc esi
+        cmp esi, 3
+        jne .DrawRightRows       
+        invoke glPopMatrix      
 
 
 
@@ -854,7 +871,7 @@ proc Draw.Window2
                 jmp .exitDrawingBoard
         .skip:
         add ebx, 4
-        cmp ebx, 128
+        cmp ebx, 176
         jne @b
 
         mov eax, objectNumSelected
