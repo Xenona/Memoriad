@@ -232,7 +232,15 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov dword[windowID], eax
                         mov dword[objectNumSelected], -1
 
+                        cmp eax, 2 
+                        jne @f 
+                        mov dword[currentScrollLevel], 0
+
+                        @@:
                         ; stdcall shuffleArray, cardPicMatrix, arrTextures, 32
+
+
+
 
                 jmp     .ReturnZero
 

@@ -623,9 +623,6 @@ proc Draw.Window2
         invoke  glClear, GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT
         invoke  glMatrixMode, GL_MODELVIEW
         invoke  glLoadIdentity
-  
-        ; todo: return curr high scroll threshold to init  
-        ; when windowID <- 2
 
         mov     dword[cameraPos + vector3.x], 20.0              ; camera.x <- 20
         fld     dword[cardHeight]                               
