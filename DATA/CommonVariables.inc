@@ -99,7 +99,7 @@ cardBackTexHandle dd 0
 arrTextures dd 32 dup (0)
 ;______________________________________________________________________________ 
 
-;__ WINDOW 2 (CARDS SELECTION)_________________________________________________
+;__WINDOW 2 (CARDS SELECTION)__________________________________________________
 
 topScrollLevel dd 76.0
 currentScrollLevel dd 0 

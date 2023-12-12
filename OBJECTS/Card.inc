@@ -302,6 +302,65 @@ numOfGuessedPairs       dd      0           ; up to 16
         card32Y2       dd      ?
 
         Palette1x1     dd      ?
+        Palette1y1     dd      ?
+        Palette1x2     dd      ?
+        Palette1y2     dd      ?
+
+        Palette2x1     dd      ?
+        Palette2y1     dd      ?
+        Palette2x2     dd      ?
+        Palette2y2     dd      ?
+
+        Palette3x1     dd      ?
+        Palette3y1     dd      ?
+        Palette3x2     dd      ?
+        Palette3y2     dd      ?
+
+        Palette4x1     dd      ?
+        Palette4y1     dd      ?
+        Palette4x2     dd      ?
+        Palette4y2     dd      ?
+
+        Palette5x1     dd      ?
+        Palette5y1     dd      ?
+        Palette5x2     dd      ?
+        Palette5y2     dd      ?
+
+        Palette6x1     dd      ?
+        Palette6y1     dd      ?
+        Palette6x2     dd      ?
+        Palette6y2     dd      ?
+
+        Palette7x1     dd      ?
+        Palette7y1     dd      ?
+        Palette7x2     dd      ?
+        Palette7y2     dd      ?
+
+        Palette8x1     dd      ?
+        Palette8y1     dd      ?
+        Palette8x2     dd      ?
+        Palette8y2     dd      ?
+
+        Palette9x1     dd      ?
+        Palette9y1     dd      ?
+        Palette9x2     dd      ?
+        Palette9y2     dd      ?
+
+        Palette10x1     dd      ?
+        Palette10y1     dd      ?
+        Palette10x2     dd      ?
+        Palette10y2     dd      ?
+
+        Palette11x1     dd      ?
+        Palette11y1     dd      ?
+        Palette11x2     dd      ?
+        Palette11y2     dd      ?
+
+        Palette12x1     dd      ?
+        Palette12y1     dd      ?
+        Palette12x2     dd      ?
+        Palette12y2     dd      ?
+
 
 
 
