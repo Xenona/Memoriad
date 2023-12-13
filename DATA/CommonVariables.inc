@@ -95,6 +95,7 @@ cardBackTextureFile db ".\ASSETS\INGAME\CARDBACK.bmp", 0
 cardsPath db "C:\Users\golub\Desktop\Memoriad\ASSETS\CARDS\*.bmp", 0
 cardsFolderPath db "ASSETS\CARDS\", 0
 filenamesArrayHandle dd 0
+numberOfFiles dd 0
 cardBackTexHandle dd 0
 arrTextures dd 32 dup (0)
 ;______________________________________________________________________________ 
@@ -107,6 +108,8 @@ brush dd 0
 currTexArray dd 32 dup (0)
 paletteYOffset dd -8.5
 paletteXOffset dd 15.0
+currentPage     dd  0
+NUM_OF_FILES_ON_A_PAGE = 12
 
 ;______________________________________________________________________________ 
 

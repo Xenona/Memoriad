@@ -63,16 +63,14 @@ endp
         currFile        WIN32_FIND_DATA ? 
         exePath         dd MAX_PATH dup (?) 
 
-proc File.GetFilesInDirectory, dirPath
+proc File.GetFilesInDirectory uses eax ecx esi edi ebx, dirPath
         
-        locals
-                filenamesArray  dd ? 
+        locals 
                 hFind           dd ?  
-                numberOfFiles   dd 0
                 capacity        dd 16
                 currentArrayPointer dd ?
 
-                ; filenamesArray - holds initial value returned with malloc/realloc (aka the first byte)
+                ; filenamesArrayHandle - holds initial value returned with malloc/realloc (aka the first byte)
                 ; hFind - holds handler for FindNext/FindClose
                 ; numberOfFiles - current number to calculate next pointer and size of array for realloc
                 ; capacity - maximum number of files
@@ -140,7 +138,7 @@ proc File.GetFilesInDirectory, dirPath
 
 
         stdcall malloc, 16*260                                  ; (1)             
-        mov [filenamesArray], eax
+        mov [filenamesArrayHandle], eax
         mov [currentArrayPointer], eax
         
         invoke FindFirstFile, cardsPath, currFile       
@@ -185,13 +183,13 @@ proc File.GetFilesInDirectory, dirPath
 
                         mov eax, MAX_PATH                       ; (16)
                         mul [capacity]
-                        stdcall realloc, [filenamesArray], eax
-                        mov [filenamesArray], eax
+                        stdcall realloc, [filenamesArrayHandle], eax
+                        mov [filenamesArrayHandle], eax
 
                         mov eax, MAX_PATH                       ; (17)
                         mul [numberOfFiles]
                         sub eax, MAX_PATH
-                        mov ebx, [filenamesArray]
+                        mov ebx, [filenamesArrayHandle]
                         add ebx, eax
                         mov [currentArrayPointer], ebx
 
@@ -223,9 +221,81 @@ proc File.GetFilesInDirectory, dirPath
         jnz @b
 
         invoke FindClose, [hFind]
-        mov eax, [filenamesArray]
-        mov [filenamesArrayHandle], eax
-
         
         ret
+endp
+
+proc File.GetLastPalettePageNum uses ecx edx ebx
+
+        ; returning to eax
+        ; page counting starts from 1
+
+        ; (numOfFiles - (numOfFiles % 12)) / 12 + 1
+        xor edx, edx
+
+        mov eax, [numberOfFiles]
+        ror eax, 16
+        mov dx, ax 
+        ror eax, 16
+        mov ebx, NUM_OF_FILES_ON_A_PAGE
+        div bx
+        mov ebx, [numberOfFiles]
+        sub ebx, edx
+        mov eax, ebx ; eax <- (numOfFiles - (numOfFiles % 12))
+        xor edx, edx 
+        mov ebx, NUM_OF_FILES_ON_A_PAGE
+        div ebx 
+        inc eax 
+        ret 
+endp 
+
+proc File.LoadAPageOfTextures uses esi edi eax ecx, pageNumber
+
+        ; esi points to a filename starting from a page 
+        ; with pageNumber (starts with 0)
+
+        ; ecx is a counter for loop to load all 12 pics
+
+        ; edi writes a handle to tex array 
+
+        mov esi, [filenamesArrayHandle]
+        mov eax, MAX_PATH * 12
+        mul dword[pageNumber]
+        add esi, eax
+
+        mov edi, currTexArray
+        stdcall File.GetLastPalettePageNum
+        cmp dword[pageNumber], eax 
+        jg @f
+        mov eax, NUM_OF_FILES_ON_A_PAGE
+        jmp .continue
+        @@:
+        dec eax
+        mov ebx, NUM_OF_FILES_ON_A_PAGE
+        mul ebx 
+        mov ebx, dword[numberOfFiles]
+        sub ebx, eax
+        .continue:
+
+
+        mov ecx, eax 
+
+
+
+        @@:
+
+        push ecx
+        stdcall Texture.Constructor, edi, esi, GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE   
+        pop ecx
+
+
+        add edi, 4
+        add esi, MAX_PATH 
+        dec ecx
+        cmp ecx, 0 
+        jne @b 
+        
+     
+
+        ret 
 endp

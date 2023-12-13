@@ -90,7 +90,6 @@ extensionNames:
 
                         
                         GL_TEXTURE0                     =  0x84C0
-                        GL_TEXTURE0                     =  0x84C0
                         GL_TEXTURE1                     =  0x84C1
                         GL_TEXTURE2                     =  0x84C2
                         GL_TEXTURE3                     =  0x84C3

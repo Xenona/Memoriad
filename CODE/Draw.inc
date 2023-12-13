@@ -654,7 +654,6 @@ proc Draw.Window2
         .DrawLeftRows: 
         invoke glPushMatrix
 
-                fnop
 
                 fld     [y2]
                 fadd    [cardHeight]
@@ -747,6 +746,7 @@ proc Draw.Window2
         fstp    dword[y2]
 
 
+        ; second loop for right part: 
 
         mov ebx, Palette1x1
 
@@ -802,8 +802,12 @@ proc Draw.Window2
 
                 invoke glColor3f, 1.0, 1.0, 1.0 
 
+
+
+                nop
+
                 mov eax, esi 
-                shl eax, 1
+                shl eax, 2
                 add eax, edi
                 shl eax, 2
                 add eax, currTexArray

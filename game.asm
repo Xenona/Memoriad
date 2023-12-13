@@ -13,6 +13,7 @@
 ; 23. Check file path string for having 3f ('?'). If present, sub edi, MAX_PATH   
 ; 24. Rewrite CardsPath to a relative path
 ; 25. Add a ShowMessage (smth like 'game will start with default settings') if user didn't visit the window 2 (i.e. if the settings file (?) is empty)
+; 26. Add a check on a existense of a texture. If there's no, don't draw the card palette
 
 format  PE GUI 5.0
 entry   WinMain
@@ -49,8 +50,8 @@ entry   WinMain
         include         ".\CODE\Random.asm"
         include         ".\CODE\String.asm"
         include         ".\CODE\mem_funcs.asm"
-        include         ".\CODE\Texture.asm"
         include         ".\CODE\file.asm"
+        include         ".\CODE\Texture.asm"
         
         include         ".\DATA\CommonVariables.inc"
         include         ".\DATA\FpuConstants.inc"
@@ -157,6 +158,11 @@ proc WinMain
         add esi, MAX_PATH
         loop @b
 
+
+        stdcall File.LoadAPageOfTextures, 0     
+
+
+
         ; nop 
         ; mov esi, arrTextures
         ; mov ecx, 32
@@ -237,7 +243,11 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov dword[currentScrollLevel], 0
 
                         @@:
-                        ; stdcall shuffleArray, cardPicMatrix, arrTextures, 32
+
+                        cmp eax, 1
+                        jne @f 
+                        stdcall shuffleArray, cardPicMatrix, arrTextures, 32
+                        @@:
 
 
 
@@ -469,7 +479,6 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         sar eax, 16 
                         mov [mouseY], eax
 
-                        nop
                         stdcall On.Hover, 32, card1X1, card1BrdrHandler
                         stdcall On.Hover, 12, Palette1x1, palette1BrdrHandler
 
