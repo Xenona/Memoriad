@@ -561,6 +561,11 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         ; case VK_ESCAPE, .ReturnToMenu
 
                         mov [windowID], 0
+                        mov [numOfTriedPairs], 0
+                        mov [numOfGuessedPairs], 0
+                        
+        
+
                 jmp     .ReturnZero
 
                 .onMouseMove4:
