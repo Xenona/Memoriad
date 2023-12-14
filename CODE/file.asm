@@ -36,12 +36,12 @@ proc File.LoadBmp uses edi,\
                 read    dd      ?
                 pBuffer dd      ?
         endl
-
-        invoke  CreateFile, [fileName], GENERIC_READ, ebx, ebx, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, ebx
+        
+        invoke  CreateFile, [fileName], GENERIC_READ, 0, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0
  
         mov     [hFile], eax
 
-        invoke  GetFileSize, [hFile], ebx
+        invoke  GetFileSize, [hFile], 0
 
         inc     eax
         mov     [length], eax
@@ -50,7 +50,7 @@ proc File.LoadBmp uses edi,\
 
 
         lea     edi, [read]
-        invoke  ReadFile, [hFile], [pBuffer], [length], edi, ebx
+        invoke  ReadFile, [hFile], [pBuffer], [length], edi, 0
 
         invoke  CloseHandle, [hFile]
 
@@ -272,7 +272,6 @@ proc File.LoadAPageOfTextures uses esi edi eax ecx, pageNumber
         mul dword[pageNumber]
         add esi, eax
 
-                        fnop
         mov edi, currTexArray
         stdcall File.GetLastPalettePageNum
         dec eax 
@@ -296,6 +295,7 @@ proc File.LoadAPageOfTextures uses esi edi eax ecx, pageNumber
         @@:
 
         push ecx
+        fnop
         stdcall Texture.Constructor, edi, esi, GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE   
         pop ecx
 

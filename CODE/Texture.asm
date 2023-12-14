@@ -1,6 +1,6 @@
 proc Texture.Constructor uses edi esi eax ebx ecx edx,\
     pID, pFileImage, texType, texSlot, format, pixelType
- 
+
 
     mov     esi, [pID]
     ; Block textures
@@ -19,7 +19,7 @@ proc Texture.Constructor uses edi esi eax ebx ecx edx,\
     add     edi, dword [eax + 10]
 
     invoke  glTexImage2D, [texType], 0,\ 
-                    GL_RGB8, dword [eax + 18], dword [eax + 22], ebx,\ 
+                    GL_RGB8, dword [eax + 18], dword [eax + 22], 0,\ 
                     [format], [pixelType], edi
     invoke  HeapFree, [hHeap], 0, eax
     invoke  glGenerateMipmap, [texType]

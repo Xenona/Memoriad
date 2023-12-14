@@ -442,8 +442,30 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         case VK_ESCAPE, .ReturnToMenu
                         case VK_DOWN, .scrollDown
                         case VK_UP, .scrollUp
+                        case VK_RIGHT, .incPage
+                        case VK_LEFT, .decPage
  
 
+                jmp     .ReturnZero
+
+                .incPage:
+
+
+                stdcall File.GetLastPalettePageNum
+                dec eax
+                cmp dword[currentPage], eax
+                jge @f
+                inc [currentPage]     
+                stdcall File.LoadAPageOfTextures, dword[currentPage]
+                @@: 
+                jmp     .ReturnZero 
+                
+                .decPage:
+                cmp dword[currentPage], 0
+                je @f
+                dec [currentPage]     
+                stdcall File.LoadAPageOfTextures, dword[currentPage]
+                @@: 
                 jmp     .ReturnZero
 
                 .scrollDown: 
@@ -483,14 +505,12 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov [mouseY], eax
 
                         stdcall On.Hover, 44, card1X1, card1BrdrHandler
-                        ; stdcall On.Hover, 12, Palette1x1, palette1BrdrHandler
 
                 jmp .ReturnZero
 
                
 
                 .onLClick2:
-                nop
 
                 mov eax, [objectNumSelected]
                 cmp eax, -1             ; remove selection 
@@ -498,7 +518,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 mov [brush], 0  
                 jmp .continue2
                 @@:
-                cmp eax, 32             ; right part 
+                cmp eax, 31             ; right part 
                 jng @f 
                 and eax, 31 ; eax with num on palette
                 shl eax, 2
@@ -513,14 +533,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 mov dword[eax], ebx 
 
 
-                ; stdcall File.GetLastPalettePageNum
-                ; dec eax
-                ; cmp dword[currentPage], eax
-                ; jge @f
-                ; inc [currentPage]     
-                ; stdcall File.LoadAPageOfTextures, dword[currentPage]
-                ; @@: 
-
+              
 
                 .continue2:
                 jmp .ReturnZero
@@ -544,8 +557,8 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jmp .ReturnZero
 
                 .onKeyDown4:
-                        switch [wParam]
-                        case VK_ESCAPE, .onDestroy
+                        ; switch [wParam]
+                        ; case VK_ESCAPE, .ReturnToMenu
 
                         mov [windowID], 0
                 jmp     .ReturnZero
