@@ -258,23 +258,34 @@ proc File.LoadAPageOfTextures uses esi edi eax ecx, pageNumber
 
         ; edi writes a handle to tex array 
 
+        mov edi, 0 
+        @@:
+
+        mov dword[edi+currTexArray], 0
+
+        add edi, 4
+        cmp edi, 12*4
+        jne @b 
+
         mov esi, [filenamesArrayHandle]
         mov eax, MAX_PATH * 12
         mul dword[pageNumber]
         add esi, eax
 
+                        fnop
         mov edi, currTexArray
         stdcall File.GetLastPalettePageNum
+        dec eax 
         cmp dword[pageNumber], eax 
-        jg @f
+        jge @f
         mov eax, NUM_OF_FILES_ON_A_PAGE
         jmp .continue
         @@:
-        dec eax
         mov ebx, NUM_OF_FILES_ON_A_PAGE
         mul ebx 
         mov ebx, dword[numberOfFiles]
         sub ebx, eax
+        xchg ebx, eax
         .continue:
 
 

@@ -15,7 +15,10 @@ className               db      "MEMORIAD (C) XENONA GAMES 2023", 0
 clientRect              RECT
 hdc                     dd      ?
 aspect                  dq      ?                       ; width/height 
-windowID                dd      2                    ; shows, which game screen should be drawn 
+test1 db 0x22
+test2 db 0x22
+test3 db 0x22
+windowID                dd      0                    ; shows, which game screen should be drawn 
 objectNumSelected       dd      -1
 hinst                   dd      ?
 hCurs1                  dd      ?
@@ -102,14 +105,16 @@ arrTextures dd 32 dup (0)
 
 ;__WINDOW 2 (CARDS SELECTION)__________________________________________________
 
-topScrollLevel dd 76.0
+topScrollLevel dd 83.0
 currentScrollLevel dd 0 
 brush dd 0
-currTexArray dd 32 dup (0)
+currTexArray dd 12 dup (0)
 paletteYOffset dd -8.5
 paletteXOffset dd 15.0
 currentPage     dd  0
 NUM_OF_FILES_ON_A_PAGE = 12
+
+
 
 ;______________________________________________________________________________ 
 

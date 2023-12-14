@@ -14,6 +14,8 @@
 ; 24. Rewrite CardsPath to a relative path
 ; 25. Add a ShowMessage (smth like 'game will start with default settings') if user didn't visit the window 2 (i.e. if the settings file (?) is empty)
 ; 26. Add a check on a existense of a texture. If there's no, don't draw the card palette
+; 27. RETURN WINDOW 1 TO INIT 
+
 
 format  PE GUI 5.0
 entry   WinMain
@@ -142,24 +144,23 @@ proc WinMain
         stdcall File.GetFilesInDirectory, cardsPath
         popa
 
-        mov edi, arrTextures
-        mov esi, dword[filenamesArrayHandle]
-        mov ecx, 32
-        @@:
+        ; mov edi, arrTextures
+        ; mov esi, dword[filenamesArrayHandle]
+        ; mov ecx, 32
+        ; @@:
 
-        push ecx
-        stdcall Texture.Constructor, edi, esi,\
-                            GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE   
-
-
-        pop ecx
-
-        add edi, 4
-        add esi, MAX_PATH
-        loop @b
+        ; push ecx
+        ; stdcall Texture.Constructor, edi, esi,\
+        ;                     GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE   
 
 
-        stdcall File.LoadAPageOfTextures, 0     
+        ; pop ecx
+
+        ; add edi, 4
+        ; add esi, MAX_PATH
+        ; loop @b
+
+
 
 
 
@@ -241,6 +242,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         cmp eax, 2 
                         jne @f 
                         mov dword[currentScrollLevel], 0
+                        stdcall File.LoadAPageOfTextures, dword[currentPage]
 
                         @@:
 
@@ -263,6 +265,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov [mouseY], eax
 
                         stdcall On.Hover, 4, buttStartX1, buttStartBrdr
+
 
                 jmp     .ReturnZero
         
@@ -479,17 +482,47 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         sar eax, 16 
                         mov [mouseY], eax
 
-                        stdcall On.Hover, 32, card1X1, card1BrdrHandler
-                        stdcall On.Hover, 12, Palette1x1, palette1BrdrHandler
+                        stdcall On.Hover, 44, card1X1, card1BrdrHandler
+                        ; stdcall On.Hover, 12, Palette1x1, palette1BrdrHandler
 
                 jmp .ReturnZero
 
                
 
                 .onLClick2:
+                nop
 
-                       
+                mov eax, [objectNumSelected]
+                cmp eax, -1             ; remove selection 
+                jne @f 
+                mov [brush], 0  
+                jmp .continue2
+                @@:
+                cmp eax, 32             ; right part 
+                jng @f 
+                and eax, 31 ; eax with num on palette
+                shl eax, 2
+                add eax, currTexArray
+                mov eax, dword[eax]
+                mov [brush], eax  
+                jmp .continue2
+                @@:                     ; left part 
+                shl eax, 2 
+                add eax, arrTextures
+                mov ebx, [brush]
+                mov dword[eax], ebx 
 
+
+                ; stdcall File.GetLastPalettePageNum
+                ; dec eax
+                ; cmp dword[currentPage], eax
+                ; jge @f
+                ; inc [currentPage]     
+                ; stdcall File.LoadAPageOfTextures, dword[currentPage]
+                ; @@: 
+
+
+                .continue2:
                 jmp .ReturnZero
 
                 
@@ -736,7 +769,6 @@ proc On.Hover uses ecx ebx esi edi edx eax , numOfObjs, objArr, brdrHandler;
 
 
                 mov dword[esi], 1                                               ; if got there -> mouse got on the obj
-
                 push dword[numOfObjs]                                           ; saving selected object id (list of IDs in winProc)
                 pop dword[objectNumSelected]                                    ; so when user clicks smth no need to check coords   
                 sub [objectNumSelected], ecx                                    ; again

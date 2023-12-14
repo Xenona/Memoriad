@@ -634,6 +634,7 @@ proc Draw.Window2
         fmul    dword[fourdd]
         fsub    dword[threedd]
         faddp
+        fadd    dword[eightdd]
         fsub    dword[currentScrollLevel]
         fst     dword[cameraPos + vector3.y]                    ; camera.y <- (cardHeight-1)*16+(marginY*16-2)-currLevel
         fstp    dword[targetPos + vector3.y]                    ; target.y <- (cardHeight-1)*16+(marginY*16-2)-currLevel
@@ -804,7 +805,6 @@ proc Draw.Window2
 
 
 
-                nop
 
                 mov eax, esi 
                 shl eax, 2
@@ -812,11 +812,17 @@ proc Draw.Window2
                 shl eax, 2
                 add eax, currTexArray
                 mov eax, dword[eax]
+
+                cmp eax, 0 
+                je @f
                 
                 stdcall PutObject, cardFace, cardColors, NUM_OF_VERTS_FOR_CARD_FACE, 1, eax, cardTextures
                 stdcall PutObject, cardBack, cardColors, NUM_OF_VERTS_FOR_CARD_BACK, 1, dword[cardBackTexHandle] , cardTextures
                 stdcall PutObject, cardVertices, cardColors, NUM_OF_VERTS_FOR_CARD_BORDERS, 0, 0, 0
+
+                @@:
                 invoke glPopMatrix
+
 
 
                 add ebx, 16
