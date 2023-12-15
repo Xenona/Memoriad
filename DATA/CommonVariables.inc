@@ -15,9 +15,6 @@ className               db      "MEMORIAD (C) XENONA GAMES 2023", 0
 clientRect              RECT
 hdc                     dd      ?
 aspect                  dq      ?                       ; width/height 
-test1 db 0x22
-test2 db 0x22
-test3 db 0x22
 windowID                dd      0                    ; shows, which game screen should be drawn 
 objectNumSelected       dd      -1
 hinst                   dd      ?
@@ -47,16 +44,13 @@ cameraPos           	vector3         ?, ?, ?
 targetPos  	            vector3         ?, ?, ? 
 upVector 	            vector3         0.0, 1.0, 0.0                      
 camAngle                dd              0.01
-camAngleStep            dd              3.14;0.01745320
+camAngleStep            dd              0.01745320
 camViewRadius           dd              25.0
 ;______________________________________________________________________________    
 
 
 ;__CONTROLLING USER ACTIONS____________________________________________________    
 
-dfsef db 0x22
-dfsef22 db 0x22
-dfsef2 db 0x22
 mouseX                  dd      0 
 mouseY                  dd      0
 canClick                dd      1
@@ -95,7 +89,7 @@ NUM_OF_VERTS_FOR_CARD_BACK          =       10 * 3
 ;__TEXTURES: FILENAMES AND ARRAYS______________________________________________ 
 
 cardBackTextureFile db ".\ASSETS\INGAME\CARDBACK.bmp", 0
-cardsPath db "C:\Users\golub\Desktop\Memoriad\ASSETS\CARDS\*.bmp", 0
+cardsPath db ".\ASSETS\CARDS\*.bmp", 0
 cardsFolderPath db "ASSETS\CARDS\", 0
 filenamesArrayHandle dd 0
 numberOfFiles dd 0
