@@ -96,6 +96,9 @@ numberOfFiles dd 0
 cardBackTexHandle dd 0
 arrTextures dd 32 dup (0)
 arrTexturesInit dd 32 dup (0)
+musicOpen db "open .\ASSETS\INGAME\awaken-136824.mp3 type mpegvideo alias mp3", 0
+musicPlay db "play mp3", 0
+musicStop db "stop mp3", 0
 ;______________________________________________________________________________ 
 
 ;__WINDOW 2 (CARDS SELECTION)__________________________________________________

@@ -39,7 +39,8 @@ entry   WinMain
         include         ".\INCLUDE\api\gdi32.inc"       
         include         ".\INCLUDE\api\opengl.inc"
         include         ".\INCLUDE\DLL\glut.inc"        
-
+        include         ".\INCLUDE\DLL\winmm.inc"               
+        
         include         ".\OBJECTS\Card.inc"
         include         ".\OBJECTS\SeaPlane.inc"
         include         ".\OBJECTS\SkyPlane.inc"
@@ -72,7 +73,8 @@ data import
                 gdi32,          "GDI32.DLL",\
                 opengl32,       "OPENGL32.DLL",\
                 glu32,          "GLU32.DLL",\
-                glut32,         ".\INCLUDE\DLL\glut32.dll"
+                glut32,         ".\INCLUDE\DLL\glut32.dll",\
+                winmm,          ".\INCLUDE\DLL\winmm.dll"
 
 end data
 
@@ -222,6 +224,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 .onKeyDown0:
                         switch [wParam]
                         case VK_ESCAPE, .onDestroy
+                        case 0x4b, .onPlayMusic
                 jmp     .ReturnZero
 
                 .onLClick0:
@@ -265,6 +268,14 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
 
 
+
+                jmp     .ReturnZero
+
+                .onPlayMusic: 
+
+                        invoke mciExecute, musicOpen
+                        invoke Sleep, 1000
+                        invoke mciExecute, musicPlay
 
                 jmp     .ReturnZero
 

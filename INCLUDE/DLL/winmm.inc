@@ -1,0 +1,2 @@
+import winmm, \
+    mciExecute, "mciExecute"
