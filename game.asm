@@ -252,12 +252,16 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov ecx, 32
                         rep movsd  
 
+
                         @@:
 
                         cmp eax, 1
                         jne @f 
                         stdcall shuffleArray, cardPicMatrix, arrTextures, 32
+                        mov dword[camAngle], 0
+
                         @@:
+
 
 
 
