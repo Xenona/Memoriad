@@ -127,8 +127,6 @@ cardPicMatrix           dd  0, 0, 1, 1, 2, 2, 3, 3,\
                             8, 8, 9, 9, 10, 10, 11, 11,\
                             12, 12, 13, 13, 14, 14, 15, 15
 
-
-
 timeToWait          dd      2000
 
 cardRotAngStep      dd      3.0

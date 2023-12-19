@@ -95,6 +95,7 @@ filenamesArrayHandle dd 0
 numberOfFiles dd 0
 cardBackTexHandle dd 0
 arrTextures dd 32 dup (0)
+arrTexturesInit dd 32 dup (0)
 ;______________________________________________________________________________ 
 
 ;__WINDOW 2 (CARDS SELECTION)__________________________________________________

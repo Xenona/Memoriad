@@ -244,6 +244,14 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         mov dword[currentScrollLevel], 0
                         stdcall File.LoadAPageOfTextures, dword[currentPage]
 
+                        nop
+
+                        mov edi, arrTextures
+                        mov esi, arrTexturesInit
+
+                        mov ecx, 32
+                        rep movsd  
+
                         @@:
 
                         cmp eax, 1
@@ -452,20 +460,20 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
 
                 stdcall File.GetLastPalettePageNum
-                dec eax
-                cmp dword[currentPage], eax
-                jge @f
-                inc [currentPage]     
-                stdcall File.LoadAPageOfTextures, dword[currentPage]
-                @@: 
+                        dec eax
+                        cmp dword[currentPage], eax
+                        jge @f
+                        inc [currentPage]     
+                        stdcall File.LoadAPageOfTextures, dword[currentPage]
+                        @@: 
                 jmp     .ReturnZero 
                 
                 .decPage:
-                cmp dword[currentPage], 0
-                je @f
-                dec [currentPage]     
-                stdcall File.LoadAPageOfTextures, dword[currentPage]
-                @@: 
+                        cmp dword[currentPage], 0
+                        je @f
+                        dec [currentPage]     
+                        stdcall File.LoadAPageOfTextures, dword[currentPage]
+                        @@: 
                 jmp     .ReturnZero
 
                 .scrollDown: 
@@ -531,8 +539,9 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 add eax, arrTextures
                 mov ebx, [brush]
                 mov dword[eax], ebx 
-
-
+                sub eax, arrTextures
+                add eax, arrTexturesInit
+                mov dword[eax], ebx 
               
 
                 .continue2:

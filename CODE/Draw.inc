@@ -960,6 +960,19 @@ proc Draw.Window4
 
         stdcall Draw.Text, -90.0, -50.0, 0, 1.0, 1.0, 1.0, 0.05, Window2.ExitHint, 1
 
+        xor eax, eax 
+        mov esi, cardPicMatrix
+        @@:
+
+        mov dword[esi], eax
+        mov dword[esi+4], eax
+        add esi, 8
+        inc eax
+        cmp eax, 16
+        jne @b
+
+        
+
         invoke  SwapBuffers, [hdc]
 
         ret
