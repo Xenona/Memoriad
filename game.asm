@@ -151,21 +151,7 @@ proc WinMain
         invoke GetTickCount
         mov [musicStartTime], eax
 
-        ; mov edi, arrTextures
-        ; mov esi, dword[filenamesArrayHandle]
-        ; mov ecx, 32
-        ; @@:
-
-        ; push ecx
-        ; stdcall Texture.Constructor, edi, esi,\
-        ;                     GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE   
-
-
-        ; pop ecx
-
-        ; add edi, 4
-        ; add esi, MAX_PATH
-        ; loop @b
+      
 
 
 
@@ -519,15 +505,45 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         case VK_UP, .scrollUp
                         case VK_RIGHT, .incPage
                         case VK_LEFT, .decPage
-                        case 0x4d, .onPlayMusic
+                        case 0x4d, .onPlayMusic ; M
+                        case 0x46, .fillCards ; F
  
 
                 jmp     .ReturnZero
 
+                .fillCards:
+
+                        cmp dword[filled], 1
+                        je .ReturnZero
+
+                        mov dword[filled], 1
+
+                        mov edi, arrTextures
+                        mov esi, dword[filenamesArrayHandle]
+                        mov ecx, 16
+                        @@:
+
+                        push ecx
+                        stdcall Texture.Constructor, edi, esi,\
+                                        GL_TEXTURE_2D, GL_TEXTURE0, GL_BGRA, GL_UNSIGNED_BYTE   
+
+                        mov ecx, dword[edi]
+                        mov dword[edi+4], ecx  
+
+
+                        pop ecx
+
+                        add edi, 8
+                        add esi, MAX_PATH
+                        loop @b  
+                        
+
+                jmp .ReturnZero 
+
                 .incPage:
 
 
-                stdcall File.GetLastPalettePageNum
+                        stdcall File.GetLastPalettePageNum
                         dec eax
                         cmp dword[currentPage], eax
                         jge @f
