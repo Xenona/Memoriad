@@ -145,7 +145,11 @@ proc WinMain
         pusha 
         stdcall File.GetFilesInDirectory, cardsPath
         popa
-        invoke mciExecute, musicOpen
+        invoke mciExecute, musicOpen 
+        invoke Sleep, 1000
+        invoke mciExecute, musicPlay
+        invoke GetTickCount
+        mov [musicStartTime], eax
 
         ; mov edi, arrTextures
         ; mov esi, dword[filenamesArrayHandle]
@@ -195,6 +199,25 @@ endp
 
 proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
  
+        cmp dword[playing], 1
+
+        je @f
+        invoke GetTickCount
+        sub eax, dword[musicStartTime]
+        cmp eax, dword[musicLen]
+        jle @f
+        ; invoke mciExecute, musicClose
+        ; invoke Sleep, 1000
+        ; invoke mciExecute, musicOpen
+        ; invoke mciExecute, musicPlay
+        ; invoke GetTickCount
+        ; mov dword[musicStartTime], eax 
+
+; 
+        @@:
+
+
+
         switch  dword[windowID] 
         case    0,      .window0                        ; Main menu
         case    1,      .window1                        ; Game screen
