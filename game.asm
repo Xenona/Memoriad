@@ -145,6 +145,7 @@ proc WinMain
         pusha 
         stdcall File.GetFilesInDirectory, cardsPath
         popa
+        invoke mciExecute, musicOpen
 
         ; mov edi, arrTextures
         ; mov esi, dword[filenamesArrayHandle]
@@ -224,7 +225,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 .onKeyDown0:
                         switch [wParam]
                         case VK_ESCAPE, .onDestroy
-                        case 0x4b, .onPlayMusic
+                        case 0x4d, .onPlayMusic
                 jmp     .ReturnZero
 
                 .onLClick0:
@@ -273,9 +274,17 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                 .onPlayMusic: 
 
-                        invoke mciExecute, musicOpen
-                        invoke Sleep, 1000
-                        invoke mciExecute, musicPlay
+                        cmp [playing], 0
+                        jne .turnOff
+                        .turnOn:
+                                invoke mciExecute, musicPlay
+                                mov dword[playing], 1
+                                jmp @f
+                        .turnOff:
+                                invoke mciExecute, musicStop
+                                mov dword[playing], 0
+                        @@: 
+
 
                 jmp     .ReturnZero
 
@@ -317,7 +326,27 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         case VK_ESCAPE, .ReturnToMenu
                         case VK_DOWN, .decCamAngle
                         case VK_UP, .incCamAngle
+                        case 0xBC, .incCardSpeed
+                        case 0xBE, .decCardSpeed
+                        case 0x4d, .onPlayMusic
+
                 jmp     .ReturnZero
+
+                .decCardSpeed:
+                cmp [timeToWait], 0000
+                jle .ReturnZero 
+                invoke Beep, dword[hertz], 80
+                sub [timeToWait], 100
+                add [hertz],100
+                jmp .ReturnZero 
+
+                .incCardSpeed: 
+                cmp [timeToWait], 5000
+                jge .ReturnZero
+                invoke Beep, dword[hertz], 80
+                add [timeToWait], 100
+                sub [hertz], 100 
+                jmp .ReturnZero
 
                 .ReturnToMenu: 
                         mov [windowID], 0
@@ -467,6 +496,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                         case VK_UP, .scrollUp
                         case VK_RIGHT, .incPage
                         case VK_LEFT, .decPage
+                        case 0x4d, .onPlayMusic
  
 
                 jmp     .ReturnZero
@@ -581,8 +611,9 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jmp .ReturnZero
 
                 .onKeyDown4:
-                        ; switch [wParam]
-                        ; case VK_ESCAPE, .ReturnToMenu
+                        switch [wParam]
+                        case 0x4d, .onPlayMusic
+ 
 
                         mov [windowID], 0
                         mov [numOfTriedPairs], 0

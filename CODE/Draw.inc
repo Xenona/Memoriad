@@ -151,16 +151,19 @@ proc Draw.Window0
         stdcall PutObject, seaVertices, seaColors, dword[seaPlaneVertCount], 0, 0, 0
         stdcall PutObject, sunVertices, sunColors, dword[sunPlaneVertCount], 0, 0, 0
  
-        stdcall Draw.Text, 35.0, 29.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.StartButton, 0
         stdcall Draw.Text, 27.0, 7.5, 0.0, 1.0, 1.0, 1.0, 0.07, Window0.CardsButton, 0
-        stdcall Draw.Text, 28.5, -16.5, 0.0, 1.0, 1.0, 1.0, 0.09, Window0.SettsButton, 0
         stdcall Draw.Text, 43.0, -40.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.ExitButton, 0
         stdcall Draw.Text, -85.0, 37.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.WelcomeText0, 1
         stdcall Draw.Text, -85.0, 23.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.WelcomeText1, 1
 
+        stdcall checkStart 
+        cmp eax, 1
+        jne @f
+        stdcall Draw.Text, 35.0, 29.0, 0.0, 1.0, 1.0, 1.0, 0.1, Window0.StartButton, 0
         stdcall Draw.Rect, [buttStartBrdr], 1, 0.0, 0.5, 0.5, [buttStartX1], [buttStartY1], [buttStartX2], [buttStartY2], [onedd]
+        @@:
+
         stdcall Draw.Rect, [buttCardsBrdr], 1, 0.0, 0.5, 0.5, [buttCardsX1], [buttCardsY1], [buttCardsX2],  [buttCardsY2], [onedd]
-        stdcall Draw.Rect, [buttSettsBrdr], 1, 0.0, 0.5, 0.5, [buttSettsX1], [buttSettsY1], [buttSettsX2], [buttSettsY2], [onedd]
         stdcall Draw.Rect, [buttExitBrdr],  1, 0.0, 0.5, 0.5, [buttExitX1],  [buttExitY1],  [buttExitX2],  [buttExitY2], [onedd]
 
         invoke  SwapBuffers, [hdc]
@@ -169,6 +172,24 @@ proc Draw.Window0
         ret
 endp
 
+proc checkStart 
+
+        mov eax, 1
+        mov ecx, 32
+        mov esi, arrTextures 
+        @@:
+
+        cmp dword[esi], 0
+        jne .exit000
+
+        mov eax, 0
+
+        .exit000:
+        dec ecx
+        jne @b
+
+        ret 
+endp
 
 proc Draw.Window1
         locals

@@ -17,7 +17,6 @@ hdc                     dd      ?
 aspect                  dq      ?                       ; width/height 
 windowID                dd      0                    ; shows, which game screen should be drawn 
 objectNumSelected       dd      -1
-hinst                   dd      ?
 hCurs1                  dd      ?
 hCurs2                  dd      ?
 
@@ -60,7 +59,6 @@ canClick                dd      1
 ;__SOME STRINGS TO PRINT_______________________________________________________  
 Window0.StartButton     db      "START", 0
 Window0.CardsButton     db      "VIEW CARDS", 0
-Window0.SettsButton     db      "SETTINGS", 0
 Window0.ExitButton      db      "EXIT", 0
 Window0.WelcomeText0    db      "WELCOME TO", 0
 Window0.WelcomeText1    db      "MEMORIAD", 0
@@ -99,6 +97,8 @@ arrTexturesInit dd 32 dup (0)
 musicOpen db "open .\ASSETS\INGAME\awaken-136824.mp3 type mpegvideo alias mp3", 0
 musicPlay db "play mp3", 0
 musicStop db "stop mp3", 0
+playing     db 0
+hertz   dd 1900
 ;______________________________________________________________________________ 
 
 ;__WINDOW 2 (CARDS SELECTION)__________________________________________________
