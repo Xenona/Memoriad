@@ -99,7 +99,7 @@ musicPlay db "play mp3 repeat", 0
 musicStop db "stop mp3", 0
 musicClose db "close mp3", 0
 playing     db 1
-hertz   dd 1900
+hertz   dd 1400
 musicStartTime dd 0
 musicLen    dd  1000*3*60
 

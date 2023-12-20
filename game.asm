@@ -346,7 +346,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jle .ReturnZero 
                 invoke Beep, dword[hertz], 80
                 sub [timeToWait], 100
-                add [hertz],100
+                add [hertz],50
                 jmp .ReturnZero 
 
                 .incCardSpeed: 
@@ -354,7 +354,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
                 jge .ReturnZero
                 invoke Beep, dword[hertz], 80
                 add [timeToWait], 100
-                sub [hertz], 100 
+                sub [hertz], 50 
                 jmp .ReturnZero
 
                 .ReturnToMenu: 
@@ -520,6 +520,7 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         mov edi, arrTextures
                         mov esi, dword[filenamesArrayHandle]
+                        mov ebx, arrTexturesInit
                         mov ecx, 16
                         @@:
 
@@ -529,11 +530,14 @@ proc WindowProc uses ebx, hWnd, uMsg, wParam, lParam
 
                         mov ecx, dword[edi]
                         mov dword[edi+4], ecx  
+                        mov dword[ebx], ecx 
+                        mov dword[ebx+4], ecx
 
 
                         pop ecx
 
                         add edi, 8
+                        add ebx, 8
                         add esi, MAX_PATH
                         loop @b  
                         
